@@ -5,7 +5,7 @@ import { addEntry, clientIp, removeEntry } from "@/lib/maps";
 export const POST = handle(async (req) => {
   const slug = new URL(req.url).searchParams.get("slug") ?? "";
   const body = await readJson(req);
-  return json(await addEntry(slug, { nickname: body.nickname, birthday: body.birthday, consent: body.consent }, clientIp(req)));
+  return json(await addEntry(slug, { nickname: body.nickname, birthday: body.birthday, time: body.time, consent: body.consent }, clientIp(req)));
 });
 
 // 주인이 지도에서 지우기 ?slug=&id=

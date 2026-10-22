@@ -139,7 +139,15 @@ export interface KoreanSign {
   zodiac: (typeof ZODIAC)[number];
   sunLongitude: number;
   stem: number;
+  /** 네 기둥 (시간을 모르면 hour = null) */
+  pillars: { year: PillarView; month: PillarView; day: PillarView; hour: PillarView | null };
 }
+
+export interface PillarView { han: string; roman: string; stemElement: Element; branchElement: Element }
+const pillarView = (p: Pillar): PillarView => ({
+  han: pillarHan(p), roman: `${STEM_ROMAN[p.stem]}-${BRANCH_ROMAN[p.branch]}`,
+  stemElement: STEM_ELEMENT[p.stem], branchElement: BRANCH_ELEMENT[p.branch],
+});
 
 export function signOf(b: BirthInput): KoreanSign {
   const c = chartOf(b);
@@ -158,6 +166,7 @@ export function signOf(b: BirthInput): KoreanSign {
     zodiac: zodiacOf(c.sunLongitude),
     sunLongitude: Math.round(c.sunLongitude * 10) / 10,
     stem,
+    pillars: { year: pillarView(c.year), month: pillarView(c.month), day: pillarView(c.day), hour: c.hour ? pillarView(c.hour) : null },
   };
 }
 

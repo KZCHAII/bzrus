@@ -36,6 +36,17 @@
     return 'You were born in ' + season + ', when ' + el + ' isn’t the strongest element. You work harder for it, and people underestimate you until they don’t.';
   }
 
+  function pillarsHtml(s) {
+    if (!s.pillars) return '';
+    var cell = function (label, p, me) {
+      if (!p) return '<div class="unk"><dt>' + label + '</dt><dd><span class="ph">??</span><span class="pr">add time</span></dd></div>';
+      var h = esc(p.han);
+      return '<div' + (me ? ' class="me"' : '') + '><dt>' + label + '</dt><dd><span class="ph"><span style="color:var(' + EL_VAR[p.stemElement] + ')">' + h.charAt(0) + '</span><span style="color:var(' + EL_VAR[p.branchElement] + ')">' + h.charAt(1) + '</span></span><span class="pr">' + esc(p.roman) + '</span></dd></div>';
+    };
+    var P = s.pillars;
+    return cell('Year', P.year) + cell('Month', P.month) + cell('Day', P.day, true) + cell('Hour', P.hour);
+  }
+
   /** 사인 카드 채우기 (요소 id 접두사 p) */
   function fillSign(card, s, name, p) {
     p = p || '';
@@ -48,6 +59,7 @@
     set('k-meta', (s.yang ? 'Yang' : 'Yin') + ' ' + esc(s.element) + ' ' + EL_H[s.element] + ' · day pillar ' + esc(s.dayPillar.roman));
     set('k-tag', esc(s.tagline));
     set('k-stats', '<div><dt>Element</dt><dd>' + (s.yang ? 'Yang' : 'Yin') + ' ' + esc(s.element) + '</dd></div><div><dt>Season</dt><dd>' + esc(s.season) + '</dd></div><div><dt>Strength</dt><dd class="hot">' + STRENGTH[s.strength] + '</dd></div>');
+    set('k-pillars', pillarsHtml(s));
     set('k-why', '<b>Why ' + esc(s.name) + '?</b> Saju names you after your <b>Day Master</b>, the heavenly stem of the day you were born. Yours is ' + esc(s.hanja) + ', ' + (s.yang ? 'Yang' : 'Yin') + ' ' + esc(s.element) + '. ' + whyText(s));
   }
 

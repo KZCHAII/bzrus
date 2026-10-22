@@ -15,11 +15,16 @@ export function clientIp(req: Request): string {
   return (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || req.headers.get("x-real-ip") || "";
 }
 
-/** "YYYY-MM-DD" → 생일 (1920–올해) */
-export function parseBirthday(v: unknown): { year: number; month: number; day: number; iso: string } {
+export interface Birth { year: number; month: number; day: number; hour: number | null; minute: number | null; iso: string; time: string | null }
+
+/** "YYYY-MM-DD" (+ 선택 "HH:MM") → 생일 (1920–올해) */
+export function parseBirthday(v: unknown, t?: unknown): Birth {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(str(v, 10));
   if (!m) throw new HttpError(400, "BAD_BIRTHDAY", { error: "BAD_BIRTHDAY", message: "Enter a valid birthday." });
-  const b = { year: +m[1], month: +m[2], day: +m[3] };
+  const ts = str(t, 5);
+  const tm = ts ? /^([01]\d|2[0-3]):([0-5]\d)$/.exec(ts) : null;
+  if (ts && !tm) throw new HttpError(400, "BAD_TIME", { error: "BAD_TIME", message: "Enter a valid birth time, or leave it empty." });
+  const b = { year: +m[1], month: +m[2], day: +m[3], hour: tm ? +tm[1] : null, minute: tm ? +tm[2] : null };
   const thisYear = new Date().getUTCFullYear();
   try {
     if (b.year < 1920 || b.year > thisYear) throw 0;
@@ -27,7 +32,7 @@ export function parseBirthday(v: unknown): { year: number; month: number; day: n
   } catch {
     throw new HttpError(400, "BAD_BIRTHDAY", { error: "BAD_BIRTHDAY", message: "Enter a valid birthday." });
   }
-  return { ...b, iso: m[0] };
+  return { ...b, iso: m[0], time: tm ? tm[0] : null };
 }
 
 export function cleanName(v: unknown, field: string): string {
@@ -37,11 +42,18 @@ export function cleanName(v: unknown, field: string): string {
   return s;
 }
 
+/** 본인에게만: 네 기둥·태양 황경까지 */
 export function publicSign(s: KoreanSign) {
   return {
     key: s.key, name: s.name, hanja: s.hanja, tagline: s.tagline, element: s.element, yang: s.yang,
     season: s.season, strength: s.strength, dayPillar: s.dayPillar, zodiac: s.zodiac, sunLongitude: s.sunLongitude,
+    pillars: s.pillars,
   };
+}
+
+/** 다른 사람에게 보여 줄 때: 생일을 거꾸로 알아낼 수 있는 값(기둥·황경)은 뺀다 */
+export function sharedSign(s: KoreanSign) {
+  return { key: s.key, name: s.name, hanja: s.hanja, tagline: s.tagline, element: s.element, yang: s.yang, season: s.season, strength: s.strength, zodiac: s.zodiac };
 }
 
 const newSlug = () => {
@@ -50,9 +62,9 @@ const newSlug = () => {
   return Array.from(b, (x) => abc[x % abc.length]).join("");
 };
 
-export async function createMap(input: { name: unknown; birthday: unknown }, ip: string, isTest = false) {
+export async function createMap(input: { name: unknown; birthday: unknown; time?: unknown }, ip: string, isTest = false) {
   const name = cleanName(input.name, "your name");
-  const b = parseBirthday(input.birthday);
+  const b = parseBirthday(input.birthday, input.time);
   const sign = signOf(b);
   const sql = getSql();
   const ipHash = hashIp(ip);
@@ -62,42 +74,47 @@ export async function createMap(input: { name: unknown; birthday: unknown }, ip:
   }
   const ownerToken = randomBytes(24).toString("base64url");
   const slug = newSlug();
-  await sql`insert into maps (slug, owner_token_hash, name, birth_date, sign_key, ip_hash, is_test)
-            values (${slug}, ${sha(ownerToken)}, ${name}, ${b.iso}, ${sign.key}, ${ipHash}, ${isTest})`;
+  await sql`insert into maps (slug, owner_token_hash, name, birth_date, birth_time, sign_key, ip_hash, is_test)
+            values (${slug}, ${sha(ownerToken)}, ${name}, ${b.iso}, ${b.time}, ${sign.key}, ${ipHash}, ${isTest})`;
   return { slug, ownerToken, name, sign: publicSign(sign) };
 }
 
-interface MapRow { id: string; slug: string; owner_token_hash: string; name: string; birth_date: string }
+interface MapRow { id: string; slug: string; owner_token_hash: string; name: string; birth_date: string; birth_time: string | null }
 
 async function loadMap(slug: string): Promise<MapRow> {
   if (!/^[a-z0-9]{10}$/.test(slug)) throw new HttpError(404, "MAP_NOT_FOUND");
-  const [m] = await getSql()<MapRow[]>`select id, slug, owner_token_hash, name, to_char(birth_date, 'YYYY-MM-DD') birth_date from maps where slug = ${slug}`;
+  const [m] = await getSql()<MapRow[]>`select id, slug, owner_token_hash, name, to_char(birth_date, 'YYYY-MM-DD') birth_date, to_char(birth_time, 'HH24:MI') birth_time from maps where slug = ${slug}`;
   if (!m) throw new HttpError(404, "MAP_NOT_FOUND", { error: "MAP_NOT_FOUND", message: "This map doesn't exist." });
   return m;
 }
-const signOfIso = (iso: string) => { const [y, m, d] = iso.split("-").map(Number); return signOf({ year: y, month: m, day: d }); };
+const signOfIso = (iso: string, time: string | null) => {
+  const [y, m, d] = iso.split("-").map(Number);
+  const [h, mi] = time ? time.split(":").map(Number) : [null, null];
+  return signOf({ year: y, month: m, day: d, hour: h, minute: mi });
+};
 const isOwner = (m: MapRow, token: string) => !!token && sha(token) === m.owner_token_hash;
 
 /** 지도 보기. 생일은 누구에게도 돌려주지 않는다 (별명·타입·관계만) */
 export async function viewMap(slug: string, ownerToken: string) {
   const m = await loadMap(slug);
-  const owner = signOfIso(m.birth_date);
-  const rows = await getSql()<{ id: string; nickname: string; birth_date: string; relation: RelationKind; score: number; created_at: Date }[]>`
-    select id, nickname, to_char(birth_date, 'YYYY-MM-DD') birth_date, relation, score, created_at
+  const owner = signOfIso(m.birth_date, m.birth_time);
+  const rows = await getSql()<{ id: string; nickname: string; birth_date: string; birth_time: string | null; relation: RelationKind; score: number; created_at: Date }[]>`
+    select id, nickname, to_char(birth_date, 'YYYY-MM-DD') birth_date, to_char(birth_time, 'HH24:MI') birth_time, relation, score, created_at
       from map_entries where map_id = ${m.id} and removed_at is null order by score desc, created_at asc limit ${MAX_ENTRIES}`;
   const entries = rows.map((r) => {
-    const s = signOfIso(r.birth_date);
+    const s = signOfIso(r.birth_date, r.birth_time);
     return { id: r.id, nickname: r.nickname, sign: { name: s.name, hanja: s.hanja, element: s.element }, relation: r.relation, score: r.score };
   });
-  return { slug: m.slug, name: m.name, sign: publicSign(owner), entries, isOwner: isOwner(m, ownerToken) };
+  const own = isOwner(m, ownerToken);
+  return { slug: m.slug, name: m.name, sign: own ? publicSign(owner) : sharedSign(owner), entries, isOwner: own };
 }
 
 /** 친구가 생일을 넣는다. 지도에 올리기는 동의했을 때만 (안 해도 결과는 본다) */
-export async function addEntry(slug: string, input: { nickname: unknown; birthday: unknown; consent: unknown }, ip: string, isTest = false) {
+export async function addEntry(slug: string, input: { nickname: unknown; birthday: unknown; time?: unknown; consent: unknown }, ip: string, isTest = false) {
   const m = await loadMap(slug);
   const nickname = cleanName(input.nickname, "a nickname");
-  const b = parseBirthday(input.birthday);
-  const owner = signOfIso(m.birth_date), friend = signOf(b);
+  const b = parseBirthday(input.birthday, input.time);
+  const owner = signOfIso(m.birth_date, m.birth_time), friend = signOf(b);
   const rel = relationOf(owner, friend);
   let added = false;
   if (input.consent === true) {
@@ -112,12 +129,12 @@ export async function addEntry(slug: string, input: { nickname: unknown; birthda
         const [{ k }] = await tx<{ k: number }[]>`select count(*)::int k from map_entries where map_id = ${m.id} and ip_hash = ${ipHash} and created_at > now() - interval '1 hour'`;
         if (k >= ENTRIES_PER_IP_PER_HOUR) throw new HttpError(429, "TOO_MANY", { error: "TOO_MANY", message: "Too many entries from you. Try again later." });
       }
-      await tx`insert into map_entries (map_id, nickname, birth_date, sign_key, relation, score, ip_hash, is_test)
-               values (${m.id}, ${nickname}, ${b.iso}, ${friend.key}, ${rel.kind}, ${rel.score}, ${ipHash}, ${isTest})`;
+      await tx`insert into map_entries (map_id, nickname, birth_date, birth_time, sign_key, relation, score, ip_hash, is_test)
+               values (${m.id}, ${nickname}, ${b.iso}, ${b.time}, ${friend.key}, ${rel.kind}, ${rel.score}, ${ipHash}, ${isTest})`;
     });
     added = true;
   }
-  return { added, sign: publicSign(friend), relation: rel, owner: { name: m.name, sign: publicSign(owner) } };
+  return { added, sign: publicSign(friend), relation: rel, owner: { name: m.name, sign: sharedSign(owner) } };
 }
 
 export async function removeEntry(slug: string, entryId: string, ownerToken: string) {

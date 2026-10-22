@@ -18,6 +18,14 @@ describe("sign", () => {
     expect(r.data.sign).toMatchObject({ name: "Winter Ocean", hanja: "壬", zodiac: "Scorpio" });
     expect((await sql`select count(*)::int n from maps`)[0].n).toBe(0);
   });
+  it("시간을 넣으면 네 기둥, 안 넣으면 시주 없음", async () => {
+    const withT = await call(sign, req("/api/sign", { body: { birthday: "1996-11-21", time: "14:30" } }));
+    expect(withT.data.sign.pillars.hour).toMatchObject({ han: expect.stringMatching(/^.{2}$/) });
+    expect(withT.data.sign.pillars.day.han).toBe("壬戌");
+    const noT = await call(sign, req("/api/sign", { body: { birthday: "1996-11-21" } }));
+    expect(noT.data.sign.pillars.hour).toBeNull();
+    for (const t of ["24:00", "9:5", "noon"]) expect((await call(sign, req("/api/sign", { body: { birthday: "1996-11-21", time: t } }))).status, t).toBe(400);
+  });
   it("잘못된 생일", async () => {
     for (const b of ["1996-02-30", "abc", "1800-01-01", "2999-01-01", ""]) {
       expect((await call(sign, req("/api/sign", { body: { birthday: b } }))).status, b).toBe(400);
@@ -28,20 +36,23 @@ describe("sign", () => {
 describe("지도", () => {
   let slug = "", token = "";
   it("만들기: 링크와 주인 토큰 (토큰은 해시로만 저장)", async () => {
-    const r = await call(createMap, req("/api/maps", { body: { name: "  Alex <b> ", birthday: "1996-11-21" } }));
+    const r = await call(createMap, req("/api/maps", { body: { name: "  Alex <b> ", birthday: "1996-11-21", time: "07:15" } }));
     expect(r.status).toBe(200);
     ({ slug, ownerToken: token } = r.data);
     expect(slug).toMatch(/^[a-z0-9]{10}$/);
     expect(r.data.name).toBe("Alex b");
-    const [m] = await sql`select owner_token_hash, birth_date::text b from maps where slug = ${slug}`;
+    const [m] = await sql`select owner_token_hash, birth_date::text b, birth_time::text t from maps where slug = ${slug}`;
     expect(m.owner_token_hash).not.toContain(token);
     expect(m.b).toBe("1996-11-21");
+    expect(m.t).toBe("07:15:00");
   });
 
   it("친구: 동의하면 지도에 올라가고, 안 하면 결과만", async () => {
-    const yes = await call(addEntry, req(`/api/maps/entries?slug=${slug}`, { body: { nickname: "Jordan", birthday: "1995-04-02", consent: true } }));
+    const yes = await call(addEntry, req(`/api/maps/entries?slug=${slug}`, { body: { nickname: "Jordan", birthday: "1995-04-02", time: "23:40", consent: true } }));
     expect(yes.status).toBe(200);
     expect(yes.data).toMatchObject({ added: true, owner: { name: "Alex b" }, relation: { kind: "mirror" } });
+    expect(JSON.stringify(yes.data.owner)).not.toMatch(/sunLongitude|pillars|dayPillar/);
+    expect(yes.data.sign.pillars.hour).not.toBeNull();
     const no = await call(addEntry, req(`/api/maps/entries?slug=${slug}`, { body: { nickname: "Sam", birthday: "1990-07-04" }, ip: "198.51.100.2" }));
     expect(no.data.added).toBe(false);
     expect(no.data.sign.name).toBeTruthy();
@@ -54,8 +65,11 @@ describe("지도", () => {
     expect(guest.data.entries).toHaveLength(1);
     expect(JSON.stringify(guest.data)).not.toContain("1995-04-02");
     expect(JSON.stringify(guest.data)).not.toContain("1996-11-21");
+    // 생일을 거꾸로 알아낼 수 있는 값(태양 황경·기둥)도 손님에게는 안 나감
+    for (const k of ["sunLongitude", "pillars", "dayPillar", "07:15"]) expect(JSON.stringify(guest.data)).not.toContain(k);
     const owner = await call(getMap, req(`/api/maps?slug=${slug}`, { headers: { "x-owner-token": token } }));
     expect(owner.data.isOwner).toBe(true);
+    expect(owner.data.sign.pillars.hour).not.toBeNull();
     expect(JSON.stringify(owner.data)).not.toContain("1995-04-02");
   });
 

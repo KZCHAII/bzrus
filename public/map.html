@@ -41,11 +41,14 @@
     <form class="panel" id="gForm" novalidate>
       <span class="corner"></span><span class="corner-br"></span>
       <span class="tag">INPUT <em>// YOU</em></span>
-      <div class="fields">
+      <div class="fields" style="grid-template-columns:1fr">
         <div class="field"><label for="g-name">Nickname</label><input id="g-name" type="text" placeholder="Jordan" maxlength="20" autocomplete="nickname"></div>
-        <div class="field"><label for="g-date">Birthday</label><input id="g-date" type="date" min="1920-01-01"></div>
       </div>
-      <label class="check" for="g-consent"><input type="checkbox" id="g-consent" checked><span>Put my nickname and relationship type on <b id="g-owner3"></b>'s map. Anyone with the link can see it. Your birthday stays private.</span></label>
+      <div class="fields three">
+        <div class="field"><label for="g-date">Birthday</label><input id="g-date" type="date" min="1920-01-01"></div>
+        <div class="field"><label for="g-time">Birth time <span class="opt">(opt.)</span></label><input id="g-time" type="time"></div>
+      </div>
+      <label class="check" for="g-consent"><input type="checkbox" id="g-consent" checked><span>Put my nickname and relationship type on <b id="g-owner3"></b>'s map. Anyone with the link can see it. Your birthday and birth time stay private.</span></label>
       <button class="btn" type="submit" id="gBtn">Show what we are <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M1 7h11m0 0L7 2m5 5L7 12" stroke="currentColor" stroke-width="1.8"/></svg></button>
       <p class="err" id="g-err" hidden></p>
     </form>
@@ -61,6 +64,7 @@
       <p class="kmeta" id="k-meta"></p>
       <p class="tagline" id="k-tag"></p>
       <dl class="stats" id="k-stats"></dl>
+      <dl class="pillars" id="k-pillars" aria-label="Your four pillars"></dl>
       <div class="why" id="k-why"></div>
       </article>
       <div class="panel" style="margin-top:14px">
@@ -174,7 +178,7 @@
     if (!d) { err.textContent = 'ERROR // Enter your birthday.'; err.hidden = false; return; }
     $('gBtn').disabled = true;
     try {
-      var r = await WS.api('/api/maps/entries?slug=' + slug, { body: { nickname: nick, birthday: d, consent: $('g-consent').checked } });
+      var r = await WS.api('/api/maps/entries?slug=' + slug, { body: { nickname: nick, birthday: d, time: $('g-time').value, consent: $('g-consent').checked } });
       $('ex-tag').hidden = true;
       WS.fillSign($('card'), r.sign, nick, '');
       $('g-rel').innerHTML = WS.relHtml(r.relation, r.owner.sign, r.sign, 'You are ' + esc(r.owner.name) + '’s {R}', r.owner.name);

@@ -28,13 +28,16 @@
     <form class="panel" id="meForm" novalidate>
       <span class="corner"></span><span class="corner-br"></span>
       <span class="tag">INPUT <em>// BIRTHDAY</em></span>
-      <div class="fields">
+      <div class="fields" style="grid-template-columns:1fr">
         <div class="field"><label for="me-name">Name <span class="opt">(optional)</span></label><input id="me-name" type="text" autocomplete="given-name" placeholder="Alex" maxlength="20"></div>
+      </div>
+      <div class="fields three">
         <div class="field"><label for="me-date">Birthday</label><input id="me-date" type="date" min="1920-01-01" required></div>
+        <div class="field"><label for="me-time">Birth time <span class="opt">(opt.)</span></label><input id="me-time" type="time"></div>
       </div>
       <button class="btn" type="submit">Reveal my Korean sign <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M1 7h11m0 0L7 2m5 5L7 12" stroke="currentColor" stroke-width="1.8"/></svg></button>
       <p class="err" id="me-err" hidden></p>
-      <p class="note">Your birthday isn't saved unless you make a map.</p>
+      <p class="note">Birth time unlocks your hour pillar. Nothing is saved unless you make a map.</p>
     </form>
 
     <article class="panel sign" id="card" aria-live="polite">
@@ -47,6 +50,7 @@
       <p class="kmeta" id="k-meta"></p>
       <p class="tagline" id="k-tag"></p>
       <dl class="stats" id="k-stats"></dl>
+      <dl class="pillars" id="k-pillars" aria-label="Your four pillars"></dl>
       <div class="why" id="k-why"></div>
       <form class="mapform" id="mapForm" novalidate style="margin-top:18px;text-align:left">
         <p class="rel-pair" style="margin:0 0 8px">NEXT // YOUR SKY MAP</p>
@@ -108,8 +112,9 @@
 <script src="/js/withsaju.js"></script>
 <script>
 (function () {
-  var $ = WS.$, birthday = '';
-  var EXAMPLE = { key: 'winter-ocean', name: 'Winter Ocean', hanja: '壬', tagline: 'Big, restless, holds everything. Calm on top, deep underneath.', element: 'Water', yang: true, season: 'Winter', strength: 'peak', dayPillar: { han: '壬戌', roman: 'Im-sul' }, zodiac: 'Scorpio', sunLongitude: 239.4 };
+  var $ = WS.$, birthday = '', btime = '';
+  var EXAMPLE = { key: 'winter-ocean', name: 'Winter Ocean', hanja: '壬', tagline: 'Big, restless, holds everything. Calm on top, deep underneath.', element: 'Water', yang: true, season: 'Winter', strength: 'peak', dayPillar: { han: '壬戌', roman: 'Im-sul' }, zodiac: 'Scorpio', sunLongitude: 239.4,
+    pillars: { year: { han: '丙子', roman: 'Byeong-ja', stemElement: 'Fire', branchElement: 'Water' }, month: { han: '己亥', roman: 'Gi-hae', stemElement: 'Earth', branchElement: 'Water' }, day: { han: '壬戌', roman: 'Im-sul', stemElement: 'Water', branchElement: 'Earth' }, hour: null } };
   WS.fillSign($('card'), EXAMPLE, '', '');
   $('mapForm').hidden = true;
 
@@ -119,8 +124,9 @@
     var d = $('me-date').value;
     if (!d) { err.textContent = 'ERROR // Enter your birthday.'; err.hidden = false; return; }
     try {
-      var r = await WS.api('/api/sign', { body: { birthday: d } });
-      birthday = d;
+      var t = $('me-time').value;
+      var r = await WS.api('/api/sign', { body: { birthday: d, time: t } });
+      birthday = d; btime = t;
       var name = $('me-name').value.trim();
       $('ex-tag').hidden = true;
       WS.fillSign($('card'), r.sign, name, '');
@@ -137,7 +143,7 @@
     if (!name) { err.textContent = 'ERROR // Enter the name your friends know you by.'; err.hidden = false; return; }
     $('mapBtn').disabled = true;
     try {
-      var r = await WS.api('/api/maps', { body: { name: name, birthday: birthday } });
+      var r = await WS.api('/api/maps', { body: { name: name, birthday: birthday, time: btime } });
       WS.store.set('ws_owner_' + r.slug, r.ownerToken);
       location.href = '/m/' + r.slug;
     } catch (x) { err.textContent = 'ERROR // ' + x.message; err.hidden = false; $('mapBtn').disabled = false; }
