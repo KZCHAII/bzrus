@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Serif+KR:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/withsaju.css">
+<title>WITHSAJU — Full reading</title>
+<meta name="description" content="Your full Korean Saju reading: four pillars, 10-year luck cycles, your zodiac side by side, and your 2027.">
+</head>
+<body>
+<nav>
+  <a class="logo" href="/" style="text-decoration:none"><div class="logo-mark"><span></span><span></span><span></span><span></span></div><div class="logo-text">WITH<em>SAJU</em></div></a>
+  <div class="nav-right">
+    <a class="nav-link" id="nav-mymap" href="/" hidden>My map</a>
+    <a class="nav-cta" href="/reading">Full reading</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <section class="hero">
+    <p class="eyebrow" style="color:var(--purple)">Full reading // $9.99</p>
+    <h1>Your whole chart, <span class="accent">in plain English.</span></h1>
+    <p class="sub">Your Korean sign comes from one pillar. The full reading uses all four, your <strong>10-year luck cycles</strong>, and your zodiac chart side by side.</p>
+
+    <ul class="feat" style="margin-bottom:26px">
+      <li><span>四</span><div><b>Four pillars</b>Year, month, day and hour, and what each says about you.</div></li>
+      <li><span>運</span><div><b>10-year luck cycles</b>Which decade is yours, and what changes in the next one.</div></li>
+      <li><span>星</span><div><b>Side by side with your zodiac</b>Where the two systems agree, and where they don't.</div></li>
+      <li><span>年</span><div><b>Your 2027</b>Month by month: love, money and work.</div></li>
+    </ul>
+
+    <form class="panel product" id="rForm" novalidate>
+      <span class="corner"></span><span class="corner-br"></span>
+      <span class="badge">LAUNCH PRICE · $9.99</span>
+      <div class="fields" style="grid-template-columns:1fr;margin-top:6px">
+        <div class="field"><label for="r-name">Name</label><input id="r-name" type="text" autocomplete="given-name" maxlength="20"></div>
+      </div>
+      <div class="fields three">
+        <div class="field"><label for="r-date">Birthday</label><input id="r-date" type="date" min="1920-01-01"></div>
+        <div class="field"><label for="r-time">Birth time</label><input id="r-time" type="time"></div>
+      </div>
+      <label class="check" for="r-unk"><input type="checkbox" id="r-unk"><span>I don't know my birth time. Read three pillars without the hour.</span></label>
+      <div class="fields" style="grid-template-columns:1fr">
+        <div class="field"><label for="r-place">Birth city</label><input id="r-place" type="text" placeholder="Austin, TX" maxlength="80" autocomplete="address-level2"></div>
+        <div class="field"><label for="r-email">Email</label><input id="r-email" type="email" placeholder="you@email.com" maxlength="254" autocomplete="email"></div>
+      </div>
+      <button class="btn" type="submit" id="rBtn" style="background:var(--purple);box-shadow:0 0 20px rgba(168,85,247,.3)">Reserve my reading <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M1 7h11m0 0L7 2m5 5L7 12" stroke="currentColor" stroke-width="1.8"/></svg></button>
+      <p class="err" id="r-err" hidden></p>
+      <p class="note">Checkout opens soon. Reserve now and we'll email you the moment it does, at the launch price. You won't be charged today.</p>
+    </form>
+
+    <div class="panel hide" id="r-done" style="margin-top:18px">
+      <span class="corner"></span><span class="corner-br"></span>
+      <span class="tag">RESERVED <em>// <span id="r-done-mail"></span></em></span>
+      <h2 style="margin-top:16px">You're on the list.</h2>
+      <p class="sub" style="margin:0 0 18px">We saved your chart details. When checkout opens, you'll get an email and your reading is one click away.</p>
+      <a class="btn" href="/" style="text-decoration:none">Back to my Korean sign <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M1 7h11m0 0L7 2m5 5L7 12" stroke="currentColor" stroke-width="1.8"/></svg></a>
+    </div>
+  </section>
+</div>
+
+<footer>
+  WITHSAJU · KOREAN SAJU × WESTERN ASTROLOGY<br>
+  For entertainment purposes only. Not medical, legal or financial advice.<br>
+  © 2026 WITHSAJU
+</footer>
+<div class="dock" id="dock" role="complementary" aria-label="Full reading offer">
+  <div class="t"><span>Your full Saju reading</span><b>Four pillars, 10-year luck, your 2027</b></div>
+  <a href="/reading">$9.99 →</a>
+  <button class="x" type="button" aria-label="Close">×</button>
+</div>
+
+<script src="/js/withsaju.js"></script>
+<script>
+(function () {
+  var $ = WS.$;
+  WS.initNav();
+  var saved = WS.me.get();
+  if (saved) { $('r-name').value = saved.name || ''; $('r-date').value = saved.birthday || ''; $('r-time').value = saved.time || ''; }
+  $('r-unk').addEventListener('change', function () { $('r-time').disabled = this.checked; if (this.checked) $('r-time').value = ''; });
+  $('rForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var err = $('r-err'); err.hidden = true;
+    var body = { name: $('r-name').value.trim(), birthday: $('r-date').value, time: $('r-time').value, timeUnknown: $('r-unk').checked, place: $('r-place').value.trim(), email: $('r-email').value.trim() };
+    var miss = !body.name ? 'your name' : !body.birthday ? 'your birthday' : (!body.time && !body.timeUnknown) ? 'your birth time, or check "I don’t know"' : !body.place ? 'your birth city' : !body.email ? 'your email' : '';
+    if (miss) { err.textContent = 'ERROR // Add ' + miss + '.'; err.hidden = false; return; }
+    $('rBtn').disabled = true;
+    try {
+      await WS.api('/api/reading', { body: body });
+      WS.me.set({ name: body.name, birthday: body.birthday, time: body.time });
+      $('r-done-mail').textContent = body.email.toUpperCase();
+      $('rForm').classList.add('hide'); $('r-done').classList.remove('hide');
+      $('r-done').scrollIntoView({ block: 'start' });
+    } catch (x) { err.textContent = 'ERROR // ' + x.message; err.hidden = false; $('rBtn').disabled = false; }
+  });
+})();
+</script>
+</body>
+</html>

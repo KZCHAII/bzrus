@@ -13,6 +13,7 @@ const nextConfig: NextConfig = {
     return [
       { source: "/", destination: "/index.html" },
       { source: "/m/:slug", destination: "/map.html" },
+      { source: "/reading", destination: "/reading.html" },
     ];
   },
   async headers() {
@@ -20,6 +21,7 @@ const nextConfig: NextConfig = {
       { source: "/:page*.html", headers: htmlHeaders },
       { source: "/", headers: htmlHeaders },
       { source: "/m/:slug", headers: htmlHeaders },
+      { source: "/reading", headers: htmlHeaders },
       { source: "/js/:path*", headers: [{ key: "Cache-Control", value: "no-cache" }] },
       { source: "/css/:path*", headers: [{ key: "Cache-Control", value: "no-cache" }] },
       { source: "/api/:path*", headers: [{ key: "Cache-Control", value: "no-store" }] },

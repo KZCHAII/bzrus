@@ -125,5 +125,32 @@
     return Object.keys(REL).map(function (k) { return '<span><i style="background:var(' + REL[k].c + ');box-shadow:0 0 6px var(' + REL[k].c + ')"></i>' + REL[k].n + '</span>'; }).join('');
   }
 
-  window.WS = { api: api, esc: esc, $: $, store: store, fillSign: fillSign, relHtml: relHtml, drawMap: drawMap, legendHtml: legendHtml, REL: REL, EL_VAR: EL_VAR };
+  // 내 정보(이 기기에만): 다시 오면 바로 내 사인, 내가 만든 지도 목록
+  var me = {
+    get: function () { try { return JSON.parse(store.get('ws_me') || 'null'); } catch (e) { return null; } },
+    set: function (v) { store.set('ws_me', JSON.stringify(v)); },
+    maps: function () { try { return JSON.parse(store.get('ws_maps') || '[]'); } catch (e) { return []; } },
+    addMap: function (slug, name, token) {
+      store.set('ws_owner_' + slug, token);
+      var l = me.maps().filter(function (m) { return m.slug !== slug; }); l.unshift({ slug: slug, name: name });
+      store.set('ws_maps', JSON.stringify(l.slice(0, 5)));
+    }
+  };
+
+  /** 상단 메뉴: 내 지도가 있으면 바로가기 */
+  function initNav() {
+    var l = me.maps(), a = $('nav-mymap');
+    if (a && l.length) { a.href = '/m/' + l[0].slug; a.hidden = false; }
+  }
+
+  /** 아래에서 올라오는 유료 리포트 안내 (닫으면 이번 방문 동안 안 뜸) */
+  function dock(show) {
+    var d = $('dock'); if (!d) return;
+    var closed = false; try { closed = sessionStorage.getItem('ws_dock_x') === '1'; } catch (e) { /* ignore */ }
+    if (show && !closed) { d.classList.add('on'); document.body.classList.add('has-dock'); }
+    var x = d.querySelector('.x');
+    if (x && !x.dataset.on) { x.dataset.on = '1'; x.addEventListener('click', function () { d.classList.remove('on'); document.body.classList.remove('has-dock'); try { sessionStorage.setItem('ws_dock_x', '1'); } catch (e) { /* ignore */ } }); }
+  }
+
+  window.WS = { api: api, esc: esc, $: $, store: store, fillSign: fillSign, relHtml: relHtml, drawMap: drawMap, legendHtml: legendHtml, REL: REL, EL_VAR: EL_VAR, me: me, initNav: initNav, dock: dock };
 })();
