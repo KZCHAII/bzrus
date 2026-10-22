@@ -58,11 +58,22 @@
       <div class="why" id="k-why"></div>
     </article>
 
-    <div class="actions hide" id="actions">
-      <button class="act" type="button" id="mapBtn"><span class="k">Free // Sky map</span><b>See what your friends are to you</b><span class="d">Get a link. Friends add a birthday and land on your map.</span></button>
-      <a class="act paid" href="/reading" id="readBtn"><span class="k">Full reading</span><b>Your whole chart in plain English</b><span class="pr">$9.99</span></a>
+    <div class="hide" id="actions">
+      <div class="panel" style="margin-top:14px">
+        <span class="corner"></span><span class="corner-br"></span>
+        <div class="sign-top" style="margin-bottom:10px"><span class="tag">YOUR <em>// SKY MAP</em></span><span class="coord" id="pv-count">0 FRIENDS</span></div>
+        <p class="west" style="margin:0 0 4px" id="pv-title">Who fills your five slots?</p>
+        <p class="note" style="text-align:left;margin:0">Battery, Spark, Co-pilot, Mirror, Coach. Friends add a birthday and land in one. Closer to the center means better chemistry.</p>
+        <div class="map" style="margin-top:14px;border:0;background:transparent">
+          <canvas id="pvCanvas" width="640" height="640" role="img" aria-label="Your sky map, five relationship slots around you"></canvas>
+        </div>
+        <button class="btn" type="button" id="mapBtn">Get my link to fill it <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M1 7h11m0 0L7 2m5 5L7 12" stroke="currentColor" stroke-width="1.8"/></svg></button>
+        <p class="err" id="map-err" hidden></p>
+      </div>
+      <div class="actions" style="grid-template-columns:1fr">
+        <a class="act paid" href="/reading" id="readBtn"><span class="k">Full reading // $9.99</span><b>Your whole chart in plain English: four pillars, 10-year luck, your 2027</b></a>
+      </div>
     </div>
-    <p class="err" id="map-err" hidden></p>
   </section>
 
   <section class="block">
@@ -127,6 +138,7 @@
     WS.fillSign($('card'), r.sign, name, '');
     $('card').classList.remove('hide'); $('actions').classList.remove('hide');
     WS.dock(true);
+    drawPreview(name);
     if (scroll) $('card').scrollIntoView({ block: 'start' });
   }
 
@@ -141,7 +153,27 @@
     $('meBtn').disabled = false;
   });
 
+  // 내 지도 미리보기: 이미 만든 지도가 있으면 실제 친구들, 없으면 빈 다섯 칸
+  var myMap = null;
+  async function drawPreview(name) {
+    var maps = WS.me.maps(), entries = [];
+    if (maps.length) {
+      try {
+        var d = await WS.api('/api/maps?slug=' + maps[0].slug, { token: WS.store.get('ws_owner_' + maps[0].slug) || '' });
+        if (d.isOwner) { myMap = d; entries = d.entries; name = d.name; }
+      } catch (e) { /* 지도가 없어졌으면 빈 지도 */ }
+    }
+    var draw = function () { WS.drawMap($('pvCanvas'), name || 'YOU', entries); };
+    draw(); if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
+    $('pv-count').textContent = entries.length + (entries.length === 1 ? ' FRIEND' : ' FRIENDS');
+    if (myMap) {
+      $('pv-title').textContent = entries.length ? 'Your map so far' : 'Your map is ready. Fill your five slots.';
+      $('mapBtn').firstChild.textContent = 'Open my map and share ';
+    }
+  }
+
   $('mapBtn').addEventListener('click', async function () {
+    if (myMap) { location.href = '/m/' + myMap.slug; return; }
     var err = $('map-err'); err.hidden = true;
     var name = (cur && cur.name) || $('me-name').value.trim();
     if (!name) { err.textContent = 'ERROR // Add your name at the top first. Friends will see it on your map.'; err.hidden = false; $('me-name').focus(); return; }
