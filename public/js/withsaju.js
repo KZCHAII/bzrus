@@ -93,31 +93,66 @@
 
   function cssVar(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
 
-  /** 지도: 가운데 주인, 점수가 높을수록 가깝게, 관계별로 방향을 나눔 */
+  /** 지도: 원을 관계 5종으로 다섯 등분. 빈 칸도 보여 주고, 점수가 높을수록 가운데(주인) 가까이 */
+  var KINDS = ['battery', 'spark', 'copilot', 'mirror', 'coach'];
+  function rgba(hex, a) {
+    var h = hex.replace('#', ''); if (h.length === 3) h = h.split('').map(function (c) { return c + c; }).join('');
+    var n = parseInt(h, 16); return 'rgba(' + (n >> 16 & 255) + ',' + (n >> 8 & 255) + ',' + (n & 255) + ',' + a + ')';
+  }
   function drawMap(canvas, centerLabel, entries) {
-    var x = canvas.getContext('2d'), W = canvas.width, H = canvas.height, cx = W / 2, cy = H / 2, R = Math.min(W, H) / 2 - 34;
+    var x = canvas.getContext('2d'), W = canvas.width, H = canvas.height, cx = W / 2, cy = H / 2, R = Math.min(W, H) / 2 - 92;
+    var TAU = Math.PI * 2, span = TAU / 5;
     x.clearRect(0, 0, W, H);
-    [[1, 'rgba(0,240,255,0.14)'], [.66, 'rgba(168,85,247,0.16)'], [.33, 'rgba(236,72,153,0.16)']].forEach(function (o) {
-      x.save(); x.translate(cx, cy); x.scale(1, .78); x.beginPath(); x.arc(0, 0, R * o[0], 0, Math.PI * 2); x.restore(); x.strokeStyle = o[1]; x.lineWidth = 1; x.stroke();
+    x.textBaseline = 'middle';
+    KINDS.forEach(function (k, i) {
+      var col = cssVar(REL[k].c), a0 = -Math.PI / 2 - span / 2 + i * span, a1 = a0 + span, mid = (a0 + a1) / 2;
+      var list = entries.filter(function (e) { return e.relation === k; });
+      // 칸 채우기 (빈 칸은 더 옅게)
+      var g = x.createRadialGradient(cx, cy, 30, cx, cy, R);
+      g.addColorStop(0, rgba(col, list.length ? .02 : .01)); g.addColorStop(1, rgba(col, list.length ? .16 : .06));
+      x.fillStyle = g; x.beginPath(); x.moveTo(cx, cy); x.arc(cx, cy, R, a0, a1); x.closePath(); x.fill();
+      // 바깥 테두리 호
+      x.strokeStyle = rgba(col, list.length ? .75 : .3); x.lineWidth = 2; x.setLineDash(list.length ? [] : [4, 5]);
+      x.beginPath(); x.arc(cx, cy, R, a0 + .02, a1 - .02); x.stroke(); x.setLineDash([]);
+      // 칸 이름 + 인원
+      var lx = cx + Math.cos(mid) * (R + 44), ly = cy + Math.sin(mid) * (R + 44);
+      x.textAlign = 'center';
+      x.fillStyle = list.length ? col : rgba(col, .55);
+      x.font = '700 22px "JetBrains Mono", monospace'; x.fillText(REL[k].n.toUpperCase(), lx, ly - 12);
+      x.font = '500 16px "JetBrains Mono", monospace'; x.fillStyle = list.length ? '#e0e0e0' : '#666';
+      x.fillText(list.length ? list.length + (list.length === 1 ? ' FRIEND' : ' FRIENDS') : 'EMPTY', lx, ly + 14);
+      if (!list.length) {
+        x.fillStyle = rgba(col, .5); x.font = '500 16px "JetBrains Mono", monospace';
+        x.fillText('OPEN SLOT', cx + Math.cos(mid) * R * .62, cy + Math.sin(mid) * R * .62);
+      }
+      // 사람 점: 칸 안에 고르게, 점수 높을수록 가까이
+      list.forEach(function (e, j) {
+        var ang = a0 + span * (j + 1) / (list.length + 1);
+        var dist = Math.max(.34, Math.min(.92, 1 - (e.score - 60) / 45)) + (list.length > 4 ? (j % 2 ? .08 : -.04) : 0);
+        e._p = { x: cx + Math.cos(ang) * R * dist, y: cy + Math.sin(ang) * R * dist, col: col };
+      });
     });
-    var kinds = ['battery', 'spark', 'copilot', 'mirror', 'coach'];
-    var pos = entries.map(function (e, i) {
-      var sector = kinds.indexOf(e.relation), within = entries.filter(function (f, j) { return j < i && f.relation === e.relation; }).length;
-      var ang = -Math.PI / 2 + sector * (Math.PI * 2 / 5) + (within % 5 - 2) * 0.22 + Math.floor(within / 5) * 0.11;
-      var dist = Math.max(.28, Math.min(.95, 1 - (e.score - 60) / 42));
-      return { e: e, px: cx + Math.cos(ang) * R * dist, py: cy + Math.sin(ang) * R * dist * .78 };
-    });
-    pos.forEach(function (p) { x.beginPath(); x.moveTo(cx, cy); x.lineTo(p.px, p.py); x.strokeStyle = 'rgba(255,255,255,0.10)'; x.setLineDash([2, 4]); x.stroke(); x.setLineDash([]); });
-    var g = x.createRadialGradient(cx, cy, 2, cx, cy, 46); g.addColorStop(0, 'rgba(0,240,255,.45)'); g.addColorStop(1, 'rgba(0,240,255,0)');
-    x.fillStyle = g; x.beginPath(); x.arc(cx, cy, 46, 0, Math.PI * 2); x.fill();
-    x.fillStyle = '#fff'; x.beginPath(); x.arc(cx, cy, 24, 0, Math.PI * 2); x.fill();
-    x.fillStyle = '#000'; x.font = '700 11px "JetBrains Mono", monospace'; x.textAlign = 'center'; x.textBaseline = 'middle';
-    x.fillText(String(centerLabel).slice(0, 6).toUpperCase(), cx, cy + 1);
-    pos.forEach(function (p) {
-      var col = cssVar(REL[p.e.relation].c);
-      x.shadowColor = col; x.shadowBlur = 14; x.fillStyle = col; x.beginPath(); x.arc(p.px, p.py, 6, 0, Math.PI * 2); x.fill(); x.shadowBlur = 0;
-      x.fillStyle = col; x.font = '600 13px "JetBrains Mono", monospace'; x.textAlign = p.px > cx + R * .55 ? 'right' : 'left';
-      x.fillText(String(p.e.nickname).slice(0, 12).toUpperCase(), p.px + (x.textAlign === 'right' ? -11 : 11), p.py + 1);
+    // 칸 나누는 선 + 동심원
+    x.strokeStyle = 'rgba(255,255,255,0.09)'; x.lineWidth = 1;
+    for (var i = 0; i < 5; i++) { var a = -Math.PI / 2 - span / 2 + i * span; x.beginPath(); x.moveTo(cx + Math.cos(a) * 40, cy + Math.sin(a) * 40); x.lineTo(cx + Math.cos(a) * R, cy + Math.sin(a) * R); x.stroke(); }
+    [.36, .66].forEach(function (f) { x.beginPath(); x.arc(cx, cy, R * f, 0, TAU); x.setLineDash([2, 5]); x.stroke(); x.setLineDash([]); });
+    // 주인 (가운데)
+    var glow = x.createRadialGradient(cx, cy, 2, cx, cy, 56); glow.addColorStop(0, 'rgba(0,240,255,.45)'); glow.addColorStop(1, 'rgba(0,240,255,0)');
+    x.fillStyle = glow; x.beginPath(); x.arc(cx, cy, 56, 0, TAU); x.fill();
+    x.fillStyle = '#fff'; x.beginPath(); x.arc(cx, cy, 40, 0, TAU); x.fill();
+    x.fillStyle = '#000'; x.font = '700 17px "JetBrains Mono", monospace'; x.textAlign = 'center';
+    x.fillText(String(centerLabel).slice(0, 7).toUpperCase(), cx, cy + 1);
+    // 사람
+    entries.forEach(function (e) {
+      var p = e._p; if (!p) return;
+      x.strokeStyle = rgba(p.col, .35); x.setLineDash([2, 4]); x.beginPath(); x.moveTo(cx, cy); x.lineTo(p.x, p.y); x.stroke(); x.setLineDash([]);
+      x.shadowColor = p.col; x.shadowBlur = 14; x.fillStyle = p.col; x.beginPath(); x.arc(p.x, p.y, 10, 0, TAU); x.fill(); x.shadowBlur = 0;
+      var right = p.x < cx;
+      x.textAlign = right ? 'right' : 'left'; x.fillStyle = '#fff'; x.font = '700 19px "JetBrains Mono", monospace';
+      x.fillText(String(e.nickname).slice(0, 10).toUpperCase(), p.x + (right ? -16 : 16), p.y - 2);
+      x.fillStyle = p.col; x.font = '500 16px "JetBrains Mono", monospace';
+      x.fillText(String(e.score), p.x + (right ? -16 : 16), p.y + 18);
+      delete e._p;
     });
   }
 

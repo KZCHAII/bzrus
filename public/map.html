@@ -106,9 +106,9 @@
     <p class="eyebrow">Map // <span id="m-count">0</span> friends</p>
     <div class="map">
       <span class="tag">LIVE <em>// MAP</em></span>
-      <canvas id="mapCanvas" width="640" height="440" role="img" aria-label="Friends placed around the map owner by relationship type"></canvas>
+      <canvas id="mapCanvas" width="640" height="640" role="img" aria-label="Your map, split into five relationship types, with friends placed closer to you the better the chemistry"></canvas>
     </div>
-    <div class="legend" id="legend"></div>
+    <p class="note" style="text-align:left;margin-top:10px">Five slices, one per relationship type. Closer to the center means better chemistry.</p>
     <ol class="list" id="list"></ol>
     <p class="empty hide" id="empty">No one yet. Share your link and the map starts filling up.</p>
   </section>
@@ -138,7 +138,6 @@
   function renderMap() {
     show('mapBlock');
     $('m-count').textContent = data.entries.length;
-    $('legend').innerHTML = WS.legendHtml();
     var draw = function () { WS.drawMap($('mapCanvas'), data.name, data.entries); };
     draw(); if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
     $('empty').classList.toggle('hide', data.entries.length > 0);
