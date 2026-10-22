@@ -25,5 +25,8 @@ BZR과 같은 방식이라 관리·이해가 쉽고 빠르다. 디자인도 BZR 
 ## D7. 친구 정보 공개 범위
 친구의 생일은 저장하지만 어떤 API도 돌려주지 않는다. 지도에는 별명·타입·관계·점수만. 친구가 "지도에 올리기"에 동의(기본 체크, 끌 수 있음)했을 때만 저장하고, 안 하면 결과만 보여 주고 아무것도 저장하지 않는다.
 
-## D8. Supabase 프로젝트는 아직 안 만듦
-Supabase 무료 플랜은 활성 프로젝트 2개까지이고 이미 bzr·maeil-gukeo가 있다. 세 번째는 유료(Pro $25/월)이거나 다른 계정이 필요 → 사장님 결정 사항. 그 전까지는 로컬 Postgres로 개발·테스트하고, 화면 확인은 Vercel 미리보기로 한다.
+## D8. DB는 Vercel 연동 Neon Postgres (무료, 미국 동부)
+Supabase 무료 플랜은 활성 프로젝트 2개까지이고 이미 bzr·maeil-gukeo가 있다. 유료($25/월)·새 계정 대신 사장님이 Vercel Storage에서 Neon(무료)을 붙였다. Vercel이 DATABASE_URL 등을 자동으로 넣어 준다.
+- 스키마는 그대로 `supabase/migrations/*.sql`. Neon에는 Supabase의 화면용 역할(anon·authenticated)이 없어 migration은 그 역할이 있을 때만 권한을 막는다. 화면은 어차피 DB에 직접 붙지 않고 서버 API만 쓴다.
+- 배포 빌드 때 `scripts/db-migrate.mjs`가 아직 안 넣은 migration만 순서대로 적용 (`schema_migrations` 표에 기록, 동시 배포 잠금). 비밀 값은 채팅·로그에 나오지 않는다.
+- 로그인은 Supabase Auth 대신 다른 방법(구글 로그인 직접 또는 Auth.js)으로 붙인다 → 그때 결정 기록.

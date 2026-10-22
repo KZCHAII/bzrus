@@ -17,7 +17,7 @@
 - 화면: `public/*.html` + `public/js/withsaju.js` + `public/css/withsaju.css`. Next.js가 정적 파일로 서빙 (`/` → index.html, `/m/<slug>` → map.html).
 - 서버: Next.js API (`app/api/**`).
 - 사주 계산: `lib/saju.ts` 하나가 기준 (화면은 API로 받아 쓴다). 만세력 라이브러리와 대조 테스트 있음.
-- DB: Supabase Postgres (미국 지역 예정). 스키마는 `supabase/migrations/*.sql`, 모든 표 RLS(정책 없음 = 서버만 접근).
+- DB: Vercel 연동 Neon Postgres (무료, 미국 동부). 스키마는 `supabase/migrations/*.sql`, 모든 표 RLS(정책 없음 = 서버만 접근). 배포 빌드 때 `scripts/db-migrate.mjs`가 자동 적용.
 - 배포: GitHub push → Vercel 자동 배포 (iad1).
 - 예정: 로그인(구글·애플), 결제(Paddle, merchant of record), 이메일 발송, AI 리포트(BZR의 생성·재시도·카드 결과지 방식).
 

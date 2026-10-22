@@ -7,3 +7,7 @@
 - API: `POST /api/sign`, `POST/GET /api/maps`, `POST/DELETE /api/maps/entries`.
 - 화면: `/` 랜딩(BZR 디자인), `/m/<slug>` 지도(주인 화면 / 친구 화면).
 - 아직 없음: 실제 DB(Supabase), 로그인, 결제, 이메일, AI 리포트 → backlog.md
+
+## 2026-10-22 — DB 연결 준비
+- Vercel 프로젝트 생성 + Neon(무료) 연결 (사장님).
+- 배포 때 migration 자동 적용 스크립트 추가, Neon(일반 Postgres)에서도 돌도록 migration 수정.

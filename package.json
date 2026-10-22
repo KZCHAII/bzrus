@@ -4,13 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "node scripts/db-migrate.mjs && next build",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "test:db": "vitest run test/db",
-    "db:local": "bash scripts/pg-local.sh start"
+    "db:local": "bash scripts/pg-local.sh start",
+    "db:migrate": "node scripts/db-migrate.mjs"
   },
   "dependencies": {
     "astronomy-engine": "2.1.19",
