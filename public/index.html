@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Serif+KR:wght@700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/withsaju.css">
+<link rel="stylesheet" href="/css/datepicker.css">
 <title>WITHSAJU — Meet your Korean sign</title>
 <meta name="description" content="You know your zodiac sign. Meet your Korean one. Free Korean Saju sign from your birthday, plus a friend map you can share.">
 <meta property="og:title" content="What's your Korean sign?">
@@ -17,6 +18,7 @@
 <nav>
   <a class="logo" href="/" style="text-decoration:none"><div class="logo-mark"><span></span><span></span><span></span><span></span></div><div class="logo-text">WITH<em>SAJU</em></div></a>
   <div class="nav-right">
+    <a class="nav-link" id="nav-myreading" href="/" hidden>My reading</a>
     <a class="nav-link" id="nav-mymap" href="/" hidden>My map</a>
     <a class="nav-cta" href="/reading">Full reading</a>
   </div>
@@ -36,7 +38,8 @@
         <div class="field"><label for="me-name">Name</label><input id="me-name" type="text" autocomplete="given-name" placeholder="What friends call you" maxlength="20"></div>
       </div>
       <div class="fields three">
-        <div class="field"><label for="me-date">Birthday</label><input id="me-date" type="date" min="1920-01-01" required></div>
+        <div class="field"><label>Birthday</label><input id="me-date" type="hidden">
+          <div class="bzr-datepicker" data-target="me-date"><button type="button" class="bzr-dp-trigger" data-part="month"><span class="bzr-dp-val">MM</span><span class="bzr-dp-arrow">▾</span></button><span class="bzr-dp-sep">/</span><button type="button" class="bzr-dp-trigger" data-part="day"><span class="bzr-dp-val">DD</span><span class="bzr-dp-arrow">▾</span></button><span class="bzr-dp-sep">/</span><button type="button" class="bzr-dp-trigger" data-part="year"><span class="bzr-dp-val">YYYY</span><span class="bzr-dp-arrow">▾</span></button></div></div>
         <div class="field"><label for="me-time">Birth time <span class="opt">(opt.)</span></label><input id="me-time" type="time"></div>
       </div>
       <button class="btn" type="submit" id="meBtn">Reveal my Korean sign <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M1 7h11m0 0L7 2m5 5L7 12" stroke="currentColor" stroke-width="1.8"/></svg></button>
@@ -126,6 +129,7 @@
 </div>
 
 <script src="/js/withsaju.js"></script>
+<script src="/js/datepicker.js"></script>
 <script>
 (function () {
   var $ = WS.$, cur = null;
@@ -189,6 +193,7 @@
   var saved = WS.me.get();
   if (saved && saved.birthday) {
     $('me-name').value = saved.name || ''; $('me-date').value = saved.birthday; $('me-time').value = saved.time || '';
+    if (window.bzrRehydrateDatepickers) window.bzrRehydrateDatepickers();
     var maps = WS.me.maps(), w = $('welcome');
     w.innerHTML = 'Welcome back' + (saved.name ? ', ' + WS.esc(saved.name) : '') + (maps.length ? ' · <a href="/m/' + maps[0].slug + '">open my sky map</a>' : '');
     w.classList.remove('hide');

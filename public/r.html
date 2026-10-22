@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Serif+KR:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/withsaju.css">
+<title>WITHSAJU — Your reading</title>
+<meta name="robots" content="noindex">
+</head>
+<body>
+<nav>
+  <a class="logo" href="/" style="text-decoration:none"><div class="logo-mark"><span></span><span></span><span></span><span></span></div><div class="logo-text">WITH<em>SAJU</em></div></a>
+  <div class="nav-right">
+    <a class="nav-link" id="nav-myreading" href="/" hidden>My reading</a>
+    <a class="nav-link" id="nav-mymap" href="/" hidden>My map</a>
+    <a class="nav-cta" href="/reading">Full reading</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <section class="hero" id="top">
+    <p class="eyebrow" style="color:var(--purple)">Full reading // <span id="v-sign"></span></p>
+    <h1 id="v-title">Your reading</h1>
+    <p class="kmeta" id="v-meta" style="text-align:left"></p>
+
+    <div class="panel" id="v-wait">
+      <span class="corner"></span><span class="corner-br"></span>
+      <span class="tag">WRITING <em>// <span id="v-elapsed">0:00</span></em></span>
+      <ul class="prog" id="v-prog">
+        <li data-s="0">Calculating your four pillars</li>
+        <li data-s="1">Finding your 10-year luck cycle</li>
+        <li data-s="2">Reading the last five years</li>
+        <li data-s="3">Mapping the next five years</li>
+        <li data-s="4">Writing your full reading</li>
+      </ul>
+      <p class="note" style="text-align:left;margin-top:16px">This takes about 1–2 minutes. You can leave this page; the link keeps working.</p>
+    </div>
+    <div class="panel hide" id="v-fail">
+      <span class="corner"></span><span class="corner-br"></span>
+      <h2>We couldn't finish this reading.</h2>
+      <p class="sub">Something went wrong on our side. Nothing was charged. Please try again in a few minutes.</p>
+      <a class="btn" href="/reading" style="text-decoration:none">Try again <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M1 7h11m0 0L7 2m5 5L7 12" stroke="currentColor" stroke-width="1.8"/></svg></a>
+    </div>
+    <p class="loading hide" id="v-missing">READING NOT FOUND</p>
+  </section>
+  <div id="v-body"></div>
+</div>
+
+<footer>
+  WITHSAJU · KOREAN SAJU × WESTERN ASTROLOGY<br>
+  For entertainment purposes only. Not medical, legal or financial advice.<br>
+  © 2026 WITHSAJU
+</footer>
+
+<script src="/js/withsaju.js"></script>
+<script src="/js/reading-view.js"></script>
+<script>
+(function () {
+  var $ = WS.$;
+  WS.initNav();
+  var id = (location.pathname.match(/^\/r\/([0-9a-f-]{36})$/i) || [])[1] || new URLSearchParams(location.search).get('id') || '';
+  var key = new URLSearchParams(location.search).get('k') || WS.me.readingKey(id) || '';
+  var t0 = Date.now(), rendered = '', timer = null;
+
+  function tick() {
+    var s = Math.floor((Date.now() - t0) / 1000);
+    $('v-elapsed').textContent = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+    var step = Math.min(4, Math.floor(s / 12));
+    Array.prototype.forEach.call($('v-prog').children, function (li, i) { li.className = i < step ? 'done' : i === step ? 'on' : ''; });
+  }
+  function header(d) {
+    $('v-title').innerHTML = WS.esc(d.name) + '\u2019s <span class="accent">Korean Saju reading</span>';
+    $('v-sign').textContent = d.chart.sign.name.toUpperCase() + ' ' + d.chart.sign.hanja;
+    $('v-meta').textContent = d.birthday + (d.time ? ' ' + d.time : ' · time unknown') + ' · ' + d.gender;
+    document.title = d.name + '\u2019s reading — WITHSAJU';
+  }
+  async function load() {
+    var d;
+    try { d = await WS.api('/api/readings?id=' + encodeURIComponent(id) + '&k=' + encodeURIComponent(key)); }
+    catch (x) { if (x.status === 404) { $('v-wait').classList.add('hide'); $('v-missing').classList.remove('hide'); return; } return setTimeout(load, 5000); }
+    header(d);
+    if (d.status === 'generating') { $('v-wait').classList.remove('hide'); return setTimeout(load, 4000); }
+    clearInterval(timer);
+    $('v-wait').classList.add('hide');
+    if (d.status === 'failed') { $('v-fail').classList.remove('hide'); return; }
+    var sig = (d.cards ? 'c' : 't') + d.text.length;
+    if (sig !== rendered) { rendered = sig; WSReading.render($('v-body'), d); }
+    if (!d.cards && d.cardsPending) setTimeout(load, 5000);
+  }
+  if (!id || !key) { $('v-wait').classList.add('hide'); $('v-missing').classList.remove('hide'); }
+  else { timer = setInterval(tick, 1000); tick(); load(); }
+})();
+</script>
+</body>
+</html>

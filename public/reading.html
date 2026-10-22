@@ -8,13 +8,15 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Serif+KR:wght@700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/withsaju.css">
+<link rel="stylesheet" href="/css/datepicker.css">
 <title>WITHSAJU — Full reading</title>
-<meta name="description" content="Your full Korean Saju reading: four pillars, 10-year luck cycles, your zodiac side by side, and your 2027.">
+<meta name="description" content="Your full Korean Saju reading: four pillars, 10-year luck cycles, and the next five years, in plain English.">
 </head>
 <body>
 <nav>
   <a class="logo" href="/" style="text-decoration:none"><div class="logo-mark"><span></span><span></span><span></span><span></span></div><div class="logo-text">WITH<em>SAJU</em></div></a>
   <div class="nav-right">
+    <a class="nav-link" id="nav-myreading" href="/" hidden>My reading</a>
     <a class="nav-link" id="nav-mymap" href="/" hidden>My map</a>
     <a class="nav-cta" href="/reading">Full reading</a>
   </div>
@@ -22,35 +24,37 @@
 
 <div class="wrap">
   <section class="hero">
-    <p class="eyebrow" style="color:var(--purple)">Full reading // $9.99</p>
+    <p class="eyebrow" style="color:var(--purple)">Full reading</p>
     <h1>Your whole chart, <span class="accent">in plain English.</span></h1>
-    <p class="sub">Your Korean sign comes from one pillar. The full reading uses all four, your <strong>10-year luck cycles</strong>, and your zodiac chart side by side.</p>
+    <p class="sub">Your Korean sign comes from one pillar. The full reading uses all four, your <strong>10-year luck cycles</strong>, and each year from 5 years back to 5 years ahead.</p>
 
     <ul class="feat" style="margin-bottom:26px">
-      <li><span>四</span><div><b>Four pillars</b>Year, month, day and hour, and what each says about you.</div></li>
-      <li><span>運</span><div><b>10-year luck cycles</b>Which decade is yours, and what changes in the next one.</div></li>
-      <li><span>星</span><div><b>Side by side with your zodiac</b>Where the two systems agree, and where they don't.</div></li>
-      <li><span>年</span><div><b>Your 2027</b>Month by month: love, money and work.</div></li>
+      <li><span>四</span><div><b>Four pillars</b>Year, month, day and hour, read together.</div></li>
+      <li><span>運</span><div><b>10-year luck cycles</b>Which decade you're in, and what the next one changes.</div></li>
+      <li><span>年</span><div><b>Five years back, five ahead</b>Year by year: openings and stretches to be careful in.</div></li>
+      <li><span>心</span><div><b>Money, people, body and mind</b>And the one drive behind everything you do.</div></li>
     </ul>
 
     <form class="panel product" id="rForm" novalidate>
       <span class="corner"></span><span class="corner-br"></span>
-      <span class="badge">LAUNCH PRICE · $9.99</span>
+      <span class="badge" id="r-badge">$9.99</span>
       <div class="fields" style="grid-template-columns:1fr;margin-top:6px">
         <div class="field"><label for="r-name">Name</label><input id="r-name" type="text" autocomplete="given-name" maxlength="20"></div>
       </div>
       <div class="fields three">
-        <div class="field"><label for="r-date">Birthday</label><input id="r-date" type="date" min="1920-01-01"></div>
+        <div class="field"><label>Birthday</label><input id="r-date" type="hidden">
+          <div class="bzr-datepicker" data-target="r-date"><button type="button" class="bzr-dp-trigger" data-part="month"><span class="bzr-dp-val">MM</span><span class="bzr-dp-arrow">▾</span></button><span class="bzr-dp-sep">/</span><button type="button" class="bzr-dp-trigger" data-part="day"><span class="bzr-dp-val">DD</span><span class="bzr-dp-arrow">▾</span></button><span class="bzr-dp-sep">/</span><button type="button" class="bzr-dp-trigger" data-part="year"><span class="bzr-dp-val">YYYY</span><span class="bzr-dp-arrow">▾</span></button></div></div>
         <div class="field"><label for="r-time">Birth time</label><input id="r-time" type="time"></div>
       </div>
       <label class="check" for="r-unk"><input type="checkbox" id="r-unk"><span>I don't know my birth time. Read three pillars without the hour.</span></label>
       <div class="fields" style="grid-template-columns:1fr">
-        <div class="field"><label for="r-place">Birth city</label><input id="r-place" type="text" placeholder="Austin, TX" maxlength="80" autocomplete="address-level2"></div>
-        <div class="field"><label for="r-email">Email</label><input id="r-email" type="email" placeholder="you@email.com" maxlength="254" autocomplete="email"></div>
+        <div class="field"><label>Gender</label><div class="gender" id="r-gender" role="radiogroup" aria-label="Gender"><button type="button" data-g="woman" role="radio" aria-checked="false">Woman</button><button type="button" data-g="man" role="radio" aria-checked="false">Man</button></div>
+          <span class="note" style="text-align:left;margin:4px 0 0">Saju uses this to set the direction of your 10-year luck cycles.</span></div>
+        <div class="field" id="r-email-f"><label for="r-email">Email <span class="opt" id="r-email-opt"></span></label><input id="r-email" type="email" placeholder="you@email.com" maxlength="254" autocomplete="email"></div>
       </div>
-      <button class="btn" type="submit" id="rBtn" style="background:var(--purple);box-shadow:0 0 20px rgba(168,85,247,.3)">Reserve my reading <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M1 7h11m0 0L7 2m5 5L7 12" stroke="currentColor" stroke-width="1.8"/></svg></button>
+      <button class="btn" type="submit" id="rBtn" style="background:var(--purple);box-shadow:0 0 20px rgba(168,85,247,.3)"><span id="rBtnT">Get my reading</span> <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M1 7h11m0 0L7 2m5 5L7 12" stroke="currentColor" stroke-width="1.8"/></svg></button>
       <p class="err" id="r-err" hidden></p>
-      <p class="note">Checkout opens soon. Reserve now and we'll email you the moment it does, at the launch price. You won't be charged today.</p>
+      <p class="note" id="r-note"></p>
     </form>
 
     <div class="panel hide" id="r-done" style="margin-top:18px">
@@ -68,30 +72,51 @@
   For entertainment purposes only. Not medical, legal or financial advice.<br>
   © 2026 WITHSAJU
 </footer>
-<div class="dock" id="dock" role="complementary" aria-label="Full reading offer">
-  <div class="t"><span>Your full Saju reading</span><b>Four pillars, 10-year luck, your 2027</b></div>
-  <a href="/reading">$9.99 →</a>
-  <button class="x" type="button" aria-label="Close">×</button>
-</div>
 
 <script src="/js/withsaju.js"></script>
+<script src="/js/datepicker.js"></script>
 <script>
 (function () {
-  var $ = WS.$;
+  var $ = WS.$, mode = 'reserve', gender = '';
   WS.initNav();
   var saved = WS.me.get();
-  if (saved) { $('r-name').value = saved.name || ''; $('r-date').value = saved.birthday || ''; $('r-time').value = saved.time || ''; }
+  if (saved) { $('r-name').value = saved.name || ''; $('r-date').value = saved.birthday || ''; $('r-time').value = saved.time || ''; gender = saved.gender || ''; if (window.bzrRehydrateDatepickers) window.bzrRehydrateDatepickers(); }
+  function setGender(g) { gender = g; Array.prototype.forEach.call($('r-gender').children, function (b) { var on = b.dataset.g === g; b.classList.toggle('on', on); b.setAttribute('aria-checked', on ? 'true' : 'false'); }); }
+  if (gender) setGender(gender);
+  $('r-gender').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) setGender(b.dataset.g); });
   $('r-unk').addEventListener('change', function () { $('r-time').disabled = this.checked; if (this.checked) $('r-time').value = ''; });
+
+  function applyMode() {
+    if (mode === 'test') {
+      $('r-badge').textContent = 'FREE PREVIEW';
+      $('rBtnT').textContent = 'Read my chart now';
+      $('r-email-opt').textContent = '(optional)';
+      $('r-note').textContent = 'Free while we test, a few readings a day. Your reading takes about 1–2 minutes to write.';
+    } else {
+      $('r-badge').textContent = 'LAUNCH PRICE · $9.99';
+      $('rBtnT').textContent = 'Reserve my reading';
+      $('r-note').textContent = 'Checkout opens soon. Reserve now and we\u2019ll email you the moment it does, at the launch price. You won\u2019t be charged today.';
+    }
+  }
+  applyMode();
+  WS.api('/api/readings/mode').then(function (r) { mode = r.mode; applyMode(); }).catch(function () {});
+
   $('rForm').addEventListener('submit', async function (e) {
     e.preventDefault();
     var err = $('r-err'); err.hidden = true;
-    var body = { name: $('r-name').value.trim(), birthday: $('r-date').value, time: $('r-time').value, timeUnknown: $('r-unk').checked, place: $('r-place').value.trim(), email: $('r-email').value.trim() };
-    var miss = !body.name ? 'your name' : !body.birthday ? 'your birthday' : (!body.time && !body.timeUnknown) ? 'your birth time, or check "I don’t know"' : !body.place ? 'your birth city' : !body.email ? 'your email' : '';
+    var body = { name: $('r-name').value.trim(), birthday: $('r-date').value, time: $('r-time').value, timeUnknown: $('r-unk').checked, gender: gender, email: $('r-email').value.trim() };
+    var miss = !body.name ? 'your name' : !body.birthday ? 'your birthday' : (!body.time && !body.timeUnknown) ? 'your birth time, or check "I don\u2019t know"' : !body.gender ? 'your gender' : (mode !== 'test' && !body.email) ? 'your email' : '';
     if (miss) { err.textContent = 'ERROR // Add ' + miss + '.'; err.hidden = false; return; }
     $('rBtn').disabled = true;
     try {
+      WS.me.set({ name: body.name, birthday: body.birthday, time: body.time, gender: body.gender });
+      if (mode === 'test') {
+        var r = await WS.api('/api/readings', { body: body });
+        WS.me.addReading(r.id, r.key, body.name);
+        location.href = '/r/' + r.id + '?k=' + encodeURIComponent(r.key);
+        return;
+      }
       await WS.api('/api/reading', { body: body });
-      WS.me.set({ name: body.name, birthday: body.birthday, time: body.time });
       $('r-done-mail').textContent = body.email.toUpperCase();
       $('rForm').classList.add('hide'); $('r-done').classList.remove('hide');
       $('r-done').scrollIntoView({ block: 'start' });

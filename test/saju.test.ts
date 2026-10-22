@@ -83,3 +83,36 @@ describe("관계", () => {
     expect(r.score).toBeLessThan(100);
   });
 });
+
+describe("상세 원국 (십신·대운)", async () => {
+  const { fullChart, tenGodOf, yearPillarOf, chartText } = await import("@/lib/saju-chart");
+  it("십신: 庚 일간 기준", () => {
+    // 庚(6) 기준: 庚 비견, 辛 겁재, 壬 식신, 癸 상관, 甲 편재, 乙 정재, 丙 편관, 丁 정관, 戊 편인, 己 정인
+    expect([6, 7, 8, 9, 0, 1, 2, 3, 4, 5].map((s) => tenGodOf(6, s))).toEqual(
+      ["companion", "rob", "eating", "hurting", "indirectWealth", "directWealth", "sevenKillings", "directOfficer", "indirectResource", "directResource"]);
+  });
+  it("세운: 2026 丙午, 1984 甲子", () => {
+    expect(yearPillarOf(2026)).toEqual({ stem: 2, branch: 6 });
+    expect(yearPillarOf(1984)).toEqual({ stem: 0, branch: 0 });
+  });
+  it("대운: 1992-03-15 14:30 (壬申년 = 양년), 남자 순행 / 여자 역행", () => {
+    const b = { year: 1992, month: 3, day: 15, hour: 14, minute: 30, utcOffsetMinutes: 540 };
+    const m = fullChart(b, "man", [2026]), w = fullChart(b, "woman", [2026]);
+    expect(m.luck.forward).toBe(true);
+    expect(w.luck.forward).toBe(false);
+    // 월주 癸卯 → 순행 첫 대운 甲辰, 역행 첫 대운 壬寅
+    expect(m.luck.cycles[0].pillar.han).toBe("甲辰");
+    expect(w.luck.cycles[0].pillar.han).toBe("壬寅");
+    // 경칩(3/5)에서 10일 지남 → 역행 약 3세, 다음 절기 청명(4/4)까지 약 20일 → 순행 약 7세
+    expect(w.luck.startAge).toBe(3);
+    expect(m.luck.startAge).toBe(7);
+    expect(m.elements).toEqual({ Wood: 2, Fire: 0, Earth: 1, Metal: 2, Water: 3 });
+  });
+  it("시간 모름이면 시주 없음, 글에도 그렇게", () => {
+    const ch = fullChart({ year: 1992, month: 3, day: 15 }, "woman", [2026]);
+    expect(ch.pillars.hour).toBeNull();
+    const t = chartText(ch, "Alex", { iso: "1992-03-15", time: null }, "woman", 2026);
+    expect(t).toContain("unknown (birth time not given)");
+    expect(t).toContain("CURRENT CYCLE");
+  });
+});

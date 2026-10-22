@@ -165,6 +165,12 @@
     get: function () { try { return JSON.parse(store.get('ws_me') || 'null'); } catch (e) { return null; } },
     set: function (v) { store.set('ws_me', JSON.stringify(v)); },
     maps: function () { try { return JSON.parse(store.get('ws_maps') || '[]'); } catch (e) { return []; } },
+    readings: function () { try { return JSON.parse(store.get('ws_readings') || '[]'); } catch (e) { return []; } },
+    addReading: function (id, key, name) {
+      var l = me.readings().filter(function (r) { return r.id !== id; }); l.unshift({ id: id, key: key, name: name });
+      store.set('ws_readings', JSON.stringify(l.slice(0, 5)));
+    },
+    readingKey: function (id) { var r = me.readings().filter(function (x) { return x.id === id; })[0]; return r ? r.key : ''; },
     addMap: function (slug, name, token) {
       store.set('ws_owner_' + slug, token);
       var l = me.maps().filter(function (m) { return m.slug !== slug; }); l.unshift({ slug: slug, name: name });
@@ -176,6 +182,8 @@
   function initNav() {
     var l = me.maps(), a = $('nav-mymap');
     if (a && l.length) { a.href = '/m/' + l[0].slug; a.hidden = false; }
+    var rl = me.readings(), b = $('nav-myreading');
+    if (b && rl.length) { b.href = '/r/' + rl[0].id + '?k=' + encodeURIComponent(rl[0].key); b.hidden = false; }
   }
 
   /** 아래에서 올라오는 유료 리포트 안내 (닫으면 이번 방문 동안 안 뜸) */

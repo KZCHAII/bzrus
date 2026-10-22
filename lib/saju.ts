@@ -40,6 +40,8 @@ export interface Chart {
   season: Season;
   /** 출생 순간의 태양 황경(도) */
   sunLongitude: number;
+  /** 출생 순간 (UTC) */
+  instant: Date;
 }
 
 export function julianDayNumber(y: number, m: number, d: number): number {
@@ -103,7 +105,7 @@ export function chartOf(b: BirthInput): Chart {
 
   const mb = month.branch;
   const season: Season = mb >= 2 && mb <= 4 ? "Spring" : mb >= 5 && mb <= 7 ? "Summer" : mb >= 8 && mb <= 10 ? "Autumn" : "Winter";
-  return { year, month, day, hour, season, sunLongitude: lon };
+  return { year, month, day, hour, season, sunLongitude: lon, instant };
 }
 
 // ── 서양 별자리 ──
