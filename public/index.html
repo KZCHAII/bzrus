@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Serif+KR:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/withsaju.css">
+<title>WITHSAJU — Meet your Korean sign</title>
+<meta name="description" content="You know your zodiac sign. Meet your Korean one. Free Korean Saju sign from your birthday, plus a friend map you can share.">
+<meta property="og:title" content="What's your Korean sign?">
+<meta property="og:description" content="You know your zodiac sign. Meet your Korean one.">
+</head>
+<body>
+<nav>
+  <a class="logo" href="/" style="text-decoration:none"><div class="logo-mark"><span></span><span></span><span></span><span></span></div><div class="logo-text">WITH<em>SAJU</em></div></a>
+  <div class="nav-status">SAJU ENGINE ONLINE</div>
+</nav>
+
+<div class="wrap">
+  <section class="hero">
+    <p class="eyebrow">Korean Saju <span class="x">×</span> <span class="p">Western Astrology</span></p>
+    <h1>You know your zodiac sign.<br><span class="accent">Meet your Korean one.</span></h1>
+    <p class="sub">In Korea, birthdays are read with <strong>Saju</strong>, a 2,000-year-old system of five elements and four seasons. Same birthday, <strong>a second sign</strong>. Most people are surprised by theirs.</p>
+
+    <form class="panel" id="meForm" novalidate>
+      <span class="corner"></span><span class="corner-br"></span>
+      <span class="tag">INPUT <em>// BIRTHDAY</em></span>
+      <div class="fields">
+        <div class="field"><label for="me-name">Name <span class="opt">(optional)</span></label><input id="me-name" type="text" autocomplete="given-name" placeholder="Alex" maxlength="20"></div>
+        <div class="field"><label for="me-date">Birthday</label><input id="me-date" type="date" min="1920-01-01" required></div>
+      </div>
+      <button class="btn" type="submit">Reveal my Korean sign <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M1 7h11m0 0L7 2m5 5L7 12" stroke="currentColor" stroke-width="1.8"/></svg></button>
+      <p class="err" id="me-err" hidden></p>
+      <p class="note">Your birthday isn't saved unless you make a map.</p>
+    </form>
+
+    <article class="panel sign" id="card" aria-live="polite">
+      <span class="corner"></span><span class="corner-br"></span>
+      <div class="sign-top"><span class="tag" id="ex-tag">EXAMPLE <em>// NOV 21 1996</em></span><span class="coord" id="coord"></span></div>
+      <p class="west" id="w-line"></p>
+      <p class="but">but in Korea, you're</p>
+      <div class="hanja" id="k-han"></div>
+      <div class="kname" id="k-name"></div>
+      <p class="kmeta" id="k-meta"></p>
+      <p class="tagline" id="k-tag"></p>
+      <dl class="stats" id="k-stats"></dl>
+      <div class="why" id="k-why"></div>
+      <form class="mapform" id="mapForm" novalidate style="margin-top:18px;text-align:left">
+        <p class="rel-pair" style="margin:0 0 8px">NEXT // YOUR SKY MAP</p>
+        <p class="west" style="margin:0 0 4px">Want to know what your friends are to you?</p>
+        <div class="fields" style="margin-top:12px;grid-template-columns:1fr">
+          <div class="field"><label for="map-name">Your name on the map</label><input id="map-name" type="text" placeholder="Alex" maxlength="20" autocomplete="given-name"></div>
+        </div>
+        <button class="btn" type="submit" id="mapBtn">Make my sky map <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M1 7h11m0 0L7 2m5 5L7 12" stroke="currentColor" stroke-width="1.8"/></svg></button>
+        <p class="err" id="map-err" hidden></p>
+      </form>
+    </article>
+
+    <div class="trust"><span>Real Saju calendar math</span><span>Zodiac from the Sun's position</span><span>No sign-up to try</span></div>
+  </section>
+
+  <section class="block">
+    <p class="eyebrow">Your sky map</p>
+    <h2>Share one link. <span class="accent">Your friends fill the map.</span></h2>
+    <p class="section-sub">Every friend who adds a birthday lands on your map, placed by chemistry. They see their Korean sign and what they are to you.</p>
+    <ol class="steps">
+      <li><b>Get your link</b>Post it to your story or drop it in the group chat.</li>
+      <li><b>Friends add a birthday</b>Each one sees their Korean sign and what they are to you.</li>
+      <li><b>Watch the map fill</b>The closer to you, the better the chemistry.</li>
+    </ol>
+    <div class="map">
+      <span class="tag">EXAMPLE <em>// MAP</em></span>
+      <canvas id="mapCanvas" width="640" height="440" role="img" aria-label="Example map: you in the center, eight friends around you colored by relationship type"></canvas>
+      <div class="coord">NODES <b>08</b> · BEST MATCH <b>BATTERY</b></div>
+    </div>
+    <div class="legend" id="legend"></div>
+  </section>
+
+  <section class="block">
+    <p class="eyebrow">Full reading</p>
+    <h2>The whole chart, <span class="accent">in plain English.</span></h2>
+    <p class="section-sub">Add your birth time and place for the complete Saju chart, read next to your birth chart.</p>
+    <div class="panel product">
+      <span class="corner"></span><span class="corner-br"></span>
+      <span class="badge">COMING SOON</span>
+      <h3>Your Korean Saju Reading</h3>
+      <ul class="feat">
+        <li><span>四</span><div><b>Four pillars</b>Year, month, day and hour, and what each says about you.</div></li>
+        <li><span>運</span><div><b>10-year luck cycles</b>Which decade is yours, and what changes in the next one.</div></li>
+        <li><span>星</span><div><b>Side by side with your zodiac</b>Where the two systems agree, and where they don't.</div></li>
+        <li><span>年</span><div><b>Your 2027</b>Month by month: love, money and work.</div></li>
+      </ul>
+      <div class="price-row"><span class="price">$9.99</span><span class="price-tag">ONE-TIME</span></div>
+      <button class="soon" type="button" disabled>Launching soon</button>
+    </div>
+  </section>
+</div>
+
+<footer>
+  WITHSAJU · KOREAN SAJU × WESTERN ASTROLOGY<br>
+  For entertainment purposes only. Not medical, legal or financial advice.<br>
+  © 2026 WITHSAJU
+</footer>
+
+<script src="/js/withsaju.js"></script>
+<script>
+(function () {
+  var $ = WS.$, birthday = '';
+  var EXAMPLE = { key: 'winter-ocean', name: 'Winter Ocean', hanja: '壬', tagline: 'Big, restless, holds everything. Calm on top, deep underneath.', element: 'Water', yang: true, season: 'Winter', strength: 'peak', dayPillar: { han: '壬戌', roman: 'Im-sul' }, zodiac: 'Scorpio', sunLongitude: 239.4 };
+  WS.fillSign($('card'), EXAMPLE, '', '');
+  $('mapForm').hidden = true;
+
+  $('meForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var err = $('me-err'); err.hidden = true;
+    var d = $('me-date').value;
+    if (!d) { err.textContent = 'ERROR // Enter your birthday.'; err.hidden = false; return; }
+    try {
+      var r = await WS.api('/api/sign', { body: { birthday: d } });
+      birthday = d;
+      var name = $('me-name').value.trim();
+      $('ex-tag').hidden = true;
+      WS.fillSign($('card'), r.sign, name, '');
+      $('mapForm').hidden = false;
+      if (name) $('map-name').value = name;
+      $('card').scrollIntoView({ block: 'start' });
+    } catch (x) { err.textContent = 'ERROR // ' + x.message; err.hidden = false; }
+  });
+
+  $('mapForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var err = $('map-err'); err.hidden = true;
+    var name = $('map-name').value.trim();
+    if (!name) { err.textContent = 'ERROR // Enter the name your friends know you by.'; err.hidden = false; return; }
+    $('mapBtn').disabled = true;
+    try {
+      var r = await WS.api('/api/maps', { body: { name: name, birthday: birthday } });
+      WS.store.set('ws_owner_' + r.slug, r.ownerToken);
+      location.href = '/m/' + r.slug;
+    } catch (x) { err.textContent = 'ERROR // ' + x.message; err.hidden = false; $('mapBtn').disabled = false; }
+  });
+
+  var EX = [['Maya','battery',90],['Leo','battery',86],['Sam','spark',84],['Noah','spark',80],['Ava','mirror',76],['Kai','copilot',75],['Zoe','coach',70],['Eli','coach',66]]
+    .map(function (a) { return { nickname: a[0], relation: a[1], score: a[2] }; });
+  function draw() { WS.drawMap($('mapCanvas'), 'YOU', EX); }
+  $('legend').innerHTML = WS.legendHtml();
+  draw(); if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
+})();
+</script>
+</body>
+</html>
