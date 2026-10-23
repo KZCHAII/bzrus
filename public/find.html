@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Serif+KR:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/withsaju.css">
+<title>WITHSAJU — Find my page</title>
+<meta name="robots" content="noindex">
+</head>
+<body>
+<nav>
+  <a class="logo" href="/" style="text-decoration:none"><div class="logo-mark"><span></span><span></span><span></span><span></span></div><div class="logo-text">WITH<em>SAJU</em></div></a>
+  <div class="nav-right">
+    <a class="nav-link opt" id="nav-myreading" href="/" hidden>My reading</a>
+    <a class="nav-link" id="nav-mymap" href="/" hidden>My map</a>
+    <a class="nav-cta" href="/reading">Full reading</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <section class="hero" style="max-width:560px">
+    <p class="eyebrow">Find my stuff</p>
+    <h1>Open your page and readings <span class="accent">on this device.</span></h1>
+    <p class="sub">Enter the email you saved your page with, or the one you used for a reading. We'll send you a link. No password.</p>
+
+    <form class="panel" id="fForm" novalidate>
+      <span class="corner"></span><span class="corner-br"></span>
+      <span class="tag">FIND <em>// BY EMAIL</em></span>
+      <div class="fields one">
+        <div class="field"><label for="f-email">Email</label><input id="f-email" type="email" placeholder="you@email.com" maxlength="254" autocomplete="email"></div>
+      </div>
+      <button class="btn" type="submit" id="fBtn">Email me a link <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M1 7h11m0 0L7 2m5 5L7 12" stroke="currentColor" stroke-width="1.8"/></svg></button>
+      <p class="err" id="f-err" hidden></p>
+    </form>
+
+    <div class="panel hide" id="f-sent">
+      <span class="corner"></span><span class="corner-br"></span>
+      <span class="tag">SENT <em>// CHECK YOUR INBOX</em></span>
+      <h2 style="margin:16px 0 8px">Check your email.</h2>
+      <p class="sub" style="margin:0">If <b id="f-sent-to"></b> has a page or a reading with us, a link is on its way. Open it on this device. It works once, for 30 minutes. Not there in a minute? Check spam.</p>
+      <button class="btn-ghost" type="button" id="f-again" style="margin-top:16px">Use a different email</button>
+    </div>
+
+    <div class="panel hide" id="f-open">
+      <span class="corner"></span><span class="corner-br"></span>
+      <span class="tag">WELCOME BACK <em>// <span id="f-who"></span></em></span>
+      <p class="sub" style="margin:16px 0 6px">This device now has your page and readings. They'll also show in the top menu.</p>
+      <div class="label" style="font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--mute-2);margin:18px 0 8px">MY PAGE</div>
+      <ul class="flist" id="f-maps"></ul>
+      <div class="label" style="font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--mute-2);margin:18px 0 8px">MY READINGS</div>
+      <ul class="flist" id="f-reads"></ul>
+    </div>
+    <p class="note hide" id="f-busy" style="font-size:13px">Opening your link…</p>
+  </section>
+</div>
+
+<footer>
+  <a href="/find" style="color:var(--cyan);text-decoration:none">Lost your page or reading? Find it →</a><br><br>
+  WITHSAJU · KOREAN SAJU × WESTERN ASTROLOGY<br>
+  Animal art based on icons by game-icons.net (CC BY 3.0).<br>
+  For entertainment purposes only. Not medical, legal or financial advice.<br>
+  © 2026 WITHSAJU
+</footer>
+<script src="/js/withsaju.js"></script>
+<script>
+(function () {
+  var $ = WS.$, esc = WS.esc;
+  WS.initNav();
+  function show(id, on) { $(id).classList.toggle('hide', !on); }
+  $('fForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var err = $('f-err'); err.hidden = true;
+    var email = $('f-email').value.trim();
+    if (!email) { err.textContent = 'ERROR // Enter your email.'; err.hidden = false; return; }
+    $('fBtn').disabled = true;
+    try {
+      await WS.api('/api/auth/link', { body: { email: email } });
+      $('f-sent-to').textContent = email;
+      show('fForm', false); show('f-sent', true);
+    } catch (x) { err.textContent = 'ERROR // ' + x.message; err.hidden = false; }
+    $('fBtn').disabled = false;
+  });
+  $('f-again').addEventListener('click', function () { show('f-sent', false); show('fForm', true); $('f-email').focus(); });
+
+  // 메일 속 링크로 들어옴: #t=토큰 → 이 기기에 열쇠 저장 (주소창에서는 바로 지움)
+  function fromHash() {
+  var t = (location.hash.match(/[#&]t=([A-Za-z0-9_-]{20,100})/) || [])[1];
+  if (t) {
+    history.replaceState(null, '', location.pathname);
+    show('fForm', false); show('f-sent', false); show('f-busy', true);
+    WS.api('/api/auth/redeem', { body: { token: t } }).then(function (r) {
+      show('f-busy', false); show('f-open', true);
+      $('f-who').textContent = r.email.toUpperCase();
+      r.maps.slice().reverse().forEach(function (m) { WS.me.addMap(m.slug, m.name, m.ownerToken); });
+      r.readings.slice().reverse().forEach(function (x) { WS.me.addReading(x.id, x.key, x.name); });
+      $('f-maps').innerHTML = r.maps.length ? r.maps.map(function (m) { return '<li><a href="/m/' + esc(m.slug) + '"><b>' + esc(m.name) + '\u2019s page</b><span>Open \u2192</span></a></li>'; }).join('')
+        : '<li class="none">No page saved to this email yet. Make one, then tap \u201cSave my page\u201d on it.</li>';
+      $('f-reads').innerHTML = r.readings.length ? r.readings.map(function (x) { return '<li><a href="/r/' + esc(x.id) + '?k=' + encodeURIComponent(x.key) + '"><b>' + esc(x.name) + '\u2019s full reading</b><span>' + new Date(x.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' \u2192</span></a></li>'; }).join('')
+        : '<li class="none">No readings with this email.</li>';
+      WS.initNav();
+    }).catch(function (x) {
+      show('f-busy', false); show('fForm', true);
+      $('f-err').textContent = 'ERROR // ' + x.message; $('f-err').hidden = false;
+    });
+  }
+  }
+  fromHash();
+  window.addEventListener('hashchange', fromHash);
+})();
+</script>
+</body>
+</html>

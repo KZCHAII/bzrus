@@ -44,7 +44,7 @@ const fakeAi = (fail = 0) => {
     return o?.schema ? CARDS : REPORT;
   } };
 };
-const input = { name: "Alex", birthday: "1992-03-15", time: "14:30", gender: "woman" };
+const input = { name: "Alex", birthday: "1992-03-15", time: "14:30", gender: "woman", email: "alex@example.com" };
 const jobs: Promise<unknown>[] = [];
 const bg = (fn: () => Promise<unknown>) => { jobs.push(fn()); };
 const flush = async () => { while (jobs.length) await jobs.shift(); };
@@ -74,7 +74,10 @@ describe("test 모드 생성", () => {
     expect(v2.chart.match.signs.length).toBeGreaterThan(0);
     expect(v2.chart.current?.cycle.startAge).toBeLessThanOrEqual(34);
     const [row] = await sql`select is_test, prompt_version from readings where id = ${id}`;
-    expect(row.is_test).toBe(true);
+    expect(row.is_test).toBe(true);    // 다 쓰면 "Your reading is ready" 메일 (테스트 모드: 보내지 않고 기록만)
+    const mails = await sql`select kind, to_email, status, body_text from email_outbox where kind = 'reading_ready' and body_text like ${"%/r/" + id + "?k=%"}`;
+    expect(mails).toHaveLength(1);
+    expect(mails[0]).toMatchObject({ to_email: "alex@example.com", status: "test" });
   });
 
   it("키가 틀리면 못 봄", async () => {
@@ -89,6 +92,7 @@ describe("test 모드 생성", () => {
   it("성별·시간 확인", async () => {
     process.env.READINGS_MODE = "test";
     await expect(createReading({ ...input, gender: "" }, "1.1.1.3", bg)).rejects.toMatchObject({ status: 400 });
+    await expect(createReading({ ...input, email: "" }, "1.1.1.3", bg)).rejects.toMatchObject({ status: 400, code: "NEED_EMAIL" });
     await expect(createReading({ ...input, time: "" }, "1.1.1.3", bg)).rejects.toMatchObject({ status: 400 });
   });
 

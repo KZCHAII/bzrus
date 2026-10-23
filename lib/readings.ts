@@ -10,6 +10,7 @@ import { signOf } from "./saju";
 import { services } from "./services";
 import { extractCards, MODEL, type Cards } from "./cards";
 import { PROMPTS } from "./prompts.generated";
+import { mailReadingReady } from "./account";
 
 export const MAX_ATTEMPTS = 3;
 const STALE_MIN = 6;              // 이 시간 넘게 '만드는 중'이면 끊긴 것으로 보고 다시
@@ -31,10 +32,10 @@ export function parseGender(v: unknown): Gender {
 interface Row {
   id: string; view_key: string; name: string; birth_date: string; birth_time: string | null; time_unknown: boolean; gender: Gender;
   status: "generating" | "done" | "failed"; attempts: number; started_at: Date | null; completed_at: Date | null;
-  content: string | null; error: string | null; cards: Cards | null; cards_status: string | null; created_at: Date; is_test: boolean;
+  content: string | null; error: string | null; cards: Cards | null; cards_status: string | null; created_at: Date; is_test: boolean; email: string | null;
 }
 const COLS = `id, view_key, name, to_char(birth_date, 'YYYY-MM-DD') birth_date, to_char(birth_time, 'HH24:MI') birth_time, time_unknown, gender,
-  status, attempts, started_at, completed_at, content, error, cards, cards_status, created_at, is_test`;
+  status, attempts, started_at, completed_at, content, error, cards, cards_status, created_at, is_test, email`;
 
 const birthOf = (r: Pick<Row, "birth_date" | "birth_time">): Birth => {
   const [y, m, d] = r.birth_date.split("-").map(Number);
@@ -75,7 +76,9 @@ export async function createReading(
   const b = parseBirthday(input.birthday, timeUnknown ? "" : input.time);
   if (!timeUnknown && !b.time) throw new HttpError(400, "NEED_TIME", { error: "NEED_TIME", message: "Add your birth time, or check \"I don't know my birth time\"." });
   const gender = parseGender(input.gender);
-  const email = input.email ? cleanEmail(input.email) : null;
+  // 이메일은 필수: 다른 기기에서 다시 보는 열쇠 (리포트 링크를 메일로 보낸다)
+  if (!str(input.email)) throw new HttpError(400, "NEED_EMAIL", { error: "NEED_EMAIL", message: "Add your email. We send your reading link there so you can open it on any device." });
+  const email = cleanEmail(input.email);
   const sql = getSql();
   const ipHash = hashIp(ip);
   const cap = Math.max(0, Number(envOptional("TEST_DAILY_CAP") ?? 10) || 10);
@@ -108,6 +111,7 @@ export async function generateReading(id: string): Promise<void> {
     const content = (await services().ai.generate(MODEL, prompt)).trim();
     if (content.length < 500 || !content.includes("##")) throw new Error("REPORT_TOO_SHORT");
     await sql`update readings set status = 'done', content = ${content}, completed_at = now(), cards = null, cards_status = null where id = ${id} and status = 'generating'`;
+    await mailReadingReady(r).catch((e) => console.error("[reading mail]", id, e instanceof Error ? e.message : e));
   } catch (e) {
     const msg = (e instanceof Error ? e.message : String(e)).slice(0, 300);
     console.error("[reading]", id, msg);

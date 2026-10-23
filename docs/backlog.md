@@ -7,6 +7,7 @@
 - 공유용 이미지 카드 (인스타 스토리 크기 PNG)
 - 약관·개인정보 처리방침·환불 정책 (미국 기준, CCPA·COPPA) + 18세 이상 확인
 - 도메인 구입 (withsaju.com 등) → SITE_URL
+- 실제 메일 켜기 (사장님): 도메인 → Resend 무료 가입 → 도메인 인증(DNS) → Vercel에 RESEND_API_KEY, EMAIL_FROM, EMAIL_MODE=live
 - 관리자 화면, 텔레그램 알림 (BZR에서 복사)
 - 지도 도배 방지 강화 (봇 차단), 지도 신고 기능
 - 출생지 선택 (시간대·경도) → 상세 리포트용

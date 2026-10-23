@@ -9,7 +9,7 @@ export const MAX_ENTRIES = 200;
 const MAPS_PER_IP_PER_DAY = 20;
 const ENTRIES_PER_IP_PER_HOUR = 5;
 
-const sha = (s: string) => createHash("sha256").update(s).digest("hex");
+export const sha = (s: string) => createHash("sha256").update(s).digest("hex");
 export const hashIp = (ip: string) => (ip ? sha(`${envOptional("IP_SALT") ?? "withsaju"}:${ip}`) : null);
 export function clientIp(req: Request): string {
   return (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || req.headers.get("x-real-ip") || "";
@@ -90,12 +90,12 @@ export async function createMap(input: { name: unknown; birthday: unknown; time?
   return { slug, ownerToken, name, sign: publicSign(sign) };
 }
 
-interface MapRow { id: string; slug: string; owner_token_hash: string; name: string; birth_date: string; birth_time: string | null }
+interface MapRow { id: string; slug: string; owner_token_hash: string; name: string; birth_date: string; birth_time: string | null; owner_email: string | null }
 
 async function loadMap(slugIn: string): Promise<MapRow> {
   const slug = slugIn.toLowerCase();
   if (!/^[a-z0-9]{10}$/.test(slug)) throw new HttpError(404, "MAP_NOT_FOUND");
-  const [m] = await getSql()<MapRow[]>`select id, slug, owner_token_hash, name, to_char(birth_date, 'YYYY-MM-DD') birth_date, to_char(birth_time, 'HH24:MI') birth_time from maps where slug = ${slug}`;
+  const [m] = await getSql()<MapRow[]>`select id, slug, owner_token_hash, name, to_char(birth_date, 'YYYY-MM-DD') birth_date, to_char(birth_time, 'HH24:MI') birth_time, owner_email from maps where slug = ${slug}`;
   if (!m) throw new HttpError(404, "MAP_NOT_FOUND", { error: "MAP_NOT_FOUND", message: "This map doesn't exist." });
   return m;
 }
@@ -104,7 +104,17 @@ const signOfIso = (iso: string, time: string | null) => {
   const [h, mi] = time ? time.split(":").map(Number) : [null, null];
   return signOf({ year: y, month: m, day: d, hour: h, minute: mi });
 };
-const isOwner = (m: MapRow, token: string) => !!token && sha(token) === m.owner_token_hash;
+/** 주인 확인: 처음 만든 기기의 열쇠, 또는 이메일 링크로 받은 기기별 열쇠 */
+async function isOwner(m: MapRow, token: string): Promise<boolean> {
+  if (!token) return false;
+  const h = sha(token);
+  if (h === m.owner_token_hash) return true;
+  const [k] = await getSql()`select 1 from map_keys where map_id = ${m.id} and token_hash = ${h}`;
+  return !!k;
+}
+/** a***@gmail.com */
+export const maskEmail = (e: string) => { const [u, d] = e.split("@"); return `${u.slice(0, 1)}${"*".repeat(Math.max(1, Math.min(4, u.length - 1)))}@${d}`; };
+export { loadMap, isOwner };
 
 /** 지도 보기. 생일은 누구에게도 돌려주지 않는다 (별명·타입·관계만) */
 export async function viewMap(slug: string, ownerToken: string) {
@@ -117,8 +127,8 @@ export async function viewMap(slug: string, ownerToken: string) {
     const s = signOfIso(r.birth_date, r.birth_time);
     return { id: r.id, nickname: r.nickname, sign: { name: s.name, hanja: s.hanja, element: s.element }, relation: r.relation, score: r.score };
   });
-  const own = isOwner(m, ownerToken);
-  return { slug: m.slug, name: m.name, sign: own ? publicSign(owner) : sharedSign(owner), entries, isOwner: own };
+  const own = await isOwner(m, ownerToken);
+  return { slug: m.slug, name: m.name, sign: own ? publicSign(owner) : sharedSign(owner), entries, isOwner: own, ...(own ? { savedEmail: m.owner_email ? maskEmail(m.owner_email) : null } : {}) };
 }
 
 /** 친구가 생일을 넣는다. 지도에 올리기는 동의했을 때만 (안 해도 결과는 본다) */
@@ -151,7 +161,7 @@ export async function addEntry(slug: string, input: { nickname: unknown; birthda
 
 export async function removeEntry(slug: string, entryId: string, ownerToken: string) {
   const m = await loadMap(slug);
-  if (!isOwner(m, ownerToken)) throw new HttpError(403, "NOT_OWNER");
+  if (!(await isOwner(m, ownerToken))) throw new HttpError(403, "NOT_OWNER");
   if (!/^[0-9a-f-]{36}$/i.test(entryId)) throw new HttpError(400, "BAD_ID");
   const r = await getSql()`update map_entries set removed_at = now() where id = ${entryId} and map_id = ${m.id} and removed_at is null returning id`;
   if (!r.length) throw new HttpError(404, "ENTRY_NOT_FOUND");
