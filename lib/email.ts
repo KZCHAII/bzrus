@@ -7,7 +7,7 @@ import { notify } from "./notify";
 export type EmailKind = "login" | "reading_ready" | "page_saved";
 export interface Mail { to: string; kind: EmailKind; subject: string; text: string; html: string }
 
-export const emailLive = () => envOptional("EMAIL_MODE") === "live" && !!envOptional("RESEND_API_KEY") && !!envOptional("EMAIL_FROM");
+export const emailLive = () => envOptional("EMAIL_MODE")?.trim() === "live" && !!envOptional("RESEND_API_KEY")?.trim() && !!envOptional("EMAIL_FROM")?.trim();
 
 export async function sendEmail(m: Mail, isTest = false): Promise<{ status: "test" | "sent" | "failed" }> {
   const sql = getSql();
@@ -20,8 +20,8 @@ export async function sendEmail(m: Mail, isTest = false): Promise<{ status: "tes
   try {
     const r = await fetch("https://api.resend.com/emails", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${envOptional("RESEND_API_KEY")}` },
-      body: JSON.stringify({ from: envOptional("EMAIL_FROM"), to: [m.to], subject: m.subject, text: m.text, html: m.html }),
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${envOptional("RESEND_API_KEY")!.trim()}` },
+      body: JSON.stringify({ from: envOptional("EMAIL_FROM")!.trim(), to: [m.to], subject: m.subject, text: m.text, html: m.html }),
     });
     const data = (await r.json().catch(() => ({}))) as { id?: string; message?: string };
     if (!r.ok) throw new Error(`RESEND_${r.status}:${(data.message ?? "").slice(0, 200)}`);
