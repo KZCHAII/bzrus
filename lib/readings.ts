@@ -10,13 +10,15 @@ import { signOf } from "./saju";
 import { services } from "./services";
 import { extractCards, MODEL, type Cards } from "./cards";
 import { PROMPTS } from "./prompts.generated";
-import { mailReadingReady } from "./account";
+import { mailReadingReady, siteBase } from "./account";
+import { lsConfig } from "./lemon";
 import { track } from "./events";
 import { escHtml, notify } from "./notify";
 
 export const MAX_ATTEMPTS = 3;
 const STALE_MIN = 6;              // 이 시간 넘게 '만드는 중'이면 끊긴 것으로 보고 다시
 const PER_IP_PER_DAY = 3;
+const PAID_PENDING_PER_IP = 10;
 const PROMPT_VERSION = createHash("sha256").update(PROMPTS.reading ?? "").digest("hex").slice(0, 10);
 
 export type Mode = "reserve" | "test" | "paid";
@@ -33,11 +35,11 @@ export function parseGender(v: unknown): Gender {
 
 interface Row {
   id: string; view_key: string; name: string; birth_date: string; birth_time: string | null; time_unknown: boolean; gender: Gender;
-  status: "generating" | "done" | "failed"; attempts: number; started_at: Date | null; completed_at: Date | null;
-  content: string | null; error: string | null; cards: Cards | null; cards_status: string | null; created_at: Date; is_test: boolean; email: string | null;
+  status: "awaiting_payment" | "generating" | "done" | "failed"; attempts: number; started_at: Date | null; completed_at: Date | null;
+  content: string | null; error: string | null; cards: Cards | null; cards_status: string | null; created_at: Date; is_test: boolean; email: string | null; checkout_url: string | null; refunded_at: Date | null;
 }
 const COLS = `id, view_key, name, to_char(birth_date, 'YYYY-MM-DD') birth_date, to_char(birth_time, 'HH24:MI') birth_time, time_unknown, gender,
-  status, attempts, started_at, completed_at, content, error, cards, cards_status, created_at, is_test, email`;
+  status, attempts, started_at, completed_at, content, error, cards, cards_status, created_at, is_test, email, checkout_url, refunded_at`;
 
 const birthOf = (r: Pick<Row, "birth_date" | "birth_time">): Birth => {
   const [y, m, d] = r.birth_date.split("-").map(Number);
@@ -72,7 +74,8 @@ export async function createReading(
   ip: string, start: (fn: () => Promise<unknown>) => void,
 ) {
   const mode = readingsMode();
-  if (mode !== "test") throw new HttpError(403, "CHECKOUT_CLOSED", { error: "CHECKOUT_CLOSED", message: "Checkout isn't open yet. Reserve your reading and we'll email you." });
+  const ls = mode === "paid" ? lsConfig() : null;
+  if (mode === "reserve" || (mode === "paid" && !ls)) throw new HttpError(403, "CHECKOUT_CLOSED", { error: "CHECKOUT_CLOSED", message: "Checkout isn't open yet. Reserve your reading and we'll email you." });
   const name = cleanName(input.name, "your name");
   const timeUnknown = input.timeUnknown === true;
   const b = parseBirthday(input.birthday, timeUnknown ? "" : input.time);
@@ -82,14 +85,32 @@ export async function createReading(
   const email = str(input.email) ? cleanEmail(input.email) : null;
   const sql = getSql();
   const ipHash = hashIp(ip);
-  const cap = Math.max(0, Number(envOptional("TEST_DAILY_CAP") ?? 10) || 10);
-  const [{ today }] = await sql<{ today: number }[]>`select count(*)::int today from readings where is_test and created_at > now() - interval '1 day'`;
-  if (today >= cap) throw new HttpError(429, "DAILY_CAP", { error: "DAILY_CAP", message: "Today's free preview readings are all taken. Try again tomorrow." });
+  if (mode === "test") {
+    const cap = Math.max(0, Number(envOptional("TEST_DAILY_CAP") ?? 10) || 10);
+    const [{ today }] = await sql<{ today: number }[]>`select count(*)::int today from readings where is_test and pay_provider is null and created_at > now() - interval '1 day'`;
+    if (today >= cap) throw new HttpError(429, "DAILY_CAP", { error: "DAILY_CAP", message: "Today's free preview readings are all taken. Try again tomorrow." });
+  }
   if (ipHash) {
-    const [{ n }] = await sql<{ n: number }[]>`select count(*)::int n from readings where ip_hash = ${ipHash} and created_at > now() - interval '1 day'`;
-    if (n >= PER_IP_PER_DAY) throw new HttpError(429, "TOO_MANY", { error: "TOO_MANY", message: "You've made 3 readings today. Try again tomorrow." });
+    // 무료 시험: 하루 3개. 유료: 결제 안 한 리포트만 하루 10개까지 (결제창 도배 방지)
+    const [{ n }] = mode === "paid"
+      ? await sql<{ n: number }[]>`select count(*)::int n from readings where ip_hash = ${ipHash} and status = 'awaiting_payment' and created_at > now() - interval '1 day'`
+      : await sql<{ n: number }[]>`select count(*)::int n from readings where ip_hash = ${ipHash} and created_at > now() - interval '1 day'`;
+    const lim = mode === "paid" ? PAID_PENDING_PER_IP : PER_IP_PER_DAY;
+    if (n >= lim) throw new HttpError(429, "TOO_MANY", { error: "TOO_MANY", message: mode === "paid" ? "Too many unpaid readings today. Finish one of them, or try again tomorrow." : "You've made 3 readings today. Try again tomorrow." });
   }
   const key = randomBytes(18).toString("base64url");
+  if (mode === "paid") {
+    // 결제 대기로 만들고 결제창 주소를 준다. 생성은 결제가 확인된 뒤 (웹훅 → confirmPayment)
+    const [row] = await sql<{ id: string }[]>`
+      insert into readings (view_key, email, name, birth_date, birth_time, time_unknown, gender, sign_key, prompt_version, ip_hash, is_test, status, pay_provider)
+      values (${key}, ${email}, ${name}, ${b.iso}, ${b.time}, ${timeUnknown}, ${gender}, ${signOf(b).key}, ${PROMPT_VERSION}, ${ipHash}, ${ls!.testMode}, 'awaiting_payment', 'lemonsqueezy')
+      returning id`;
+    const back = `${siteBase()}/r/${row.id}?k=${encodeURIComponent(key)}`;
+    const checkoutUrl = await services().pay.createCheckout({ readingId: row.id, email, name, redirectUrl: back });
+    await sql`update readings set checkout_url = ${checkoutUrl} where id = ${row.id}`;
+    await track("checkout_started", { isTest: ls!.testMode });
+    return { id: row.id, key, checkoutUrl };
+  }
   const [row] = await sql<{ id: string }[]>`
     insert into readings (view_key, email, name, birth_date, birth_time, time_unknown, gender, sign_key, prompt_version, ip_hash, is_test)
     values (${key}, ${email}, ${name}, ${b.iso}, ${b.time}, ${timeUnknown}, ${gender}, ${signOf(b).key}, ${PROMPT_VERSION}, ${ipHash}, true)
@@ -162,6 +183,7 @@ export async function viewReading(id: string, key: string, start: (fn: () => Pro
     savedEmail: r.email ? maskEmail(r.email) : null,
     chart: { sign: chart.sign, pillars: chart.pillars, elements: chart.elements, hidden: chart.hidden, hiddenSpots: chart.hiddenSpots, luck: chart.luck, current: chart.current, match: chart.match },
   };
+  if (r.status === "awaiting_payment") return { status: "awaiting_payment" as const, ...base, checkoutUrl: r.checkout_url };
   if (r.status === "generating") {
     const stale = !r.started_at || Date.now() - r.started_at.getTime() > STALE_MIN * 60_000;
     if (stale && r.attempts < MAX_ATTEMPTS) start(() => generateReading(r.id));

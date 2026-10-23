@@ -13,9 +13,11 @@ export const CLIENT_EVENTS = [
   "upsell_click",     // ref: guest_card | dock | landing | owner
   "own_page_click",   // 친구가 결과 보고 "내 페이지 만들기"
   "private_link_copy",
+  "checkout_paid_client", // 결제창에서 결제 완료 (참고용. 실제 인정은 웹훅)
 ] as const;
 /** 서버에서 기록하는 이벤트 */
 export type ServerEvent = "map_created" | "entry_added" | "reading_created" | "reading_done" | "reading_failed"
+  | "checkout_started" | "reading_paid" | "reading_refunded"
   | "page_email_saved" | "reading_email_saved" | "login_requested" | "login_used";
 
 const day = () => new Date().toISOString().slice(0, 10);
@@ -43,7 +45,7 @@ export async function trackClient(req: Request, body: Record<string, unknown>) {
 }
 
 export interface Stats {
-  days: { day: string; visitors: number; views: number; signs: number; maps: number; entries: number; shares: number; ownFromGuest: number; upsell: number; readings: number; readingsFailed: number; emails: number }[];
+  days: { day: string; visitors: number; views: number; signs: number; maps: number; entries: number; shares: number; ownFromGuest: number; upsell: number; readings: number; readingsFailed: number; emails: number; checkouts: number; paid: number; revenueCents: number; paidTest: number }[];
   pages: { page: string; views: number }[];
   sources: { src: string; visitors: number }[];
   shares: { ref: string; n: number }[];
@@ -66,7 +68,11 @@ export async function stats(days = 7): Promise<Stats> {
       (select count(*)::int from events e where e.name = 'upsell_click' and (e.created_at at time zone ${tz})::date = d) upsell,
       (select count(*)::int from events e where e.name = 'reading_created' and (e.created_at at time zone ${tz})::date = d) readings,
       (select count(*)::int from events e where e.name = 'reading_failed' and (e.created_at at time zone ${tz})::date = d) "readingsFailed",
-      (select count(*)::int from events e where e.name in ('page_email_saved', 'reading_email_saved') and (e.created_at at time zone ${tz})::date = d) emails
+      (select count(*)::int from events e where e.name in ('page_email_saved', 'reading_email_saved') and (e.created_at at time zone ${tz})::date = d) emails,
+      (select count(*)::int from events e where e.name = 'checkout_started' and (e.created_at at time zone ${tz})::date = d) checkouts,
+      (select count(*)::int from readings r where r.paid_at is not null and not r.is_test and (r.paid_at at time zone ${tz})::date = d) paid,
+      (select coalesce(sum(r.amount_cents), 0)::int from readings r where r.paid_at is not null and not r.is_test and r.refunded_at is null and (r.paid_at at time zone ${tz})::date = d) "revenueCents",
+      (select count(*)::int from readings r where r.paid_at is not null and r.is_test and (r.paid_at at time zone ${tz})::date = d) "paidTest"
     from generate_series((now() at time zone ${tz})::date - (${days - 1})::int, (now() at time zone ${tz})::date, interval '1 day') d
     order by d desc`;
   const since = sql`now() - make_interval(days => ${days})`;

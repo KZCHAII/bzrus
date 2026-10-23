@@ -76,6 +76,7 @@
   © 2026 WITHSAJU
 </footer>
 
+<script src="https://app.lemonsqueezy.com/js/lemon.js" defer></script>
 <script src="/js/withsaju.js"></script>
 <script src="/js/datepicker.js"></script>
 <script>
@@ -95,6 +96,11 @@
       $('r-email-f').classList.add('hide');
       $('rBtnT').textContent = 'Read my chart now';
       $('r-note').textContent = 'Free while we test, a few readings a day. Your reading takes about 1–2 minutes to write.';
+    } else if (mode === 'paid') {
+      $('r-badge').textContent = 'FULL READING · $9.99';
+      $('r-email-f').classList.add('hide');
+      $('rBtnT').textContent = 'Continue to payment · $9.99';
+      $('r-note').textContent = 'Secure checkout by Lemon Squeezy: card, Apple Pay, Google Pay or PayPal. Your reading starts writing the moment payment goes through, and takes about 2 minutes.';
     } else {
       $('r-badge').textContent = 'LAUNCH PRICE · $9.99';
       $('r-email-f').classList.remove('hide');
@@ -114,6 +120,15 @@
     $('rBtn').disabled = true;
     try {
       WS.me.set({ name: body.name, birthday: body.birthday, time: body.time, gender: body.gender });
+      if (mode === 'paid') {
+        var p = await WS.api('/api/readings', { body: body });
+        WS.me.addReading(p.id, p.key, body.name);
+        var go = '/r/' + p.id + '?k=' + encodeURIComponent(p.key);
+        WS.checkout(p.checkoutUrl, function () { location.href = go; });
+        $('rBtn').disabled = false;
+        $('r-note').innerHTML = 'Payment window open. Closed it by mistake? <a href="' + go + '" style="color:var(--cyan)">Continue here</a>.';
+        return;
+      }
       if (mode === 'test') {
         var r = await WS.api('/api/readings', { body: body });
         WS.me.addReading(r.id, r.key, body.name);

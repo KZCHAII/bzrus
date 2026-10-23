@@ -1,5 +1,6 @@
 // 바깥 서비스 (AI). 테스트는 setServices로 가짜를 끼운다.
 import { envOptional } from "./env";
+import { realPay, type Pay } from "./lemon";
 
 export interface Ai {
   /** schema를 주면 그 모양의 JSON 문자열만 돌려받는다 (Gemini 구조화 출력) */
@@ -26,8 +27,8 @@ export const realAi: Ai = {
   },
 };
 
-export interface Services { ai: Ai }
-const real: Services = { ai: realAi };
+export interface Services { ai: Ai; pay: Pay }
+const real: Services = { ai: realAi, pay: realPay };
 let current: Services | null = null;
 export const services = (): Services => {
   if (current) return current;

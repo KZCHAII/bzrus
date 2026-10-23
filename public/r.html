@@ -39,6 +39,14 @@
       </ul>
       <p class="note" style="text-align:left;margin-top:16px">This takes about 1–2 minutes. You can leave this page; the link keeps working.</p>
     </div>
+    <div class="panel hide" id="v-pay">
+      <span class="corner"></span><span class="corner-br"></span>
+      <span class="tag">PAYMENT <em>// $9.99</em></span>
+      <h2 style="margin:16px 0 8px">Waiting for your payment.</h2>
+      <p class="sub" style="margin:0 0 16px">Your chart is ready to read. Finish checkout and the writing starts right away. Card, Apple Pay, Google Pay or PayPal.</p>
+      <button class="btn" type="button" id="v-pay-btn" style="background:var(--purple);box-shadow:0 0 20px rgba(168,85,247,.3)">Complete payment <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M1 7h11m0 0L7 2m5 5L7 12" stroke="currentColor" stroke-width="1.8"/></svg></button>
+      <p class="note">Already paid? This page updates by itself in a few seconds.</p>
+    </div>
     <div class="panel hide" id="v-fail">
       <span class="corner"></span><span class="corner-br"></span>
       <h2>We couldn't finish this reading.</h2>
@@ -79,6 +87,7 @@
   © 2026 WITHSAJU
 </footer>
 
+<script src="https://app.lemonsqueezy.com/js/lemon.js" defer></script>
 <script src="/js/withsaju.js"></script>
 <script src="/js/charts.js"></script>
 <script src="/js/animals.js"></script>
@@ -106,7 +115,8 @@
     document.title = d.name + '\u2019s reading — WITHSAJU';
   }
   // 다시 확인 예약. 다른 앱 갔다 돌아오면(폰은 뒤에 있는 탭의 타이머를 멈춤) 기다리지 않고 바로 확인
-  var waiting = null, saveShown = false;
+  var waiting = null, saveShown = false, payUrl = '';
+  $('v-pay-btn').addEventListener('click', function () { if (payUrl) WS.checkout(payUrl, function () { load(); }); });
   function later(ms) { clearTimeout(waiting); waiting = setTimeout(load, ms); }
   function wake() { if (waiting && document.visibilityState === 'visible') { clearTimeout(waiting); waiting = null; load(); } }
   document.addEventListener('visibilitychange', wake);
@@ -144,6 +154,12 @@
     catch (x) { if (x.status === 404) { $('v-wait').classList.add('hide'); $('v-missing').classList.remove('hide'); return; } return later(5000); }
     header(d);
     if (d.status !== 'failed' && !saveShown) { saveShown = true; saveState(d.savedEmail); }
+    if (d.status === 'awaiting_payment') {
+      $('v-wait').classList.add('hide'); $('v-pay').classList.remove('hide'); clearInterval(timer);
+      payUrl = d.checkoutUrl;
+      return later(4000);
+    }
+    if (!$('v-pay').classList.contains('hide')) { $('v-pay').classList.add('hide'); t0 = Date.now(); clearInterval(timer); timer = setInterval(tick, 1000); }
     if (d.status === 'generating') { $('v-wait').classList.remove('hide'); return later(4000); }
     clearInterval(timer);
     $('v-wait').classList.add('hide');

@@ -67,12 +67,13 @@
     var t = d.days[0];
     $('o-range').textContent = d.days[d.days.length - 1].day + ' ~ ' + t.day;
     var V = sum(d, 'visitors'), S = sum(d, 'signs'), M = sum(d, 'maps'), E = sum(d, 'entries'), O = sum(d, 'ownFromGuest'), U = sum(d, 'upsell'), R = sum(d, 'readings');
-    var kpi = [['오늘 방문', t.visitors], ['기간 방문', V], ['페이지 생성', M], ['친구 입력', E], ['페이지당 친구(누적)', d.totals.entriesPerMap], ['리포트', R]];
+    var P = sum(d, 'paid'), REV = sum(d, 'revenueCents'), C = sum(d, 'checkouts');
+    var kpi = [['오늘 방문', t.visitors], ['기간 방문', V], ['페이지 생성', M], ['친구 입력', E], ['페이지당 친구(누적)', d.totals.entriesPerMap], ['판매 (테스트 제외)', P + '건 · $' + (REV / 100).toFixed(2)]];
     $('o-kpi').innerHTML = kpi.map(function (x) { return '<div><dt>' + x[0] + '</dt><dd>' + x[1] + '</dd></div>'; }).join('');
-    var f = [['방문', V, ''], ['사인 보기', S, pct(S, V)], ['내 페이지 만들기', M, pct(M, S)], ['친구가 생일 입력', E, M ? (Math.round(E / M * 10) / 10) + '명/페이지' : '–'], ['친구 → 자기 페이지', O, pct(O, E)], ['유료 안내 클릭', U, pct(U, V)], ['리포트 생성', R, pct(R, U)]];
+    var f = [['방문', V, ''], ['사인 보기', S, pct(S, V)], ['내 페이지 만들기', M, pct(M, S)], ['친구가 생일 입력', E, M ? (Math.round(E / M * 10) / 10) + '명/페이지' : '–'], ['친구 → 자기 페이지', O, pct(O, E)], ['유료 안내 클릭', U, pct(U, V)], ['결제창 열기', C, pct(C, U)], ['결제 완료', P + sum(d, 'paidTest'), pct(P + sum(d, 'paidTest'), C)], ['리포트 생성', R, '']];
     var max = Math.max.apply(null, f.map(function (x) { return x[1]; }).concat([1]));
     $('o-funnel').innerHTML = f.map(function (x) { return '<div class="fn"><span>' + x[0] + '</span><i style="width:' + Math.max(2, Math.round(x[1] / max * 100)) + '%"></i><b>' + x[1] + '</b><em>' + x[2] + '</em></div>'; }).join('');
-    var cols = [['day', '날짜'], ['visitors', '방문'], ['views', '조회'], ['signs', '사인'], ['maps', '페이지'], ['entries', '친구'], ['shares', '공유'], ['ownFromGuest', '친구→페이지'], ['upsell', '유료클릭'], ['readings', '리포트'], ['readingsFailed', '실패'], ['emails', '이메일']];
+    var cols = [['day', '날짜'], ['visitors', '방문'], ['views', '조회'], ['signs', '사인'], ['maps', '페이지'], ['entries', '친구'], ['shares', '공유'], ['ownFromGuest', '친구→페이지'], ['upsell', '유료클릭'], ['readings', '리포트'], ['readingsFailed', '실패'], ['emails', '이메일'], ['checkouts', '결제창'], ['paid', '판매'], ['paidTest', '테스트판매']];
     $('o-days').innerHTML = '<table class="adm-t wide"><tr>' + cols.map(function (c) { return '<th>' + c[1] + '</th>'; }).join('') + '</tr>' + d.days.map(function (r) { return '<tr>' + cols.map(function (c) { return '<td>' + esc(String(r[c[0]])) + '</td>'; }).join('') + '</tr>'; }).join('') + '</table>';
     $('o-src').innerHTML = list(d.sources, 'src', 'visitors');
     $('o-share').innerHTML = list(d.shares, 'ref', 'n');

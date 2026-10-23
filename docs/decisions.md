@@ -94,3 +94,11 @@ BZR 원본은 섹션당 1,500자·3문단이었지만, 화면에서 너무 길�
 - 화면 이벤트는 정해진 이름만(page_view, sign_revealed, share_click, story_image, upsell_click, own_page_click, private_link_copy). 서버 이벤트: map_created, entry_added, reading_created/done/failed, 이메일 저장, 로그인 링크.
 - /admin: ADMIN_KEY(사장님이 Vercel에 넣음) 있어야 열림. 깔때기(방문→사인→페이지→친구→친구가 자기 페이지→유료 클릭→리포트), 날짜별 표, 유입, 공유 채널.
 - 텔레그램(TELEGRAM_BOT_TOKEN·TELEGRAM_CHAT_ID): 리포트 생성, 생성 실패(재시도·최종), 메일 실패, 매일 아침 9시 요약(Vercel 크론 /api/cron/daily). 결제 붙으면 판매 알림 추가.
+
+## D23. 결제 = Lemon Squeezy (2026-10-23)
+- Paddle은 금지 목록에 horoscopes·fortune-telling(유사과학)이 있어 탈락. Stripe는 한국 사업자 직접 불가(미국 법인 필요, 고정비). 엑심베이는 원화 정산·저렴하지만 애플페이·구글페이·페이팔이 사실상 없어 미국 손님 결제 편의성이 떨어짐.
+- Lemon Squeezy: Stripe 인수, 판매 대행(MoR, 판매세 처리), 카드·애플페이·구글페이·페이팔, 한국 은행 정산 가능, 고정비 0. 수수료 5%+50¢. 사장님 결정: 바로 가입.
+- 흐름: 리포트 신청 → readings.status='awaiting_payment' + API로 결제창 생성(custom: reading_id, 24시간) → 오버레이 결제 → 웹훅 order_created(X-Signature HMAC 확인) → 서버가 /v1/orders/{id} 직접 조회해 status=paid·USD·subtotal 999(lib/catalog.ts)·variant·테스트 여부 확인 → 'generating' + AI 생성. payment_id='ls_<주문>' 고유 → 한 번만.
+- 결제 이메일을 리포트에 자동 연결(이미 저장한 이메일이 있으면 그대로) → 유료 손님은 영수증·리포트 링크 메일로 다시 보기 가능.
+- 환불(order_refunded): 결제사 확인 후 refunded_at 기록, 리포트는 계속 열림. 판매·환불·불일치는 텔레그램.
+- 모드: READINGS_MODE=paid + LEMONSQUEEZY_* 4개가 다 있어야 결제 모드. 하나라도 없으면 화면은 예약 모드. LEMONSQUEEZY_TEST_MODE가 '0'이 아니면 테스트 결제(실제 돈 X). 실제 전환은 사장님.

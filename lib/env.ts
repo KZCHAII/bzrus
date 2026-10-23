@@ -8,6 +8,11 @@ export const ENV_NAMES = [
   "TEST_DAILY_CAP", // test 모드 하루 전체 생성 상한 (기본 10)
   "EMAIL_MODE",     // 'test'(기본: 보내지 않고 email_outbox에만 기록) | 'live'(Resend로 실제 발송 — 사장님이 켬)
   "RESEND_API_KEY", // 메일 발송 (Resend)
+  "LEMONSQUEEZY_API_KEY",        // 결제 (Lemon Squeezy API 키)
+  "LEMONSQUEEZY_STORE_ID",       // 상점 번호
+  "LEMONSQUEEZY_VARIANT_ID",     // 리포트 상품의 variant 번호
+  "LEMONSQUEEZY_WEBHOOK_SECRET", // 웹훅 서명 비밀 값
+  "LEMONSQUEEZY_TEST_MODE",      // '0'이면 실제 결제, 그 외(기본)는 테스트 결제 — 실제 전환은 사장님
   "TELEGRAM_BOT_TOKEN", // 판매·오류·매일 요약 알림 (없으면 안 보냄)
   "TELEGRAM_CHAT_ID",
   "ADMIN_KEY",      // /admin 통계 화면 열쇠 (사장님만 앎, 없으면 화면 잠김)
