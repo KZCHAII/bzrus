@@ -58,8 +58,13 @@
     var byHead = {}; ((c && c.sections) || []).forEach(function (x) { byHead[x.heading] = x; });
     var first = secs.length && /report/i.test(secs[0].title) && !byHead[secs[0].title] ? secs.shift() : null;
     var lastLine = "";
-    if (secs.length && !secs[secs.length - 1].paras.length) lastLine = secs.pop().title.replace(/^\(|\)$/g, "");
-    if (c && c.final && c.final.last_line) lastLine = c.final.last_line;
+    var tail = secs[secs.length - 1];
+    if (tail && /^\(.*\)$/.test(tail.title)) {
+      // 마지막 "(One sentence to carry with you)" 섹션: 문장이 아래에 있으면 그 문장, 제목 자리에 썼으면 제목
+      secs.pop();
+      lastLine = tail.paras.length ? tail.paras.join(" ") : tail.title.replace(/^\(|\)$/g, "");
+    } else if (tail && !tail.paras.length) lastLine = secs.pop().title.replace(/^\(|\)$/g, "");
+    if (!lastLine && c && c.final && c.final.last_line) lastLine = c.final.last_line;
 
     var toc = [];
     if (c) toc.push(["core", "Conclusion"]);
