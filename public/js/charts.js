@@ -63,12 +63,22 @@
     points.forEach(function (p, i) {
       var col = p.tone === 'up' ? cv('--wood') : p.tone === 'down' ? '#ffb547' : '#ddd';
       h.push('<circle cx="' + x(i) + '" cy="' + y(p.score) + '" r="7" fill="#000" stroke="' + col + '" stroke-width="2.5"/>');
-      h.push('<text x="' + x(i) + '" y="' + (H - 32) + '" text-anchor="middle" fill="' + (p.label.indexOf(now) === 0 ? '#00f0ff' : '#aaa') + '" font-family="JetBrains Mono, monospace" font-size="18">' + esc(p.label.length > 7 ? p.label.slice(0, 7) : p.label) + '</text>');
+      h.push('<text x="' + x(i) + '" y="' + (H - 32) + '" text-anchor="middle" fill="' + (p.label.indexOf(now) === 0 ? '#00f0ff' : '#aaa') + '" font-family="JetBrains Mono, monospace" font-size="18">' + esc(short(p.label)) + '</text>');
     });
     var ni = points.findIndex(function (p) { return p.label.indexOf(now) === 0; });
     if (ni >= 0) h.push('<text x="' + x(ni) + '" y="' + (H - 8) + '" text-anchor="middle" fill="#00f0ff" font-family="JetBrains Mono, monospace" font-size="15" letter-spacing="1">NOW</text>');
     h.push('</svg>');
     return h.join('');
+  }
+
+  /** 축 이름 짧게: "2022-2023" → '22–'23, "October 2026" → Oct '26 */
+  function short(l) {
+    var r = /(\d{4})\s*[-–~]\s*(\d{2,4})/.exec(l);
+    if (r) return "'" + r[1].slice(2) + "–'" + r[2].slice(-2);
+    var m = /([A-Za-z]{3})[a-z]*\.?\s+(\d{4})/.exec(l);
+    if (m) return m[1] + " '" + m[2].slice(2);
+    var y = /\d{4}/.exec(l);
+    return y ? y[0] : l.slice(0, 7);
   }
 
   /** 인스타 스토리 크기 이미지 (1080×1920). lines: {top, hanja, name, sub, foot, color, extra} */
