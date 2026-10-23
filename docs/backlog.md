@@ -3,7 +3,7 @@
 ## 오픈 전 (돈 받기 전 꼭)
 - ~~도메인~~ withsaju.com 구입·연결 완료 (2026-10-23)
 - [사장님] Lemon Squeezy 가입·상점 심사 → 상품($9.99)·API 키·웹훅 만들고 Vercel에 LEMONSQUEEZY_* 4개 + READINGS_MODE=paid → [Claude] 테스트 결제로 끝까지 확인 (결제 코드는 완료)
-- [사장님] 실제 결제 전환: LEMONSQUEEZY_TEST_MODE=0 + 실제(live) API 키·웹훅
+- [사장님] 실제 결제 전환: 상품을 판매 모드로 복사(새 Variant ID) + 판매용 API 키·웹훅 + LEMONSQUEEZY_TEST_MODE=0
 - [사장님] 약관 검토: 판매자 이름(브랜드 vs 법적 이름), 환불 정책 확정 — 페이지는 완료(/terms /privacy /refund)
 - [사장님] 실제 메일 켜기: Resend 무료 가입 → 도메인 인증(DNS) → Vercel에 RESEND_API_KEY, EMAIL_FROM, EMAIL_MODE=live
 - [사장님] Vercel 환경 변수: ADMIN_KEY(통계 화면 열쇠), TELEGRAM_BOT_TOKEN·TELEGRAM_CHAT_ID(알림), CONTACT_EMAIL(도메인 후)

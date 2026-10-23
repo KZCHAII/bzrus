@@ -108,3 +108,8 @@ BZR 원본은 섹션당 1,500자·3문단이었지만, 화면에서 너무 길�
 - 예전 bzrus.vercel.app 화면 주소는 withsaju.com으로 308 이동. /api/* 는 이동하지 않음(결제사·크론 호출이 끊기지 않게).
 - 메일·결제 후 돌아오는 주소의 기본값도 withsaju.com (SITE_URL로 덮어쓸 수 있음).
 - 브라우저 저장(내 페이지 열쇠 등)은 주소별이라 bzrus.vercel.app에서 만든 테스트 페이지는 withsaju.com에서 주인으로 안 보임 → 오픈 전이라 영향 없음. 필요하면 Find(이메일)나 private link로 옮김.
+
+## D25. 결제창은 팝업이 아니라 전체 화면 (2026-10-23)
+- 아이폰에서 팝업(iframe) 결제창이 403: Lemon Squeezy가 결제를 장바구니로 바꾸며 쿠키를 쓰는데 사파리는 다른 사이트 iframe 쿠키를 막음. 애플페이·구글페이도 iframe 안에서는 잘 안 뜸.
+- 그래서 결제는 항상 Lemon Squeezy 결제 페이지로 이동(같은 창) → 결제 후 redirect_url로 그 손님 리포트 화면에 돌아옴. lemon.js 제거.
+- 참고: Lemon Squeezy 테스트 모드에서 만든 상품은 판매 모드로 자동으로 안 넘어감 → 실제 전환 때 상품 복사 + 새 Variant ID·판매용 API 키·웹훅.

@@ -51,7 +51,7 @@ export const realPay: Pay = {
           type: "checkouts",
           attributes: {
             product_options: { redirect_url: redirectUrl, receipt_button_text: "Open my reading", receipt_link_url: redirectUrl },
-            checkout_options: { embed: true, media: false, logo: true },
+            checkout_options: { embed: false, media: true, logo: true },
             checkout_data: { ...(email ? { email } : {}), name, custom: { reading_id: readingId } },
             test_mode: c.testMode,
             expires_at: new Date(Date.now() + 24 * 3600_000).toISOString(),

@@ -76,7 +76,6 @@
   © 2026 WITHSAJU
 </footer>
 
-<script src="https://app.lemonsqueezy.com/js/lemon.js" defer></script>
 <script src="/js/withsaju.js"></script>
 <script src="/js/datepicker.js"></script>
 <script>
@@ -124,9 +123,7 @@
         var p = await WS.api('/api/readings', { body: body });
         WS.me.addReading(p.id, p.key, body.name);
         var go = '/r/' + p.id + '?k=' + encodeURIComponent(p.key);
-        WS.checkout(p.checkoutUrl, function () { location.href = go; });
-        $('rBtn').disabled = false;
-        $('r-note').innerHTML = 'Payment window open. Closed it by mistake? <a href="' + go + '" style="color:var(--cyan)">Continue here</a>.';
+        WS.checkout(p.checkoutUrl);
         return;
       }
       if (mode === 'test') {

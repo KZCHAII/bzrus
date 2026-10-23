@@ -87,7 +87,6 @@
   © 2026 WITHSAJU
 </footer>
 
-<script src="https://app.lemonsqueezy.com/js/lemon.js" defer></script>
 <script src="/js/withsaju.js"></script>
 <script src="/js/charts.js"></script>
 <script src="/js/animals.js"></script>
@@ -116,7 +115,7 @@
   }
   // 다시 확인 예약. 다른 앱 갔다 돌아오면(폰은 뒤에 있는 탭의 타이머를 멈춤) 기다리지 않고 바로 확인
   var waiting = null, saveShown = false, payUrl = '';
-  $('v-pay-btn').addEventListener('click', function () { if (payUrl) WS.checkout(payUrl, function () { load(); }); });
+  $('v-pay-btn').addEventListener('click', function () { if (payUrl) WS.checkout(payUrl); });
   function later(ms) { clearTimeout(waiting); waiting = setTimeout(load, ms); }
   function wake() { if (waiting && document.visibilityState === 'visible') { clearTimeout(waiting); waiting = null; load(); } }
   document.addEventListener('visibilitychange', wake);

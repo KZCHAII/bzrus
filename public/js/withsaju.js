@@ -265,17 +265,11 @@
     var a = e.target.closest && e.target.closest('#dock a'); if (a) track('upsell_click', 'dock');
   });
 
-  // 결제창 (Lemon Squeezy 오버레이). lemon.js가 없으면 결제 페이지로 이동 (결제 후 리포트 화면으로 돌아옴)
-  function checkout(url, onPaid) {
-    try {
-      if (window.createLemonSqueezy) window.createLemonSqueezy();
-      if (window.LemonSqueezy && window.LemonSqueezy.Url) {
-        window.LemonSqueezy.Setup({ eventHandler: function (e) { if (e && e.event === 'Checkout.Success') { track('checkout_paid_client'); onPaid(); } } });
-        window.LemonSqueezy.Url.Open(url);
-        return;
-      }
-    } catch (e) { /* fall through */ }
-    location.href = url;
+  // 결제창: 전체 화면 결제 페이지로 이동 → 결제 후 리포트 화면으로 돌아옴.
+  // (팝업(iframe)은 사파리가 쿠키를 막아 403이 나고, 애플페이·구글페이도 잘 안 떠서 쓰지 않는다)
+  function checkout(url) {
+    track('checkout_open');
+    location.href = String(url).replace(/([?&])embed=1(&|$)/, '$1').replace(/[?&]$/, '');
   }
 
   window.WS = { api: api, esc: esc, $: $, store: store, fillSign: fillSign, relHtml: relHtml, drawMap: drawMap, legendHtml: legendHtml, REL: REL, EL_VAR: EL_VAR, me: me, initNav: initNav, dock: dock, signStory: signStory, setTime: setTime, timeOf: timeOf, track: track, checkout: checkout };

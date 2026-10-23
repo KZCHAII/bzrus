@@ -13,7 +13,7 @@ export const CLIENT_EVENTS = [
   "upsell_click",     // ref: guest_card | dock | landing | owner
   "own_page_click",   // 친구가 결과 보고 "내 페이지 만들기"
   "private_link_copy",
-  "checkout_paid_client", // 결제창에서 결제 완료 (참고용. 실제 인정은 웹훅)
+  "checkout_open",       // 결제 페이지로 이동
 ] as const;
 /** 서버에서 기록하는 이벤트 */
 export type ServerEvent = "map_created" | "entry_added" | "reading_created" | "reading_done" | "reading_failed"
