@@ -6,7 +6,7 @@
 - [사장님] 실제 결제 전환: 상품을 판매 모드로 복사(새 Variant ID) + 판매용 API 키·웹훅 + LEMONSQUEEZY_TEST_MODE=0
 - [사장님] 약관 검토: 판매자 이름(브랜드 vs 법적 이름), 환불 정책 확정 — 페이지는 완료(/terms /privacy /refund)
 - [사장님] 실제 메일 켜기: Resend 무료 가입 → 도메인 인증(DNS) → Vercel에 RESEND_API_KEY, EMAIL_FROM, EMAIL_MODE=live
-- [사장님] Vercel 환경 변수: ADMIN_KEY(통계 화면 열쇠), TELEGRAM_BOT_TOKEN·TELEGRAM_CHAT_ID(알림), CONTACT_EMAIL(도메인 후)
+- ~~ADMIN_KEY·텔레그램·CONTACT_EMAIL~~ 완료 (2026-10-23)
 
 ## 오픈 후
 - 지도에 친구가 올라오면 주인에게 알림 메일

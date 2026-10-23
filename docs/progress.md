@@ -81,3 +81,4 @@
 - 2026-10-23: Resend 연결(Vercel 자동 DNS), EMAIL_FROM=WITHSAJU <hello@withsaju.com>, EMAIL_MODE=live (사장님 결정: 실제 발송 켬).
 - 2026-10-23: CONTACT_EMAIL = 사장님 Gmail (약관·환불 연락처, 나중에 hello@withsaju.com으로 교체 가능).
 - 2026-10-23: 텔레그램(BZR 봇 공용) 키 설정.
+- 2026-10-23: ADMIN_KEY 설정(사장님) → /admin 통계 사용.
