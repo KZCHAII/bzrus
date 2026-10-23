@@ -2,8 +2,8 @@
   :root{
     color-scheme:dark;
     --bg:#000; --bg-1:#080808; --bg-2:#0d0d0d;
-    --border:#1a1a1a; --border-2:#2e2e2e; --border-3:#3a3a3a;
-    --mute-3:#555; --mute-2:#888; --mute-1:#aaa; --text-1:#e0e0e0; --white:#fff;
+    --border:#222; --border-2:#383838; --border-3:#4a4a4a;
+    --mute-3:#7a7a7a; --mute-2:#a3a3a3; --mute-1:#c2c2c2; --text-1:#ececec; --white:#fff;
     --cyan:#00f0ff; --cyan-dim:rgba(0,240,255,0.08);
     --purple:#a855f7; --pink:#ec4899;
     --wood:#3dd9a3; --fire:#ff4d8f; --earth:#c9a961; --metal:#e6ecff; --water:#00f0ff;
@@ -50,7 +50,7 @@
   .section-sub{font-size:14px;color:rgba(255,255,255,.5);margin:0 0 22px;max-width:36em}
 
   .hero{padding-block:56px 8px}
-  .trust{display:flex;gap:8px 22px;flex-wrap:wrap;padding-top:18px;border-top:1px solid rgba(255,255,255,.06);font-family:var(--mono);font-size:11px;color:#666;letter-spacing:.05em;margin-top:26px}
+  .trust{display:flex;gap:8px 22px;flex-wrap:wrap;padding-top:18px;border-top:1px solid rgba(255,255,255,.06);font-family:var(--mono);font-size:11px;color:#8a8a8a;letter-spacing:.05em;margin-top:26px}
   .trust span{display:flex;align-items:center;gap:6px}
   .trust span::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--cyan)}
   .trust span:nth-child(2)::before{background:var(--purple)} .trust span:nth-child(3)::before{background:var(--pink)}
@@ -81,7 +81,7 @@
   .btn-ghost{flex:1;font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute-1);background:transparent;padding:13px 14px;border:1px solid var(--border-3);cursor:pointer;transition:all .2s}
   .btn-ghost:hover{color:var(--el);border-color:var(--el);background:color-mix(in srgb,var(--el) 8%,transparent)}
   .btn-ghost:focus-visible{outline:2px solid var(--el);outline-offset:2px}
-  .note{margin:12px 0 0;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;color:var(--mute-3);text-align:center}
+  .note{margin:12px 0 0;font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;color:var(--mute-3);text-align:center}
   .err{margin:10px 0 0;font-family:var(--mono);font-size:12px;color:#ff3333}
 
   /* sign card */
@@ -373,3 +373,9 @@ body.has-dock footer{padding-bottom:110px}
 .hnote{font-size:13px;line-height:1.55;color:var(--mute-1);margin:8px 0 0;text-align:left}
 .hnote b{color:var(--white)}.hnote span{font-size:11.5px;color:var(--mute-3)}
 .linkbtn{background:none;border:0;padding:0;color:var(--cyan);font:inherit;text-decoration:underline;cursor:pointer}
+
+/* 입력: 한 줄씩 + 태어난 시간 선택 상자 */
+.fields.one{grid-template-columns:1fr}
+select.sel{width:100%;min-width:0;appearance:none;-webkit-appearance:none;background:var(--bg-1) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%2300f0ff' stroke-width='1.6'/%3E%3C/svg%3E") no-repeat right 14px center;border:1px solid var(--border-3);border-radius:0;color:var(--white);font:500 16px var(--sans);padding:13px 40px 13px 14px;outline:none;color-scheme:dark;cursor:pointer}
+select.sel:focus-visible{border-color:var(--cyan);box-shadow:0 0 0 1px var(--cyan),0 0 16px rgba(0,240,255,.2)}
+select.sel:invalid{color:var(--mute-2)}

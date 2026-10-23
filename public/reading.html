@@ -41,12 +41,11 @@
       <div class="fields" style="grid-template-columns:1fr;margin-top:6px">
         <div class="field"><label for="r-name">Name</label><input id="r-name" type="text" autocomplete="given-name" maxlength="20"></div>
       </div>
-      <div class="fields three">
+      <div class="fields one">
         <div class="field"><label>Birthday</label><input id="r-date" type="hidden">
           <div class="bzr-datepicker" data-target="r-date"><button type="button" class="bzr-dp-trigger" data-part="month"><span class="bzr-dp-val">MM</span><span class="bzr-dp-arrow">▾</span></button><span class="bzr-dp-sep">/</span><button type="button" class="bzr-dp-trigger" data-part="day"><span class="bzr-dp-val">DD</span><span class="bzr-dp-arrow">▾</span></button><span class="bzr-dp-sep">/</span><button type="button" class="bzr-dp-trigger" data-part="year"><span class="bzr-dp-val">YYYY</span><span class="bzr-dp-arrow">▾</span></button></div></div>
-        <div class="field"><label for="r-time">Birth time</label><input id="r-time" type="time"></div>
+        <div class="field"><label for="r-time">Birth time</label><select id="r-time" class="sel" data-time="req"></select></div>
       </div>
-      <label class="check" for="r-unk"><input type="checkbox" id="r-unk"><span>I don't know my birth time. Read three pillars without the hour.</span></label>
       <div class="fields" style="grid-template-columns:1fr">
         <div class="field"><label>Gender</label><div class="gender" id="r-gender" role="radiogroup" aria-label="Gender"><button type="button" data-g="woman" role="radio" aria-checked="false">Woman</button><button type="button" data-g="man" role="radio" aria-checked="false">Man</button></div>
           <span class="note" style="text-align:left;margin:4px 0 0">Saju uses this to set the direction of your 10-year luck cycles.</span></div>
@@ -81,11 +80,10 @@
   var $ = WS.$, mode = 'reserve', gender = '';
   WS.initNav();
   var saved = WS.me.get();
-  if (saved) { $('r-name').value = saved.name || ''; $('r-date').value = saved.birthday || ''; $('r-time').value = saved.time || ''; gender = saved.gender || ''; if (window.bzrRehydrateDatepickers) window.bzrRehydrateDatepickers(); }
+  if (saved) { $('r-name').value = saved.name || ''; $('r-date').value = saved.birthday || ''; WS.setTime($('r-time'), saved.time); gender = saved.gender || ''; if (window.bzrRehydrateDatepickers) window.bzrRehydrateDatepickers(); }
   function setGender(g) { gender = g; Array.prototype.forEach.call($('r-gender').children, function (b) { var on = b.dataset.g === g; b.classList.toggle('on', on); b.setAttribute('aria-checked', on ? 'true' : 'false'); }); }
   if (gender) setGender(gender);
   $('r-gender').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) setGender(b.dataset.g); });
-  $('r-unk').addEventListener('change', function () { $('r-time').disabled = this.checked; if (this.checked) $('r-time').value = ''; });
 
   function applyMode() {
     if (mode === 'test') {
@@ -105,8 +103,8 @@
   $('rForm').addEventListener('submit', async function (e) {
     e.preventDefault();
     var err = $('r-err'); err.hidden = true;
-    var body = { name: $('r-name').value.trim(), birthday: $('r-date').value, time: $('r-time').value, timeUnknown: $('r-unk').checked, gender: gender, email: $('r-email').value.trim() };
-    var miss = !body.name ? 'your name' : !body.birthday ? 'your birthday' : (!body.time && !body.timeUnknown) ? 'your birth time, or check "I don\u2019t know"' : !body.gender ? 'your gender' : (mode !== 'test' && !body.email) ? 'your email' : '';
+    var body = { name: $('r-name').value.trim(), birthday: $('r-date').value, time: WS.timeOf($('r-time')), timeUnknown: $('r-time').value === 'unknown', gender: gender, email: $('r-email').value.trim() };
+    var miss = !body.name ? 'your name' : !body.birthday ? 'your birthday' : (!body.time && !body.timeUnknown) ? 'your birth time (or pick "I don\u2019t know")' : !body.gender ? 'your gender' : (mode !== 'test' && !body.email) ? 'your email' : '';
     if (miss) { err.textContent = 'ERROR // Add ' + miss + '.'; err.hidden = false; return; }
     $('rBtn').disabled = true;
     try {

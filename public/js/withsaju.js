@@ -134,7 +134,7 @@
       x.textAlign = 'center';
       x.fillStyle = list.length ? col : rgba(col, .55);
       x.font = '700 22px "JetBrains Mono", monospace'; x.fillText(REL[k].n.toUpperCase(), lx, ly - 12);
-      x.font = '500 16px "JetBrains Mono", monospace'; x.fillStyle = list.length ? '#e0e0e0' : '#666';
+      x.font = '500 16px "JetBrains Mono", monospace'; x.fillStyle = list.length ? '#e0e0e0' : '#8a8a8a';
       x.fillText(list.length ? list.length + (list.length === 1 ? ' FRIEND' : ' FRIENDS') : 'EMPTY', lx, ly + 14);
       if (!list.length) {
         x.fillStyle = rgba(col, .5); x.font = '500 16px "JetBrains Mono", monospace';
@@ -222,5 +222,27 @@
     if (window.WSArt && s.animal) WSArt.toImage({ animal: s.animal.name, element: s.element, yang: s.yang, season: s.season, hanja: s.dayPillar ? s.dayPillar.han : s.hanja }, 760, go); else go(null);
   }
 
-  window.WS = { api: api, esc: esc, $: $, store: store, fillSign: fillSign, relHtml: relHtml, drawMap: drawMap, legendHtml: legendHtml, REL: REL, EL_VAR: EL_VAR, me: me, initNav: initNav, dock: dock, signStory: signStory };
+
+  // 태어난 시간: 한 시간 단위 선택 (사주 시주는 홀수 시 정각에 바뀌므로 한 시간 단위면 결과가 같다)
+  function hourLabel(h) { var a = h < 12 ? 'AM' : 'PM', k = h % 12 || 12; return k + ':00 – ' + k + ':59 ' + a + (h === 0 ? ' (midnight)' : h === 12 ? ' (noon)' : ''); }
+  function initTimeSelects() {
+    document.querySelectorAll('select[data-time]').forEach(function (el) {
+      if (el.options.length) return;
+      var req = el.getAttribute('data-time') === 'req', h = [];
+      el.required = req;
+      if (req) h.push('<option value="" disabled selected>Select</option>');
+      h.push('<option value="' + (req ? 'unknown' : '') + '">I don\u2019t know</option>');
+      for (var i = 0; i < 24; i++) h.push('<option value="' + (i < 10 ? '0' : '') + i + ':30">' + hourLabel(i) + '</option>');
+      el.innerHTML = h.join('');
+    });
+  }
+  function setTime(el, t) {
+    initTimeSelects();
+    var m = /^(\d{1,2}):/.exec(t || '');
+    if (m) el.value = ('0' + Number(m[1])).slice(-2) + ':30';
+  }
+  function timeOf(el) { return el.value && el.value !== 'unknown' ? el.value : ''; }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initTimeSelects); else initTimeSelects();
+
+  window.WS = { api: api, esc: esc, $: $, store: store, fillSign: fillSign, relHtml: relHtml, drawMap: drawMap, legendHtml: legendHtml, REL: REL, EL_VAR: EL_VAR, me: me, initNav: initNav, dock: dock, signStory: signStory, setTime: setTime, timeOf: timeOf };
 })();

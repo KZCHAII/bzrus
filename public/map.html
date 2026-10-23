@@ -49,10 +49,10 @@
       <div class="fields" style="grid-template-columns:1fr">
         <div class="field"><label for="g-name">Nickname</label><input id="g-name" type="text" placeholder="What they call you" maxlength="20" autocomplete="nickname"></div>
       </div>
-      <div class="fields three">
+      <div class="fields one">
         <div class="field"><label>Birthday</label><input id="g-date" type="hidden">
           <div class="bzr-datepicker" data-target="g-date"><button type="button" class="bzr-dp-trigger" data-part="month"><span class="bzr-dp-val">MM</span><span class="bzr-dp-arrow">▾</span></button><span class="bzr-dp-sep">/</span><button type="button" class="bzr-dp-trigger" data-part="day"><span class="bzr-dp-val">DD</span><span class="bzr-dp-arrow">▾</span></button><span class="bzr-dp-sep">/</span><button type="button" class="bzr-dp-trigger" data-part="year"><span class="bzr-dp-val">YYYY</span><span class="bzr-dp-arrow">▾</span></button></div></div>
-        <div class="field"><label for="g-time">Birth time <span class="opt">(opt.)</span></label><input id="g-time" type="time"></div>
+        <div class="field"><label for="g-time">Birth time</label><select id="g-time" class="sel" data-time="opt"></select></div>
       </div>
       <label class="check" for="g-consent"><input type="checkbox" id="g-consent" checked><span>Put my nickname and relationship type on <b id="g-owner3"></b>'s page. Anyone with the link can see it. Your birthday and birth time stay private.</span></label>
       <button class="btn" type="submit" id="gBtn">Show my sign and our match <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M1 7h11m0 0L7 2m5 5L7 12" stroke="currentColor" stroke-width="1.8"/></svg></button>
@@ -264,7 +264,7 @@
     else {
       show('guest');
       var saved = WS.me.get();   // 전에 입력한 적 있으면 미리 채움
-      if (saved && !$('g-date').value) { $('g-name').value = saved.name || ''; $('g-date').value = saved.birthday || ''; $('g-time').value = saved.time || ''; if (window.bzrRehydrateDatepickers) window.bzrRehydrateDatepickers(); }
+      if (saved && !$('g-date').value) { $('g-name').value = saved.name || ''; $('g-date').value = saved.birthday || ''; WS.setTime($('g-time'), saved.time); if (window.bzrRehydrateDatepickers) window.bzrRehydrateDatepickers(); }
     }
     renderMap();
   }
@@ -273,7 +273,7 @@
   $('gForm').addEventListener('submit', async function (e) {
     e.preventDefault();
     var err = $('g-err'); err.hidden = true;
-    var nick = $('g-name').value.trim(), d = $('g-date').value, t = $('g-time').value;
+    var nick = $('g-name').value.trim(), d = $('g-date').value, t = WS.timeOf($('g-time'));
     if (!nick) { err.textContent = 'ERROR // Enter a nickname.'; err.hidden = false; return; }
     if (!d) { err.textContent = 'ERROR // Enter your birthday.'; err.hidden = false; return; }
     $('gBtn').disabled = true;
