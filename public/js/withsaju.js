@@ -60,6 +60,7 @@
     set('k-tag', esc(s.tagline));
     set('k-stats', '<div><dt>Element</dt><dd>' + (s.yang ? 'Yang' : 'Yin') + ' ' + esc(s.element) + '</dd></div><div><dt>Season</dt><dd>' + esc(s.season) + '</dd></div><div><dt>Strength</dt><dd class="hot">' + STRENGTH[s.strength] + '</dd></div>');
     set('k-pillars', pillarsHtml(s));
+    if (window.WSCharts && s.elements) set('k-penta', '<div class="label" style="font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--mute-3);margin:4px 0 0">YOUR FIVE ELEMENTS</div>' + WSCharts.elementsPentagon([{ name: name || 'You', elements: s.elements }]));
     set('k-why', '<b>Why ' + esc(s.name) + '?</b> Saju names you after your <b>Day Master</b>, the heavenly stem of the day you were born. Yours is ' + esc(s.hanja) + ', ' + (s.yang ? 'Yang' : 'Yin') + ' ' + esc(s.element) + '. ' + whyText(s));
   }
 
@@ -181,6 +182,7 @@
   /** 상단 메뉴: 내 지도가 있으면 바로가기 */
   function initNav() {
     var l = me.maps(), a = $('nav-mymap');
+    if (a) a.textContent = 'My page';
     if (a && l.length) { a.href = '/m/' + l[0].slug; a.hidden = false; }
     var rl = me.readings(), b = $('nav-myreading');
     if (b && rl.length) { b.href = '/r/' + rl[0].id + '?k=' + encodeURIComponent(rl[0].key); b.hidden = false; }
@@ -195,5 +197,12 @@
     if (x && !x.dataset.on) { x.dataset.on = '1'; x.addEventListener('click', function () { d.classList.remove('on'); document.body.classList.remove('has-dock'); try { sessionStorage.setItem('ws_dock_x', '1'); } catch (e) { /* ignore */ } }); }
   }
 
-  window.WS = { api: api, esc: esc, $: $, store: store, fillSign: fillSign, relHtml: relHtml, drawMap: drawMap, legendHtml: legendHtml, REL: REL, EL_VAR: EL_VAR, me: me, initNav: initNav, dock: dock };
+  /** 내 사인 스토리 이미지 */
+  function signStory(s, name) {
+    if (!window.WSCharts) return;
+    var c = WSCharts.storyImage({ top: (name ? name + ', ' : '') + 'a ' + s.zodiac + ' in the West. In Korea:', hanja: s.hanja, name: s.name, sub: s.tagline, foot: "WHAT'S YOURS? " + location.host.toUpperCase(), color: WSCharts.cv(EL_VAR[s.element]) });
+    WSCharts.shareImage(c, 'my-korean-sign.png', 'My Korean sign is ' + s.name + '. What\u2019s yours?');
+  }
+
+  window.WS = { api: api, esc: esc, $: $, store: store, fillSign: fillSign, relHtml: relHtml, drawMap: drawMap, legendHtml: legendHtml, REL: REL, EL_VAR: EL_VAR, me: me, initNav: initNav, dock: dock, signStory: signStory };
 })();

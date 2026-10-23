@@ -42,9 +42,20 @@ export function cleanName(v: unknown, field: string): string {
   return s;
 }
 
+/** 오행 개수 (기둥 글자 6~8개) — 오각형 그래프용 */
+export function elementsOfSign(s: KoreanSign): Record<string, number> {
+  const out: Record<string, number> = { Wood: 0, Fire: 0, Earth: 0, Metal: 0, Water: 0 };
+  for (const p of [s.pillars.year, s.pillars.month, s.pillars.day, s.pillars.hour]) {
+    if (!p) continue;
+    out[p.stemElement]++; out[p.branchElement]++;
+  }
+  return out;
+}
+
 /** 본인에게만: 네 기둥·태양 황경까지 */
 export function publicSign(s: KoreanSign) {
   return {
+    elements: elementsOfSign(s),
     key: s.key, name: s.name, hanja: s.hanja, tagline: s.tagline, element: s.element, yang: s.yang,
     season: s.season, strength: s.strength, dayPillar: s.dayPillar, zodiac: s.zodiac, sunLongitude: s.sunLongitude,
     pillars: s.pillars,
@@ -53,7 +64,7 @@ export function publicSign(s: KoreanSign) {
 
 /** 다른 사람에게 보여 줄 때: 생일을 거꾸로 알아낼 수 있는 값(기둥·황경)은 뺀다 */
 export function sharedSign(s: KoreanSign) {
-  return { key: s.key, name: s.name, hanja: s.hanja, tagline: s.tagline, element: s.element, yang: s.yang, season: s.season, strength: s.strength, zodiac: s.zodiac };
+  return { key: s.key, name: s.name, hanja: s.hanja, tagline: s.tagline, element: s.element, yang: s.yang, season: s.season, strength: s.strength, zodiac: s.zodiac, elements: elementsOfSign(s) };
 }
 
 const newSlug = () => {

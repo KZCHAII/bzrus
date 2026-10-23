@@ -18,7 +18,7 @@
 <nav>
   <a class="logo" href="/" style="text-decoration:none"><div class="logo-mark"><span></span><span></span><span></span><span></span></div><div class="logo-text">WITH<em>SAJU</em></div></a>
   <div class="nav-right">
-    <a class="nav-link" id="nav-myreading" href="/" hidden>My reading</a>
+    <a class="nav-link opt" id="nav-myreading" href="/" hidden>My reading</a>
     <a class="nav-link" id="nav-mymap" href="/" hidden>My map</a>
     <a class="nav-cta" href="/reading">Full reading</a>
   </div>
@@ -58,19 +58,21 @@
       <p class="tagline" id="k-tag"></p>
       <dl class="stats" id="k-stats"></dl>
       <dl class="pillars" id="k-pillars" aria-label="Your four pillars"></dl>
+      <div id="k-penta" style="margin:0 0 14px"></div>
       <div class="why" id="k-why"></div>
+      <div class="sharebar" style="margin-top:14px;justify-content:center"><button type="button" data-a="img" id="k-story">Save my sign as a story image</button></div>
     </article>
 
     <div class="hide" id="actions">
       <div class="panel" style="margin-top:14px">
         <span class="corner"></span><span class="corner-br"></span>
-        <div class="sign-top" style="margin-bottom:10px"><span class="tag">YOUR <em>// SKY MAP</em></span><span class="coord" id="pv-count">0 FRIENDS</span></div>
-        <p class="west" style="margin:0 0 4px" id="pv-title">Who fills your five slots?</p>
+        <div class="sign-top" style="margin-bottom:10px"><span class="tag">YOUR <em>// PAGE</em></span><span class="coord" id="pv-count">0 FRIENDS</span></div>
+        <p class="west" style="margin:0 0 4px" id="pv-title">Your page: who fills your five slots?</p>
         <p class="note" style="text-align:left;margin:0">Battery, Spark, Co-pilot, Mirror, Coach. Friends add a birthday and land in one. Closer to the center means better chemistry.</p>
         <div class="map" style="margin-top:14px;border:0;background:transparent">
           <canvas id="pvCanvas" width="640" height="640" role="img" aria-label="Your sky map, five relationship slots around you"></canvas>
         </div>
-        <button class="btn" type="button" id="mapBtn">Get my link to fill it <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M1 7h11m0 0L7 2m5 5L7 12" stroke="currentColor" stroke-width="1.8"/></svg></button>
+        <button class="btn" type="button" id="mapBtn">Make my page and get the link <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M1 7h11m0 0L7 2m5 5L7 12" stroke="currentColor" stroke-width="1.8"/></svg></button>
         <p class="err" id="map-err" hidden></p>
       </div>
       <div class="actions" style="grid-template-columns:1fr">
@@ -129,10 +131,12 @@
 </div>
 
 <script src="/js/withsaju.js"></script>
+<script src="/js/charts.js"></script>
 <script src="/js/datepicker.js"></script>
 <script>
 (function () {
-  var $ = WS.$, cur = null;
+  var $ = WS.$, cur = null, lastSign = null;
+  $('k-story').addEventListener('click', function () { if (lastSign) WS.signStory(lastSign, cur && cur.name); });
   WS.initNav();
 
   async function reveal(name, d, t, scroll) {
@@ -140,6 +144,7 @@
     cur = { name: name, birthday: d, time: t };
     WS.me.set(cur);
     WS.fillSign($('card'), r.sign, name, '');
+    lastSign = r.sign;
     $('card').classList.remove('hide'); $('actions').classList.remove('hide');
     WS.dock(true);
     drawPreview(name);
@@ -172,7 +177,7 @@
     $('pv-count').textContent = entries.length + (entries.length === 1 ? ' FRIEND' : ' FRIENDS');
     if (myMap) {
       $('pv-title').textContent = entries.length ? 'Your map so far' : 'Your map is ready. Fill your five slots.';
-      $('mapBtn').firstChild.textContent = 'Open my map and share ';
+      $('mapBtn').firstChild.textContent = 'Open my page and share ';
     }
   }
 

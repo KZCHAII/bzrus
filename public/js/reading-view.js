@@ -38,8 +38,9 @@
     };
     h.push(head("Your Saju chart", "chart") + '<div class="card" style="--el:var(' + EL_VAR[c.sign.element] + ')">');
     h.push('<div class="label">Four pillars</div><dl class="pillars" style="margin-bottom:18px">' + cell("Year", P.year) + cell("Month", P.month) + cell("Day", P.day) + cell("Hour", P.hour) + "</dl>");
+    if (window.WSCharts) h.push('<div class="label">Five elements</div>' + WSCharts.elementsPentagon([{ name: d.name, elements: c.elements }]));
     var max = Math.max.apply(null, Object.keys(c.elements).map(function (k) { return c.elements[k]; }).concat([1]));
-    h.push('<div class="label">Five elements</div><div class="elbar">' + ["Wood", "Fire", "Earth", "Metal", "Water"].map(function (k) {
+    h.push('<div class="elbar" style="margin-top:6px">' + ["Wood", "Fire", "Earth", "Metal", "Water"].map(function (k) {
       return '<div><div class="nm" style="color:var(' + EL_VAR[k] + ')"><span>' + k + "</span><b>" + c.elements[k] + '</b></div><div class="tr"><i style="width:' + Math.round(c.elements[k] / max * 100) + "%;background:var(" + EL_VAR[k] + ')"></i></div></div>';
     }).join("") + "</div>");
     var age = new Date().getFullYear() - Number(d.birthday.slice(0, 4));
@@ -71,7 +72,7 @@
     toc.push(["chart", "Chart"]);
     secs.forEach(function (s, i) { toc.push(["s" + i, s.title.replace(/:.*$/, "").replace(/^Your /, "").slice(0, 16)]); });
     toc.push(["end", "Last word"]);
-    h.push('<div class="toc" role="navigation">' + toc.map(function (t) { return '<a href="#rc-' + t[0] + '">' + esc(t[1]) + "</a>"; }).join("") + "</div>");
+    var tocAt = h.length; h.push("");
     if (!c && d.cardsPending) h.push('<div class="wait">BUILDING YOUR SUMMARY CARDS. THE FULL TEXT IS READY BELOW</div>');
     if (first && first.paras.length) h.push('<p class="note" style="text-align:left;margin:-8px 0 18px">' + esc(first.paras.join(" ")) + "</p>");
 
@@ -80,6 +81,17 @@
       h.push('<section class="sec" id="rc-core" style="margin-top:0"><div class="card hero"><span class="corner"></span><span class="corner-br"></span>');
       h.push('<div class="label" style="color:var(--cyan)">Core insight</div><div class="big">' + esc(core.headline) + "</div><p>" + esc(core.body) + "</p>");
       h.push('<div class="grid2 mt">' + mini("good", "Biggest opening", core.strength) + mini("warn", "Watch most", core.caution) + "</div></div></section>");
+    }
+    // 연도별 흐름: 리포트 카드의 시기표(과거 5년·다음 5년)를 한 줄 그래프로
+    if (c && window.WSCharts) {
+      var pts = [];
+      (c.sections || []).forEach(function (x) { if (x.kind === "timeline") (x.timeline || []).forEach(function (t) { pts.push({ label: t.label, score: t.score, tone: t.tone }); }); });
+      pts.sort(function (a, b) { return (parseInt(a.label.match(/\d{4}/) || [0], 10)) - (parseInt(b.label.match(/\d{4}/) || [0], 10)); });
+      if (pts.length >= 3) {
+        h.push(head("Your years at a glance", "years") + '<div class="card"><div class="label">Opportunity by period · 1 low – 5 high</div>' + WSCharts.yearsLine(pts) +
+          '<p class="note" style="text-align:left">From the year-by-year sections of your reading. Green = good stretch, amber = be careful.</p></div></section>');
+        toc.splice(1, 0, ["years", "Years"]);
+      }
     }
     h.push(chartHtml(d));
 
@@ -112,6 +124,7 @@
     if (lastLine) h.push('<div class="card final"><span class="corner"></span><span class="corner-br"></span><div class="label">One sentence to carry with you</div><div class="line">' + esc(lastLine) + "</div></div>");
     h.push("</section>");
 
+    h[tocAt] = '<div class="toc" role="navigation">' + toc.map(function (t) { return '<a href="#rc-' + t[0] + '">' + esc(t[1]) + "</a>"; }).join("") + "</div>";
     el.innerHTML = '<div class="rc">' + h.join("") + "</div>";
     Array.prototype.forEach.call(el.querySelectorAll(".toc a"), function (a) {
       a.addEventListener("click", function (e) { var t = el.querySelector(a.getAttribute("href")); if (t) { e.preventDefault(); t.scrollIntoView({ behavior: "smooth", block: "start" }); } });

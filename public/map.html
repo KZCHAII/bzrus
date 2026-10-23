@@ -19,7 +19,7 @@
 <nav>
   <a class="logo" href="/" style="text-decoration:none"><div class="logo-mark"><span></span><span></span><span></span><span></span></div><div class="logo-text">WITH<em>SAJU</em></div></a>
   <div class="nav-right">
-    <a class="nav-link" id="nav-myreading" href="/" hidden>My reading</a>
+    <a class="nav-link opt" id="nav-myreading" href="/" hidden>My reading</a>
     <a class="nav-link" id="nav-mymap" href="/" hidden>My map</a>
     <a class="nav-cta" href="/reading">Full reading</a>
   </div>
@@ -30,14 +30,14 @@
 
   <section class="hero hide" id="missing">
     <p class="eyebrow">Error // 404</p>
-    <h1>This map <span class="accent">doesn't exist.</span></h1>
+    <h1>This page <span class="accent">doesn't exist.</span></h1>
     <p class="sub">The link may be mistyped, or the map was removed.</p>
-    <a class="btn" href="/" style="text-decoration:none">Make your own map <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M1 7h11m0 0L7 2m5 5L7 12" stroke="currentColor" stroke-width="1.8"/></svg></a>
+    <a class="btn" href="/" style="text-decoration:none">Make your own page <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M1 7h11m0 0L7 2m5 5L7 12" stroke="currentColor" stroke-width="1.8"/></svg></a>
   </section>
 
   <!-- 손님 화면 -->
   <section class="hero hide" id="guest">
-    <p class="eyebrow">Sky map // <span id="g-owner-ey"></span></p>
+    <p class="eyebrow"><span id="g-owner-ey"></span>'s page</p>
     <h1>What are you <span class="accent">to <span id="g-owner"></span>?</span></h1>
     <p class="sub">Add your birthday. You'll get your Korean sign and your relationship type with <strong id="g-owner2"></strong>.</p>
     <div class="mini"><div class="h" id="g-han"></div><div><b id="g-oname"></b><span id="g-osign"></span></div></div>
@@ -53,7 +53,7 @@
           <div class="bzr-datepicker" data-target="g-date"><button type="button" class="bzr-dp-trigger" data-part="month"><span class="bzr-dp-val">MM</span><span class="bzr-dp-arrow">▾</span></button><span class="bzr-dp-sep">/</span><button type="button" class="bzr-dp-trigger" data-part="day"><span class="bzr-dp-val">DD</span><span class="bzr-dp-arrow">▾</span></button><span class="bzr-dp-sep">/</span><button type="button" class="bzr-dp-trigger" data-part="year"><span class="bzr-dp-val">YYYY</span><span class="bzr-dp-arrow">▾</span></button></div></div>
         <div class="field"><label for="g-time">Birth time <span class="opt">(opt.)</span></label><input id="g-time" type="time"></div>
       </div>
-      <label class="check" for="g-consent"><input type="checkbox" id="g-consent" checked><span>Put my nickname and relationship type on <b id="g-owner3"></b>'s map. Anyone with the link can see it. Your birthday and birth time stay private.</span></label>
+      <label class="check" for="g-consent"><input type="checkbox" id="g-consent" checked><span>Put my nickname and relationship type on <b id="g-owner3"></b>'s page. Anyone with the link can see it. Your birthday and birth time stay private.</span></label>
       <button class="btn" type="submit" id="gBtn">Show what we are <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M1 7h11m0 0L7 2m5 5L7 12" stroke="currentColor" stroke-width="1.8"/></svg></button>
       <p class="err" id="g-err" hidden></p>
     </form>
@@ -63,7 +63,10 @@
         <span class="corner"></span><span class="corner-br"></span>
         <span class="tag">RESULT <em>// YOU + <span id="g-owner4"></span></em></span>
         <div class="rel" id="g-rel"></div>
+        <div class="label" style="font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--mute-3);margin:18px 0 0;text-align:center">YOUR ELEMENTS, SIDE BY SIDE</div>
+        <div id="g-penta"></div>
         <p class="note" id="g-added"></p>
+        <div class="sharebar" style="justify-content:center;margin-top:10px"><button type="button" data-a="img" id="g-story">Save our match as a story image</button></div>
       </div>
       <article class="panel sign hide" id="card" aria-live="polite">
       <span class="corner"></span><span class="corner-br"></span>
@@ -76,31 +79,61 @@
       <p class="tagline" id="k-tag"></p>
       <dl class="stats" id="k-stats"></dl>
       <dl class="pillars" id="k-pillars" aria-label="Your four pillars"></dl>
+      <div id="k-penta" style="margin:0 0 14px"></div>
       <div class="why" id="k-why"></div>
+      <div class="sharebar" style="margin-top:14px;justify-content:center"><button type="button" data-a="img" id="k-story">Save my sign as a story image</button></div>
     </article>
       <div class="actions">
-        <button class="act" type="button" id="g-own"><span class="k">Free // Sky map</span><b>Make your own map</b><span class="d">See what your friends are to you. Your details carry over.</span></button>
+        <button class="act" type="button" id="g-own"><span class="k">Free // Your page</span><b>Make your own page</b><span class="d">Get a link like this one. See what your friends are to you. Your details carry over.</span></button>
         <a class="act paid" href="/reading"><span class="k">Full reading</span><b>Your whole chart in plain English</b><span class="pr">$9.99</span></a>
       </div>
       <p class="err" id="g-own-err" hidden></p>
     </div>
   </section>
 
-  <!-- 주인 화면 -->
+  <!-- 주인 화면 = 마이페이지 -->
   <section class="hero hide" id="owner">
-    <p class="eyebrow">Your sky map</p>
-    <h1><span id="o-name"></span>'s <span class="accent">sky map</span></h1>
-    <div class="mini"><div class="h" id="o-han"></div><div><b id="o-sign"></b><span id="o-meta"></span></div></div>
-    <div class="panel">
-      <span class="corner"></span><span class="corner-br"></span>
-      <span class="tag">SHARE <em>// YOUR LINK</em></span>
-      <p class="sub" style="margin:14px 0 0">Send this to friends. Each one who adds a birthday lands on your map.</p>
-      <div class="share"><input id="o-link" type="text" readonly aria-label="Your map link"><button class="btn" type="button" id="o-copy">Share</button></div>
-      <p class="copied" id="o-copied"></p>
-      <p class="note">This browser is your key to manage the map. Keep using it.</p>
+    <p class="eyebrow">My page</p>
+    <h1><span id="o-name"></span>'s <span class="accent">page</span></h1>
+    <div class="twocol">
+      <div class="panel" style="--el:var(--cyan)">
+        <span class="corner"></span><span class="corner-br"></span>
+        <span class="tag">MY <em>// KOREAN SIGN</em></span>
+        <div class="mini" style="margin:16px 0 8px"><div class="h" id="o-han"></div><div><b id="o-sign"></b><span id="o-meta"></span></div></div>
+        <p class="tagline" id="o-tag" style="text-align:left;font-size:15px;margin:0 0 12px"></p>
+        <div class="sharebar"><button type="button" data-a="img" id="o-story">Story image</button><a href="/" style="text-decoration:none">My sign card</a></div>
+      </div>
+      <div class="panel">
+        <span class="corner"></span><span class="corner-br"></span>
+        <span class="tag">MY <em>// FIVE ELEMENTS</em></span>
+        <div id="o-penta" style="margin-top:8px"></div>
+      </div>
     </div>
-    <div class="actions" style="grid-template-columns:1fr">
-      <a class="act paid" href="/reading"><span class="k">Full reading</span><b>Your whole chart in plain English: four pillars, 10-year luck, your 2027</b><span class="pr">$9.99</span></a>
+
+    <div class="panel" style="margin-top:14px">
+      <span class="corner"></span><span class="corner-br"></span>
+      <span class="tag">SHARE <em>// MY PAGE</em></span>
+      <p class="sub" style="margin:14px 0 10px">Anyone who opens this link adds a birthday and sees what they are to you. They land on your map below.</p>
+      <div class="share" style="margin-bottom:10px"><input id="o-link" type="text" readonly aria-label="Your page link"></div>
+      <div id="o-share"></div>
+      <p class="note">This browser is your key to manage the page. Keep using it.</p>
+    </div>
+
+    <div class="panel" style="margin-top:14px">
+      <span class="corner"></span><span class="corner-br"></span>
+      <span class="tag">MY <em>// FRIENDS</em></span>
+      <dl class="kpis"><div><dt>Friends</dt><dd id="o-k1">0</dd></div><div><dt>Avg chemistry</dt><dd id="o-k2">–</dd></div><div><dt>Best match</dt><dd id="o-k3">–</dd></div></dl>
+      <div class="twocol">
+        <div><div class="label" style="font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--mute-3)">FRIENDS BY TYPE</div><div id="o-rpenta"></div></div>
+        <div><div class="label" style="font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--mute-3)">TOP CHEMISTRY</div><ol class="list" id="o-top" style="border-top:0"></ol></div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:14px">
+      <span class="corner"></span><span class="corner-br"></span>
+      <span class="tag">MY <em>// READINGS</em></span>
+      <ul class="rlist" id="o-readings"></ul>
+      <a class="act paid" href="/reading" style="margin-top:10px"><span class="k">Full reading // $9.99</span><b>Your whole chart in plain English: four pillars, 10-year luck, the next five years</b></a>
     </div>
   </section>
 
@@ -113,7 +146,7 @@
     </div>
     <p class="note" style="text-align:left;margin-top:10px">Five slices, one per relationship type. Closer to the center means better chemistry.</p>
     <ol class="list" id="list"></ol>
-    <p class="empty hide" id="empty">No one yet. Share your link and the map starts filling up.</p>
+    <p class="empty hide" id="empty">No one yet. Share your page and the map starts filling up.</p>
   </section>
 </div>
 
@@ -129,6 +162,7 @@
 </div>
 
 <script src="/js/withsaju.js"></script>
+<script src="/js/charts.js"></script>
 <script src="/js/datepicker.js"></script>
 <script>
 (function () {
@@ -136,7 +170,7 @@
   WS.initNav();
   var slug = (location.pathname.match(/^\/m\/([a-z0-9]{10})$/) || [])[1] || new URLSearchParams(location.search).get('slug') || '';
   var token = WS.store.get('ws_owner_' + slug) || '';
-  var data = null, mine = null;
+  var data = null, mine = null, lastMatch = null, mySign = null;
   function show(id) { $(id).classList.remove('hide'); }
 
   function renderMap() {
@@ -156,7 +190,7 @@
     var b = e.target.closest('.rm'); if (!b) return;
     if (b.dataset.confirm !== '1') { b.dataset.confirm = '1'; b.textContent = 'Sure?'; return; }
     b.disabled = true;
-    try { await WS.api('/api/maps/entries?slug=' + slug + '&id=' + encodeURIComponent(b.dataset.id), { method: 'DELETE', token: token }); await load(); }
+    try { await WS.api('/api/maps/entries?slug=' + slug + '&id=' + encodeURIComponent(b.dataset.id), { method: 'DELETE', token: token }); data = await WS.api('/api/maps?slug=' + slug, { token: token }); renderMap(); renderOwner(); }
     catch (x) { b.textContent = 'Failed'; }
   });
 
@@ -164,19 +198,48 @@
     var s = data.sign;
     ['g-owner', 'g-owner2', 'g-owner3', 'g-owner4', 'o-name', 'g-oname'].forEach(function (id) { $(id).textContent = data.name; });
     $('g-owner-ey').textContent = data.name.toUpperCase();
-    document.title = data.isOwner ? 'Your sky map — WITHSAJU' : 'What are you to ' + data.name + '? — WITHSAJU';
+    document.title = data.isOwner ? 'My page — WITHSAJU' : 'What are you to ' + data.name + '? — WITHSAJU';
     document.documentElement.style.setProperty('--el', 'var(' + WS.EL_VAR[s.element] + ')');
     $('g-han').textContent = $('o-han').textContent = s.hanja;
     $('g-osign').textContent = $('o-meta').textContent = s.name + ' · ' + s.zodiac;
     $('o-sign').textContent = s.name;
+    $('o-tag').textContent = s.tagline;
   }
+
+  // 마이페이지: 오각형·친구 통계·내 리포트·공유
+  function renderOwner() {
+    var s = data.sign, E = data.entries;
+    $('o-penta').innerHTML = WSCharts.elementsPentagon([{ name: data.name, elements: s.elements }]);
+    $('o-rpenta').innerHTML = WSCharts.relationsPentagon(E);
+    $('o-k1').textContent = E.length;
+    $('o-k2').textContent = E.length ? Math.round(E.reduce(function (a, e) { return a + e.score; }, 0) / E.length) : '–';
+    $('o-k3').textContent = E.length ? E[0].nickname : '–';
+    $('o-top').innerHTML = E.length ? E.slice(0, 5).map(function (e, i) {
+      var R = WS.REL[e.relation];
+      return '<li style="grid-template-columns:24px 1fr auto"><span class="rank">' + (i + 1) + '</span><div class="who"><b>' + esc(e.nickname) + '</b><span style="color:var(' + R.c + ')">' + R.n + '</span></div><span class="sc">' + e.score + '</span></li>';
+    }).join('') : '<li style="grid-template-columns:1fr"><span class="note" style="text-align:left">No friends yet. Share your page.</span></li>';
+    var rl = WS.me.readings();
+    $('o-readings').innerHTML = rl.length ? rl.map(function (r) { return '<li><a href="/r/' + esc(r.id) + '?k=' + encodeURIComponent(r.key) + '"><b>' + esc(r.name) + '\u2019s full reading</b><span>Open →</span></a></li>'; }).join('')
+      : '<li class="note" style="text-align:left">No readings on this device yet.</li>';
+  }
+  var shareReady = false;
+  function ownerShare() {
+    if (shareReady) return; shareReady = true;
+    var url = location.origin + '/m/' + data.slug;
+    $('o-link').value = url;
+    WSCharts.shareBar($('o-share'), url, 'What are you to me? Add your birthday and find out, in Korean Saju.', function () {
+      var s = data.sign;
+      WSCharts.shareImage(WSCharts.storyImage({ top: 'What are you to me? Find out in Korean Saju.', hanja: s.hanja, name: data.name + ' · ' + s.name, sub: 'Add your birthday at the link. You\u2019ll land on my map.', foot: location.host.toUpperCase() + '/M/' + data.slug.toUpperCase(), color: WSCharts.cv(WS.EL_VAR[s.element]) }), 'what-are-you-to-me.png', 'What are you to me? ' + url);
+    });
+  }
+  $('o-story').addEventListener('click', function () { WS.signStory(data.sign, data.name); });
 
   async function load() {
     try { data = await WS.api('/api/maps?slug=' + encodeURIComponent(slug), { token: token }); }
     catch (x) { $('loading').classList.add('hide'); show('missing'); return; }
     $('loading').classList.add('hide');
     fillOwnerBits();
-    if (data.isOwner) { show('owner'); $('o-link').value = location.origin + '/m/' + data.slug; WS.dock(true); }
+    if (data.isOwner) { show('owner'); ownerShare(); renderOwner(); WS.dock(true); }
     else {
       show('guest');
       var saved = WS.me.get();   // 전에 입력한 적 있으면 미리 채움
@@ -185,11 +248,6 @@
     renderMap();
   }
 
-  $('o-copy').addEventListener('click', function () {
-    var v = $('o-link').value, out = $('o-copied');
-    if (navigator.share) { navigator.share({ title: 'What are you to me?', text: 'Add your birthday and see what you are to me, in Korean Saju.', url: v }).catch(function () {}); return; }
-    try { navigator.clipboard.writeText(v).then(function () { out.textContent = 'COPIED // send it to your friends'; }, function () { $('o-link').select(); }); } catch (x) { $('o-link').select(); }
-  });
 
   $('gForm').addEventListener('submit', async function (e) {
     e.preventDefault();
@@ -203,16 +261,25 @@
       mine = { name: nick, birthday: d, time: t };
       WS.me.set(mine);
       WS.fillSign($('card'), r.sign, nick, ''); $('card').classList.remove('hide');
+      mySign = r.sign; lastMatch = r;
+      $('g-penta').innerHTML = WSCharts.elementsPentagon([{ name: r.owner.name, elements: r.owner.sign.elements }, { name: nick, elements: r.sign.elements }]);
       $('g-rel').innerHTML = WS.relHtml(r.relation, r.owner.sign, r.sign, 'You are ' + esc(r.owner.name) + '’s {R}', r.owner.name);
-      $('g-added').textContent = r.added ? 'You’re on ' + r.owner.name + '’s map now.' : 'You’re not on the map. Only you saw this.';
+      $('g-added').textContent = r.added ? 'You’re on ' + r.owner.name + '’s page now.' : 'You’re not on the page. Only you saw this.';
       $('gForm').classList.add('hide'); show('g-result');
       $('g-result').scrollIntoView({ block: 'start' });
       WS.dock(true);
-      if (r.added) { data = await WS.api('/api/maps?slug=' + slug, { token: token }); renderMap(); }
+      if (r.added) { data = await WS.api('/api/maps?slug=' + slug, { token: token }); renderMap(); if (data.isOwner) renderOwner(); }
     } catch (x) { err.textContent = 'ERROR // ' + x.message; err.hidden = false; $('gBtn').disabled = false; }
   });
 
-  // 친구 → 자기 지도 바로 만들기 (입력한 정보 그대로)
+  $('k-story').addEventListener('click', function () { if (mySign) WS.signStory(mySign, mine && mine.name); });
+  $('g-story').addEventListener('click', function () {
+    if (!lastMatch) return;
+    var R = WS.REL[lastMatch.relation.kind];
+    WSCharts.shareImage(WSCharts.storyImage({ top: mine.name + ' + ' + lastMatch.owner.name, hanja: mySign.hanja, name: 'I\u2019m ' + lastMatch.owner.name + '\u2019s ' + R.n, sub: lastMatch.owner.sign.name + ' + ' + mySign.name + ', in Korean Saju', extra: 'CHEMISTRY ' + lastMatch.relation.score, foot: 'WHAT ARE YOU TO ME? ' + location.host.toUpperCase(), color: WSCharts.cv(R.c) }), 'our-korean-match.png', 'I\u2019m ' + lastMatch.owner.name + '\u2019s ' + R.n + ' in Korean Saju.');
+  });
+
+  // 친구 → 자기 페이지 바로 만들기 (입력한 정보 그대로)
   $('g-own').addEventListener('click', async function () {
     var err = $('g-own-err'); err.hidden = true; $('g-own').disabled = true;
     try {

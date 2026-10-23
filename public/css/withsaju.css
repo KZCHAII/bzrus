@@ -303,3 +303,23 @@ body.has-dock footer{padding-bottom:110px}
 
 .rc .mini{display:block;margin:0}
 .rc .note{font-family:var(--sans);letter-spacing:0;font-size:13px}
+
+/* charts & sharing */
+.penta{display:block;width:100%;max-width:360px;height:auto;margin:0 auto}
+.pleg{display:flex;justify-content:center;gap:14px;margin-top:4px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute-1)}
+.pleg i{display:inline-block;width:10px;height:10px;margin-right:6px;vertical-align:-1px}
+.yline{display:block;width:100%;height:auto}
+.sharebar{display:flex;flex-wrap:wrap;gap:8px}
+.sharebar button,.sharebar a{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-1);background:var(--bg-1);border:1px solid var(--border-3);padding:10px 12px;text-decoration:none;cursor:pointer}
+.sharebar button:hover,.sharebar a:hover{border-color:var(--cyan);color:var(--cyan)}
+.sharebar button[data-a="native"],.sharebar button[data-a="img"]{background:var(--cyan);color:#000;border-color:var(--cyan);font-weight:700}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--border-2);margin:14px 0}
+.kpis div{padding:12px;border-left:1px solid var(--border-2);min-width:0}.kpis div:first-child{border-left:0}
+.kpis dt{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute-3);margin:0 0 4px}
+.kpis dd{margin:0;font-size:20px;font-weight:800;color:var(--white);overflow-wrap:anywhere}
+.rlist{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:8px}
+.rlist a{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:12px 14px;border:1px solid var(--border-2);background:var(--bg-1);color:var(--text-1);text-decoration:none}
+.rlist a:hover{border-color:var(--purple)}
+.rlist span{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--purple);text-transform:uppercase}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:560px){ .twocol{grid-template-columns:1fr} .kpis dd{font-size:17px} }
