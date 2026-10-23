@@ -4,9 +4,12 @@ import { envOptional } from "./env";
 import { HttpError } from "./http";
 
 export function requireAdmin(req: Request) {
-  const want = envOptional("ADMIN_KEY");
-  const got = (req.headers.get("x-admin-key") ?? "").slice(0, 200);
-  if (!want || want.length < 12) throw new HttpError(503, "ADMIN_OFF", { error: "ADMIN_OFF", message: "Admin is not set up yet (ADMIN_KEY)." });
+  // 한글 등은 화면이 encodeURIComponent로 보낸다. 앞뒤 공백·줄바꿈은 무시
+  const want = envOptional("ADMIN_KEY")?.trim();
+  let got = (req.headers.get("x-admin-key") ?? "").slice(0, 600);
+  try { got = decodeURIComponent(got); } catch { /* 그대로 */ }
+  got = got.trim();
+  if (!want || [...want].length < 8) throw new HttpError(503, "ADMIN_OFF", { error: "ADMIN_OFF", message: "Admin is not set up yet (ADMIN_KEY)." });
   const a = Buffer.from(want), b = Buffer.from(got);
   if (a.length !== b.length || !timingSafeEqual(a, b)) throw new HttpError(401, "NOT_ADMIN", { error: "NOT_ADMIN", message: "Wrong key." });
 }

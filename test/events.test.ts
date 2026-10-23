@@ -45,3 +45,12 @@ describe("통계", () => {
     expect((await call(cron, req("/api/cron/daily", { headers: { authorization: "Bearer s3cret-value" } }))).status).toBe(200);
   });
 });
+
+describe("관리자 열쇠: 한글·공백", () => {
+  it("한글 열쇠도, 앞뒤 공백이 붙어 있어도 열린다", async () => {
+    process.env.ADMIN_KEY = " 별자리위드사주2026통계\n";
+    const ok = await call(adminStats, req("/api/admin/stats", { headers: { "x-admin-key": encodeURIComponent("별자리위드사주2026통계 ") } }));
+    expect(ok.status).toBe(200);
+    expect((await call(adminStats, req("/api/admin/stats", { headers: { "x-admin-key": encodeURIComponent("별자리") } }))).status).toBe(401);
+  });
+});

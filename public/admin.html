@@ -54,7 +54,7 @@
   var put = function (v) { try { v ? localStorage.setItem(KEY, v) : localStorage.removeItem(KEY); } catch (e) { /* ignore */ } };
   async function load() {
     var k = get(); if (!k) return;
-    var res = await fetch('/api/admin/stats?days=' + days, { headers: { 'x-admin-key': k } });
+    var res = await fetch('/api/admin/stats?days=' + days, { headers: { 'x-admin-key': encodeURIComponent(k.trim()) } });
     var d = await res.json().catch(function () { return {}; });
     if (!res.ok) { put(''); $('out').classList.add('hide'); $('kForm').classList.remove('hide'); $('k-err').textContent = 'ERROR // ' + (d.message || res.status); $('k-err').hidden = false; return; }
     $('kForm').classList.add('hide'); $('out').classList.remove('hide');
