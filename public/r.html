@@ -45,9 +45,29 @@
       <p class="sub">Something went wrong on our side. Nothing was charged. Please try again in a few minutes.</p>
       <a class="btn" href="/reading" style="text-decoration:none">Try again <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M1 7h11m0 0L7 2m5 5L7 12" stroke="currentColor" stroke-width="1.8"/></svg></a>
     </div>
+    <div class="panel hide vsave" style="margin-top:14px">
+      <span class="corner"></span><span class="corner-br"></span>
+      <span class="tag">KEEP <em>// THIS READING</em></span>
+      <form class="vs-form" novalidate>
+        <p class="sub" style="margin:14px 0 10px"><b style="color:var(--white)">Want to read it again later?</b> Add your email. We'll send you the link, so you can open it on any phone or computer.</p>
+        <div class="share"><input class="vs-email" type="email" placeholder="you@email.com" maxlength="254" autocomplete="email" aria-label="Your email"><button type="submit">Save</button></div>
+        <p class="err vs-err" hidden></p>
+      </form>
+      <p class="sub hide vs-done" style="margin:14px 0 0">Saved. The link is in <b class="vs-to"></b>. Lost it? Go to <a href="/find" style="color:var(--cyan)">Find my reading</a>.</p>
+    </div>
     <p class="loading hide" id="v-missing">READING NOT FOUND</p>
   </section>
   <div id="v-body"></div>
+  <section style="max-width:720px;margin:0 auto 28px;padding:0 16px"><div class="panel hide vsave" data-bottom="1" style="margin-top:14px">
+      <span class="corner"></span><span class="corner-br"></span>
+      <span class="tag">KEEP <em>// THIS READING</em></span>
+      <form class="vs-form" novalidate>
+        <p class="sub" style="margin:14px 0 10px"><b style="color:var(--white)">Want to read it again later?</b> Add your email. We'll send you the link, so you can open it on any phone or computer.</p>
+        <div class="share"><input class="vs-email" type="email" placeholder="you@email.com" maxlength="254" autocomplete="email" aria-label="Your email"><button type="submit">Save</button></div>
+        <p class="err vs-err" hidden></p>
+      </form>
+      <p class="sub hide vs-done" style="margin:14px 0 0">Saved. The link is in <b class="vs-to"></b>. Lost it? Go to <a href="/find" style="color:var(--cyan)">Find my reading</a>.</p>
+    </div></section>
 </div>
 
 <footer>
@@ -84,24 +104,51 @@
     document.title = d.name + '\u2019s reading — WITHSAJU';
   }
   // 다시 확인 예약. 다른 앱 갔다 돌아오면(폰은 뒤에 있는 탭의 타이머를 멈춤) 기다리지 않고 바로 확인
-  var waiting = null;
+  var waiting = null, saveShown = false;
   function later(ms) { clearTimeout(waiting); waiting = setTimeout(load, ms); }
   function wake() { if (waiting && document.visibilityState === 'visible') { clearTimeout(waiting); waiting = null; load(); } }
   document.addEventListener('visibilitychange', wake);
   window.addEventListener('pageshow', wake);
   window.addEventListener('focus', wake);
+  // 다시 보려면 이메일 저장 (위·아래 두 칸이 같이 움직임)
+  var boxes = Array.prototype.slice.call(document.querySelectorAll('.vsave'));
+  var savedTo = null, isDone = false;
+  function saveState(email) {
+    savedTo = email;
+    boxes.forEach(function (b) {
+      if (b.dataset.bottom && !isDone) return; // 아래 칸은 리포트가 다 나온 뒤에만
+      b.classList.remove('hide');
+      b.querySelector('.vs-form').classList.toggle('hide', !!email);
+      b.querySelector('.vs-done').classList.toggle('hide', !email);
+      if (email) b.querySelector('.vs-to').textContent = email;
+    });
+  }
+  boxes.forEach(function (b) {
+    b.querySelector('.vs-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      var err = b.querySelector('.vs-err'), btn = b.querySelector('button'), email = b.querySelector('.vs-email').value.trim();
+      err.hidden = true;
+      if (!email) { err.textContent = 'ERROR // Enter your email.'; err.hidden = false; return; }
+      btn.disabled = true;
+      try { var r = await WS.api('/api/readings/email', { body: { id: id, key: key, email: email } }); saveState(r.email); }
+      catch (x) { err.textContent = 'ERROR // ' + x.message; err.hidden = false; }
+      btn.disabled = false;
+    });
+  });
   async function load() {
     waiting = null;
     var d;
     try { d = await WS.api('/api/readings?id=' + encodeURIComponent(id) + '&k=' + encodeURIComponent(key)); }
     catch (x) { if (x.status === 404) { $('v-wait').classList.add('hide'); $('v-missing').classList.remove('hide'); return; } return later(5000); }
     header(d);
+    if (d.status !== 'failed' && !saveShown) { saveShown = true; saveState(d.savedEmail); }
     if (d.status === 'generating') { $('v-wait').classList.remove('hide'); return later(4000); }
     clearInterval(timer);
     $('v-wait').classList.add('hide');
     if (d.status === 'failed') { $('v-fail').classList.remove('hide'); return; }
     var sig = (d.cards ? 'c' : 't') + d.text.length;
     if (sig !== rendered) { rendered = sig; WSReading.render($('v-body'), d); }
+    if (!isDone) { isDone = true; saveState(savedTo); }
     if (!d.cards && d.cardsPending) later(5000); else waiting = null;
   }
   if (!id || !key) { $('v-wait').classList.add('hide'); $('v-missing').classList.remove('hide'); }

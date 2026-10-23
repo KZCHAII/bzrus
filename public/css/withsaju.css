@@ -405,3 +405,4 @@ select.sel:invalid{color:var(--mute-2)}
 .share button{flex-shrink:0;font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:#000;background:var(--cyan);border:0;padding:0 16px;cursor:pointer}
 .share button:disabled{opacity:.6}
 #o-email{font-size:16px}
+.vs-email{font-size:16px!important}

@@ -3,7 +3,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { createTestDb } from "./helpers/db";
 import { call, req } from "./helpers/req";
 import { setServices } from "@/lib/services";
-import { buildPrompt, createReading, generateReading, viewReading } from "@/lib/readings";
+import { buildPrompt, createReading, generateReading, saveReadingEmail, viewReading } from "@/lib/readings";
 import { GET as modeRoute } from "@/app/api/readings/mode/route";
 import type { Sql } from "@/lib/db";
 
@@ -92,7 +92,6 @@ describe("test 모드 생성", () => {
   it("성별·시간 확인", async () => {
     process.env.READINGS_MODE = "test";
     await expect(createReading({ ...input, gender: "" }, "1.1.1.3", bg)).rejects.toMatchObject({ status: 400 });
-    await expect(createReading({ ...input, email: "" }, "1.1.1.3", bg)).rejects.toMatchObject({ status: 400, code: "NEED_EMAIL" });
     await expect(createReading({ ...input, time: "" }, "1.1.1.3", bg)).rejects.toMatchObject({ status: 400 });
   });
 
@@ -140,5 +139,23 @@ describe("프롬프트", () => {
     expect(prompt).toContain("Today is October 22, 2026");
     expect(prompt).not.toMatch(/\{\{\w+\}\}/);
     expect(prompt).not.toContain("<!--");
+  });
+});
+
+describe("리포트 다시 보기: 이메일은 나중에", () => {
+  it("이메일 없이 만들고, 다 쓴 뒤 화면에서 저장하면 링크 메일", async () => {
+    process.env.READINGS_MODE = "test";
+    setServices({ ai: fakeAi() });
+    const { id, key } = await createReading({ ...input, email: undefined }, "9.9.9.1", bg);
+    await flush();
+    const v = await viewReading(id, key, bg);
+    expect(v).toMatchObject({ status: "done", savedEmail: null });
+    expect((await sql`select count(*)::int n from email_outbox where body_text like ${"%/r/" + id + "?k=%"}`)[0].n).toBe(0);
+    await expect(saveReadingEmail(id, "wrong", "me@example.com")).rejects.toMatchObject({ status: 404 });
+    await expect(saveReadingEmail(id, key, "nope")).rejects.toMatchObject({ status: 400 });
+    expect(await saveReadingEmail(id, key, "Me@Example.com")).toEqual({ saved: true, email: "m*@example.com" });
+    expect((await viewReading(id, key, bg)).savedEmail).toBe("m*@example.com");
+    const mails = await sql`select to_email, status from email_outbox where kind = 'reading_ready' and body_text like ${"%/r/" + id + "?k=%"}`;
+    expect(mails).toEqual([{ to_email: "me@example.com", status: "test" }]);
   });
 });

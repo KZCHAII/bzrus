@@ -3,7 +3,7 @@ import { createHash, randomBytes } from "node:crypto";
 import { getSql } from "./db";
 import { HttpError, str } from "./http";
 import { envOptional } from "./env";
-import { cleanName, hashIp, parseBirthday, type Birth } from "./maps";
+import { cleanName, hashIp, maskEmail, parseBirthday, type Birth } from "./maps";
 import { cleanEmail } from "./reading";
 import { chartText, fullChart, type FullChart, type Gender } from "./saju-chart";
 import { signOf } from "./saju";
@@ -76,9 +76,8 @@ export async function createReading(
   const b = parseBirthday(input.birthday, timeUnknown ? "" : input.time);
   if (!timeUnknown && !b.time) throw new HttpError(400, "NEED_TIME", { error: "NEED_TIME", message: "Add your birth time, or check \"I don't know my birth time\"." });
   const gender = parseGender(input.gender);
-  // 이메일은 필수: 다른 기기에서 다시 보는 열쇠 (리포트 링크를 메일로 보낸다)
-  if (!str(input.email)) throw new HttpError(400, "NEED_EMAIL", { error: "NEED_EMAIL", message: "Add your email. We send your reading link there so you can open it on any device." });
-  const email = cleanEmail(input.email);
+  // 이메일은 선택: 리포트 화면에서 "다시 보려면 저장"으로 받는다
+  const email = str(input.email) ? cleanEmail(input.email) : null;
   const sql = getSql();
   const ipHash = hashIp(ip);
   const cap = Math.max(0, Number(envOptional("TEST_DAILY_CAP") ?? 10) || 10);
@@ -151,6 +150,7 @@ export async function viewReading(id: string, key: string, start: (fn: () => Pro
   const { chart } = buildPrompt(r);
   const base = {
     id: r.id, name: r.name, birthday: b.iso, time: b.time, gender: r.gender, created: r.created_at.toISOString(),
+    savedEmail: r.email ? maskEmail(r.email) : null,
     chart: { sign: chart.sign, pillars: chart.pillars, elements: chart.elements, hidden: chart.hidden, hiddenSpots: chart.hiddenSpots, luck: chart.luck, current: chart.current, match: chart.match },
   };
   if (r.status === "generating") {
@@ -165,4 +165,19 @@ export async function viewReading(id: string, key: string, start: (fn: () => Pro
     cards: r.cards_status === "done" ? r.cards : null,
     cardsPending: r.cards_status === null || r.cards_status === "generating",
   };
+}
+
+/** 리포트 화면에서 "다시 보려면 이메일 저장": 링크의 비밀 키가 맞을 때만. 저장하면 리포트 링크를 메일로 보낸다 */
+export async function saveReadingEmail(id: string, key: string, emailIn: unknown) {
+  if (!/^[0-9a-f-]{36}$/i.test(id) || !key) throw new HttpError(404, "NOT_FOUND");
+  const sql = getSql();
+  const [r] = await sql<{ id: string; view_key: string; name: string; email: string | null; is_test: boolean; status: string }[]>`select id, view_key, name, email, is_test, status from readings where id = ${id}`;
+  if (!r || createHash("sha256").update(r.view_key).digest("hex") !== createHash("sha256").update(key).digest("hex")) throw new HttpError(404, "NOT_FOUND");
+  const email = cleanEmail(emailIn);
+  const [{ n }] = await sql<{ n: number }[]>`select count(*)::int n from email_outbox where kind = 'reading_ready' and to_email = ${email} and created_at > now() - interval '1 hour'`;
+  if (n >= 5) throw new HttpError(429, "TOO_MANY", { error: "TOO_MANY", message: "We already sent this a few times. Check your inbox and spam." });
+  await sql`update readings set email = ${email} where id = ${id}`;
+  // 이미 다 쓴 리포트면 지금 링크를 보낸다 (아직 쓰는 중이면 다 쓴 뒤 자동으로 감)
+  if (r.status === "done") await mailReadingReady({ ...r, email });
+  return { saved: true, email: maskEmail(email) };
 }

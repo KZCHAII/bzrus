@@ -49,7 +49,7 @@
       <div class="fields" style="grid-template-columns:1fr">
         <div class="field"><label>Gender</label><div class="gender" id="r-gender" role="radiogroup" aria-label="Gender"><button type="button" data-g="woman" role="radio" aria-checked="false">Woman</button><button type="button" data-g="man" role="radio" aria-checked="false">Man</button></div>
           <span class="note" style="text-align:left;margin:4px 0 0">Saju uses this to set the direction of your 10-year luck cycles.</span></div>
-        <div class="field" id="r-email-f"><label for="r-email">Email</label><input id="r-email" type="email" placeholder="you@email.com" maxlength="254" autocomplete="email"><span class="note" style="text-align:left;margin:4px 0 0">We email you the link to your reading, so you can open it again on any phone or computer.</span></div>
+        <div class="field" id="r-email-f"><label for="r-email">Email</label><input id="r-email" type="email" placeholder="you@email.com" maxlength="254" autocomplete="email"><span class="note" style="text-align:left;margin:4px 0 0">We'll email you when checkout opens.</span></div>
       </div>
       <button class="btn" type="submit" id="rBtn" style="background:var(--purple);box-shadow:0 0 20px rgba(168,85,247,.3)"><span id="rBtnT">Get my reading</span> <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M1 7h11m0 0L7 2m5 5L7 12" stroke="currentColor" stroke-width="1.8"/></svg></button>
       <p class="err" id="r-err" hidden></p>
@@ -89,10 +89,12 @@
   function applyMode() {
     if (mode === 'test') {
       $('r-badge').textContent = 'FREE PREVIEW';
+      $('r-email-f').classList.add('hide');
       $('rBtnT').textContent = 'Read my chart now';
       $('r-note').textContent = 'Free while we test, a few readings a day. Your reading takes about 1–2 minutes to write.';
     } else {
       $('r-badge').textContent = 'LAUNCH PRICE · $9.99';
+      $('r-email-f').classList.remove('hide');
       $('rBtnT').textContent = 'Reserve my reading';
       $('r-note').textContent = 'Checkout opens soon. Reserve now and we\u2019ll email you the moment it does, at the launch price. You won\u2019t be charged today.';
     }
@@ -104,7 +106,7 @@
     e.preventDefault();
     var err = $('r-err'); err.hidden = true;
     var body = { name: $('r-name').value.trim(), birthday: $('r-date').value, time: WS.timeOf($('r-time')), timeUnknown: $('r-time').value === 'unknown', gender: gender, email: $('r-email').value.trim() };
-    var miss = !body.name ? 'your name' : !body.birthday ? 'your birthday' : (!body.time && !body.timeUnknown) ? 'your birth time (or pick "I don\u2019t know")' : !body.gender ? 'your gender' : !body.email ? 'your email' : '';
+    var miss = !body.name ? 'your name' : !body.birthday ? 'your birthday' : (!body.time && !body.timeUnknown) ? 'your birth time (or pick "I don\u2019t know")' : !body.gender ? 'your gender' : (mode !== 'test' && !body.email) ? 'your email' : '';
     if (miss) { err.textContent = 'ERROR // Add ' + miss + '.'; err.hidden = false; return; }
     $('rBtn').disabled = true;
     try {
