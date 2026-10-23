@@ -116,3 +116,19 @@ describe("상세 원국 (십신·대운)", async () => {
     expect(t).toContain("CURRENT CYCLE");
   });
 });
+
+describe("계절별 타입·스피릿 애니멀", () => {
+  it("같은 Sun이라도 여름과 겨울은 다른 설명", () => {
+    let summer = "", winter = "";
+    for (let t = Date.UTC(1990, 0, 1); (!summer || !winter); t += 86400000) {
+      const d = new Date(t), s = signOf({ year: d.getUTCFullYear(), month: d.getUTCMonth() + 1, day: d.getUTCDate() });
+      if (s.name === "Summer Sun") summer = s.tagline;
+      if (s.name === "Winter Sun") winter = s.tagline;
+    }
+    expect(summer).toMatch(/Intense/);
+    expect(winter).toMatch(/loved/);
+  });
+  it("1996-11-21 壬戌 → Black Dog", () => {
+    expect(signOf({ year: 1996, month: 11, day: 21 }).animal).toMatchObject({ name: "Dog", color: "Black" });
+  });
+});

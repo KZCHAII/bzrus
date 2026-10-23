@@ -54,7 +54,10 @@
     var set = function (id, html) { var e = $(p + id); if (e) e.innerHTML = html; };
     set('coord', 'SUN <b>' + s.sunLongitude.toFixed(1) + '°</b> · PILLAR <b>' + esc(s.dayPillar.han) + '</b>');
     set('w-line', (name ? esc(name) + ', you' : 'You') + '’re a <b>' + (ZG[s.zodiac] || '') + '︎ ' + esc(s.zodiac) + '</b> in the West,');
-    set('k-han', esc(s.hanja));
+    var art = $(p + 'k-han');
+    if (art && window.WSArt && s.animal) { art.className = 'art'; art.innerHTML = WSArt.svg({ animal: s.animal.name, element: s.element, yang: s.yang, season: s.season, hanja: s.dayPillar ? s.dayPillar.han : s.hanja }); }
+    else set('k-han', esc(s.hanja));
+    set('k-animal', s.animal ? 'Spirit animal: <b>' + esc(s.animal.color + ' ' + s.animal.name) + '</b> of ' + esc(s.season) + ' · ' + esc(s.animal.line) : '');
     set('k-name', esc(s.season) + ' <em>' + esc(TYPE_WORD(s)) + '</em>');
     set('k-meta', (s.yang ? 'Yang' : 'Yin') + ' ' + esc(s.element) + ' ' + EL_H[s.element] + ' · day pillar ' + esc(s.dayPillar.roman));
     set('k-tag', esc(s.tagline));
@@ -200,8 +203,11 @@
   /** 내 사인 스토리 이미지 */
   function signStory(s, name) {
     if (!window.WSCharts) return;
-    var c = WSCharts.storyImage({ top: (name ? name + ', ' : '') + 'a ' + s.zodiac + ' in the West. In Korea:', hanja: s.hanja, name: s.name, sub: s.tagline, foot: "WHAT'S YOURS? " + location.host.toUpperCase(), color: WSCharts.cv(EL_VAR[s.element]) });
-    WSCharts.shareImage(c, 'my-korean-sign.png', 'My Korean sign is ' + s.name + '. What\u2019s yours?');
+    var go = function (img) {
+      var c = WSCharts.storyImage({ top: (name ? name + ', ' : '') + 'a ' + s.zodiac + ' in the West. In Korea:', hanja: s.hanja, art: img, name: s.name, sub: (s.animal ? s.animal.color + ' ' + s.animal.name + ' of ' + s.season + '. ' : '') + s.tagline, foot: "WHAT'S YOURS? " + location.host.toUpperCase(), color: WSCharts.cv(EL_VAR[s.element]) });
+      WSCharts.shareImage(c, 'my-korean-sign.png', 'My Korean sign is ' + s.name + '. What\u2019s yours?');
+    };
+    if (window.WSArt && s.animal) WSArt.toImage({ animal: s.animal.name, element: s.element, yang: s.yang, season: s.season, hanja: s.dayPillar ? s.dayPillar.han : s.hanja }, 760, go); else go(null);
   }
 
   window.WS = { api: api, esc: esc, $: $, store: store, fillSign: fillSign, relHtml: relHtml, drawMap: drawMap, legendHtml: legendHtml, REL: REL, EL_VAR: EL_VAR, me: me, initNav: initNav, dock: dock, signStory: signStory };

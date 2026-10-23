@@ -126,6 +126,30 @@ export const STEM_TYPE = [
   { name: "Rain", tagline: "Quiet and patient. You change things slowly, then completely." },
 ] as const;
 
+/** 일간 × 계절: 같은 Sun이라도 여름 해는 강렬하고 겨울 해는 반갑다 */
+export const SEASON_LINE: Record<number, Record<Season, string>> = {
+  0: { Spring: "A tree in its own season. You grow fast, everyone sees it, and you are hard to stop.", Summer: "A tree in full summer. Generous shade for everyone, but you burn through your own water.", Autumn: "A tree pruned by cold wind. Tested early, disciplined, stronger for every cut.", Winter: "A tree in winter. Still on the surface, quietly storing strength for your moment." },
+  1: { Spring: "A flower in spring. Charming, everywhere at once, impossible to ignore.", Summer: "A vine in summer sun. Bright and social, but you wilt without real rest.", Autumn: "A vine in autumn. You survive what breaks bigger plants; bending is your strength.", Winter: "A winter vine. Delicate on the outside, stubborn about staying alive." },
+  2: { Spring: "A spring sun. Gentle warmth that makes everything around you grow.", Summer: "A summer sun. Intense and blazing; people can't look away, and sometimes it's too much.", Autumn: "An autumn sun. Golden, mature light: warm, but clear-eyed.", Winter: "A winter sun. The warmth everyone waits for. Rare, welcome, and deeply loved." },
+  3: { Spring: "A candle in spring. A soft, steady light with a romantic streak.", Summer: "A candle among summer suns. You shine by being precise, not loud.", Autumn: "A candle in autumn. The light people gather around as the nights get longer.", Winter: "A candle in winter. A small flame that means everything in the dark. People need you." },
+  4: { Spring: "A mountain in spring. Solid ground where everything new takes root.", Summer: "A mountain in summer. Hot, dry and imposing; your strength needs softening.", Autumn: "A mountain at harvest. Reliable, unhurried, rich in reserves.", Winter: "A snow-capped mountain. Quiet, hard to read, impossible to move." },
+  5: { Spring: "A garden in spring. Whatever you plant comes up; a natural nurturer.", Summer: "A garden in summer. Rich soil; you make other people's ideas grow.", Autumn: "A garden at harvest. Practical and generous; you see the results of your care.", Winter: "A garden at rest. Patient and private, preparing for the next season." },
+  6: { Spring: "A blade in spring. Sharp in a soft season; you cut paths others can't see.", Summer: "A blade forged in summer fire. Pressure made you tough, tempered and intense.", Autumn: "Steel in its own season. Decisive, uncompromising, at full strength.", Winter: "A blade in winter. Cold and clear: a brilliant mind behind a guarded heart." },
+  7: { Spring: "A jewel in spring. Polished and charming; you shine in fresh company.", Summer: "A jewel under summer heat. Pressure shapes you; you sparkle after hard times.", Autumn: "A jewel in autumn. Refined and exact, with rare taste and high standards.", Winter: "A jewel washed in winter water. Elegant, sharp, a little out of reach." },
+  8: { Spring: "A spring ocean. Currents that feed everything; generous, restless, full of ideas.", Summer: "A summer ocean. Warm water and big moods; people are drawn to your depth.", Autumn: "An autumn ocean with rising tides. Powerful, strategic, gaining strength.", Winter: "A winter ocean. Vast and calm on top, holding more than anyone knows." },
+  9: { Spring: "Spring rain. Things grow where you go; gentle, nourishing, quietly essential.", Summer: "Summer rain. Relief on a hot day; people feel better when you arrive.", Autumn: "Autumn rain. Reflective and perceptive; you notice what others miss.", Winter: "Winter rain. Still water and deep intuition; a mystery even to close friends." },
+};
+
+/** 일지 동물 + 일간 오방색 (목=Blue, 화=Red, 토=Yellow, 금=White, 수=Black) */
+export const ANIMAL = ["Rat", "Ox", "Tiger", "Rabbit", "Dragon", "Snake", "Horse", "Goat", "Monkey", "Rooster", "Dog", "Pig"] as const;
+export const ELEMENT_COLOR: Record<Element, string> = { Wood: "Blue", Fire: "Red", Earth: "Yellow", Metal: "White", Water: "Black" };
+export const ANIMAL_LINE: Record<string, string> = {
+  Rat: "quick, resourceful, always a step ahead", Ox: "patient, strong, finishes what it starts", Tiger: "brave, restless, born to lead",
+  Rabbit: "gentle, sharp-eared, wins by avoiding fights", Dragon: "big energy, big plans, hard to ignore", Snake: "quiet, deep, reads people instantly",
+  Horse: "free, fast, needs open road", Goat: "kind, creative, wants a peaceful home", Monkey: "clever, playful, solves anything",
+  Rooster: "proud, precise, says what it sees", Dog: "loyal, honest, guards its people", Pig: "warm, generous, enjoys life fully",
+};
+
 export type Strength = "peak" | "fed" | "off";
 
 export interface KoreanSign {
@@ -141,6 +165,8 @@ export interface KoreanSign {
   zodiac: (typeof ZODIAC)[number];
   sunLongitude: number;
   stem: number;
+  /** 일지 동물 + 일간 색 (네온 그림) */
+  animal: { name: string; color: string; line: string };
   /** 네 기둥 (시간을 모르면 hour = null) */
   pillars: { year: PillarView; month: PillarView; day: PillarView; hour: PillarView | null };
 }
@@ -162,8 +188,9 @@ export function signOf(b: BirthInput): KoreanSign {
     key: `${c.season}-${t.name}`.toLowerCase().replace(/\s+/g, "-"),
     name: `${c.season} ${t.name}`,
     hanja: STEM_H[stem],
-    tagline: t.tagline,
+    tagline: SEASON_LINE[stem]?.[c.season] ?? t.tagline,
     element, yang: stem % 2 === 0, season: c.season, strength,
+    animal: { name: ANIMAL[c.day.branch], color: ELEMENT_COLOR[element], line: ANIMAL_LINE[ANIMAL[c.day.branch]] },
     dayPillar: { han: pillarHan(c.day), roman: `${STEM_ROMAN[stem]}-${BRANCH_ROMAN[c.day.branch]}` },
     zodiac: zodiacOf(c.sunLongitude),
     sunLongitude: Math.round(c.sunLongitude * 10) / 10,

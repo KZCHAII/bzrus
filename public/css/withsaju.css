@@ -339,3 +339,14 @@ body.has-dock footer{padding-bottom:110px}
 .rc .fitc b{display:block;color:var(--white);font-size:15px;margin:4px 0 2px}
 .rc .fitc p{font-size:12.5px}
 @media (max-width:560px){ .rc .eh{font-size:52px} }
+
+.sign .art{width:min(78vw,320px);margin:8px auto 4px;line-height:0}
+.sign .art svg{width:100%;height:auto;display:block}
+.animal{font-size:13.5px;color:var(--mute-1);margin:-2px 0 14px}
+.animal b{color:var(--white)}
+.mini .h.art{width:72px;height:72px;line-height:0;text-shadow:none}
+.mini .h.art svg{width:72px;height:72px}
+
+.rc .chart-art{display:grid;grid-template-columns:180px 1fr;gap:16px;align-items:center;margin-bottom:18px}
+.rc .chart-art .art{line-height:0}.rc .chart-art svg{width:100%;height:auto}
+@media (max-width:560px){ .rc .chart-art{grid-template-columns:1fr} .rc .chart-art .art{width:min(70vw,260px);margin:0 auto} }

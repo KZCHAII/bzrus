@@ -89,15 +89,17 @@
     x.strokeStyle = 'rgba(0,240,255,0.07)'; x.lineWidth = 2;
     for (var g = 0; g <= 1080; g += 72) { x.beginPath(); x.moveTo(g, 0); x.lineTo(g, 1920); x.stroke(); }
     for (g = 0; g <= 1920; g += 72) { x.beginPath(); x.moveTo(0, g); x.lineTo(1080, g); x.stroke(); }
-    var glow = x.createRadialGradient(540, 820, 20, 540, 820, 620); glow.addColorStop(0, hexA(o.color, .28)); glow.addColorStop(1, 'rgba(0,0,0,0)');
+    var glow = x.createRadialGradient(540, 810, 20, 540, 810, 620); glow.addColorStop(0, hexA(o.color, .28)); glow.addColorStop(1, 'rgba(0,0,0,0)');
     x.fillStyle = glow; x.fillRect(0, 0, 1080, 1920);
     x.textAlign = 'center'; x.textBaseline = 'middle';
     x.fillStyle = '#00f0ff'; x.font = '600 34px "JetBrains Mono", monospace'; x.fillText('WITHSAJU', 540, 170);
     x.fillStyle = '#aaa'; x.font = '500 40px Inter, Arial, sans-serif'; wrap(x, o.top, 540, 330, 900, 54);
-    x.shadowColor = o.color; x.shadowBlur = 60; x.fillStyle = o.color; x.font = '700 420px "Noto Serif KR", serif'; x.fillText(o.hanja, 540, 800); x.shadowBlur = 0;
-    x.fillStyle = '#fff'; x.font = '800 104px Inter, Arial, sans-serif'; wrap(x, o.name, 540, 1150, 960, 112);
-    x.fillStyle = '#bbb'; x.font = '500 44px Inter, Arial, sans-serif'; wrap(x, o.sub, 540, 1330, 900, 60);
-    if (o.extra) { x.fillStyle = o.color; x.font = '700 64px "JetBrains Mono", monospace'; x.fillText(o.extra, 540, 1520); }
+    if (o.art) x.drawImage(o.art, 160, 430, 760, 760);
+    else { x.shadowColor = o.color; x.shadowBlur = 60; x.fillStyle = o.color; x.font = '700 420px "Noto Serif KR", serif'; x.fillText(o.hanja, 540, 800); x.shadowBlur = 0; }
+    var ny = o.art ? 1270 : 1150;
+    x.fillStyle = '#fff'; x.font = '800 96px Inter, Arial, sans-serif'; wrap(x, o.name, 540, ny, 960, 104);
+    x.fillStyle = '#bbb'; x.font = '500 40px Inter, Arial, sans-serif'; wrap(x, o.sub, 540, ny + 120, 900, 54);
+    if (o.extra) { x.fillStyle = o.color; x.font = '700 60px "JetBrains Mono", monospace'; x.fillText(o.extra, 540, 1590); }
     x.fillStyle = '#00f0ff'; x.fillRect(190, 1660, 700, 110);
     x.fillStyle = '#000'; x.font = '700 40px "JetBrains Mono", monospace'; x.fillText(o.foot, 540, 1716);
     return c;

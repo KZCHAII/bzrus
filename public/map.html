@@ -77,6 +77,7 @@
       <div class="kname" id="k-name"></div>
       <p class="kmeta" id="k-meta"></p>
       <p class="tagline" id="k-tag"></p>
+      <p class="animal" id="k-animal"></p>
       <dl class="stats" id="k-stats"></dl>
       <dl class="pillars" id="k-pillars" aria-label="Your four pillars"></dl>
       <div id="k-penta" style="margin:0 0 14px"></div>
@@ -152,6 +153,7 @@
 
 <footer>
   WITHSAJU · KOREAN SAJU × WESTERN ASTROLOGY<br>
+  Animal art based on icons by game-icons.net (CC BY 3.0).<br>
   For entertainment purposes only. Not medical, legal or financial advice.<br>
   © 2026 WITHSAJU
 </footer>
@@ -163,6 +165,8 @@
 
 <script src="/js/withsaju.js"></script>
 <script src="/js/charts.js"></script>
+<script src="/js/animals.js"></script>
+<script src="/js/sign-art.js"></script>
 <script src="/js/datepicker.js"></script>
 <script>
 (function () {
@@ -200,10 +204,13 @@
     $('g-owner-ey').textContent = data.name.toUpperCase();
     document.title = data.isOwner ? 'My page — WITHSAJU' : 'What are you to ' + data.name + '? — WITHSAJU';
     document.documentElement.style.setProperty('--el', 'var(' + WS.EL_VAR[s.element] + ')');
-    $('g-han').textContent = $('o-han').textContent = s.hanja;
+    if (window.WSArt && s.animal) {
+      var art = WSArt.svg({ animal: s.animal.name, element: s.element, yang: s.yang, season: s.season, hanja: s.dayPillar ? s.dayPillar.han : s.hanja });
+      ['g-han', 'o-han'].forEach(function (id) { $(id).classList.add('art'); $(id).innerHTML = art; });
+    } else $('g-han').textContent = $('o-han').textContent = s.hanja;
     $('g-osign').textContent = $('o-meta').textContent = s.name + ' · ' + s.zodiac;
     $('o-sign').textContent = s.name;
-    $('o-tag').textContent = s.tagline;
+    $('o-tag').textContent = s.tagline + (s.animal ? ' Spirit animal: ' + s.animal.color + ' ' + s.animal.name + ' of ' + s.season + '.' : '');
   }
 
   // 마이페이지: 오각형·친구 통계·내 리포트·공유
