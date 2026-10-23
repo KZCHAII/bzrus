@@ -7,7 +7,7 @@
     copilot: { n: 'Co-pilot', c: '--water' }, coach: { n: 'Coach', c: '--earth' }
   };
   var ZG = { Aries: '♈', Taurus: '♉', Gemini: '♊', Cancer: '♋', Leo: '♌', Virgo: '♍', Libra: '♎', Scorpio: '♏', Sagittarius: '♐', Capricorn: '♑', Aquarius: '♒', Pisces: '♓' };
-  var STRENGTH = { peak: 'In season', fed: 'Season-fed', off: 'Off season' };
+  var STRENGTH = { peak: 'Home season', fed: 'Tailwind', off: 'Self-made' };
   var TYPE_WORD = function (s) { return s.name.split(' ').slice(1).join(' '); };
 
   function esc(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
@@ -31,9 +31,9 @@
   function whyText(s) {
     var season = s.season.toLowerCase(), el = s.element.toLowerCase();
     var feeder = { Spring: 'wood', Summer: 'fire', Autumn: 'metal', Winter: 'water' }[s.season];
-    if (s.strength === 'peak') return 'You were born in ' + season + ', ' + el + '’s own season. In Saju that puts your element at full strength: easy to see, hard to ignore.';
-    if (s.strength === 'fed') return 'You were born in ' + season + ', and ' + feeder + ' feeds ' + el + '. The season was on your side from day one.';
-    return 'You were born in ' + season + ', when ' + el + ' isn’t the strongest element. You work harder for it, and people underestimate you until they don’t.';
+    if (s.strength === 'peak') return 'You were born in ' + season + ', ' + el + '’s own season. <b>Home season</b>: your energy runs at full power, easy to see and hard to ignore.';
+    if (s.strength === 'fed') return 'You were born in ' + season + ', and ' + feeder + ' feeds ' + el + '. <b>Tailwind</b>: the season feeds you, and things move faster when you go with it.';
+    return 'You were born in ' + season + ', when ' + el + ' isn’t the strongest element. <b>Self-made</b>: the season doesn’t hand you power, so you build your own. Late bloomer, hard to break, and people underestimate you until they don’t.';
   }
 
   function pillarsHtml(s) {
@@ -62,7 +62,7 @@
     set('k-name', s.animal ? '<span class="ttl-a">' + esc(s.animal.color + ' ' + s.animal.name) + '</span> <span class="ttl-of">of the</span> ' + esc(s.season) + ' <em>' + esc(TYPE_WORD(s)) + '</em>' : esc(s.season) + ' <em>' + esc(TYPE_WORD(s)) + '</em>');
     set('k-meta', (s.yang ? 'Yang' : 'Yin') + ' ' + esc(s.element) + ' ' + EL_H[s.element] + ' · day pillar ' + esc(s.dayPillar.roman));
     set('k-tag', esc(s.tagline));
-    set('k-stats', '<div><dt>Element</dt><dd>' + (s.yang ? 'Yang' : 'Yin') + ' ' + esc(s.element) + '</dd></div><div><dt>Season</dt><dd>' + esc(s.season) + '</dd></div><div><dt>Strength</dt><dd class="hot">' + STRENGTH[s.strength] + '</dd></div>');
+    set('k-stats', '<div><dt>Element</dt><dd>' + (s.yang ? 'Yang' : 'Yin') + ' ' + esc(s.element) + '</dd></div><div><dt>Season</dt><dd>' + esc(s.season) + '</dd></div><div><dt>Season power</dt><dd class="hot">' + STRENGTH[s.strength] + '</dd></div>');
     set('k-pillars', pillarsHtml(s));
     if (window.WSCharts && s.elements) set('k-penta', '<div class="label" style="font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--mute-3);margin:4px 0 0">YOUR FIVE ELEMENTS</div>' + WSCharts.elementsPentagon([{ name: name || 'You', elements: s.elements, hidden: s.hidden }]) + (WSCharts.hiddenNote(s, !!s.hiddenSpots) ? '<p class="hnote">' + WSCharts.hiddenNote(s, !!s.hiddenSpots) + '</p>' : ''));
     set('k-why', '<b>Why ' + esc(s.name) + '?</b> Saju names you after your <b>Day Master</b>, the heavenly stem of the day you were born. Yours is ' + esc(s.hanja) + ', ' + (s.yang ? 'Yang' : 'Yin') + ' ' + esc(s.element) + '. ' + whyText(s));

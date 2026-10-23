@@ -196,7 +196,7 @@ export function chartText(ch: FullChart, name: string, birth: { iso: string; tim
     line("Month pillar (season of birth, environment, career base)", ch.pillars.month),
     line("Day pillar (the self; the branch is the partner palace)", ch.pillars.day),
     line("Hour pillar (inner self, later life, children)", ch.pillars.hour),
-    `Day Master: ${ch.sign.hanja} = ${ch.sign.yang ? "Yang" : "Yin"} ${ch.sign.element}. Born in ${ch.sign.season}; seasonal strength: ${ch.sign.strength === "peak" ? "in season (strong)" : ch.sign.strength === "fed" ? "fed by the season (supported)" : "off season (weaker, needs support)"}.`,
+    `Day Master: ${ch.sign.hanja} = ${ch.sign.yang ? "Yang" : "Yin"} ${ch.sign.element}. Born in ${ch.sign.season}; seasonal strength: ${ch.sign.strength === "peak" ? "in season (strong); call it \"Home season\" if you name it" : ch.sign.strength === "fed" ? "fed by the season (supported); call it \"Tailwind\" if you name it" : "off season (weaker, needs support); call it \"Self-made\" if you name it, never \"weak\""}.`,
     `Five elements count across the ${ch.pillars.hour ? "8" : "6"} characters: ${Object.entries(ch.elements).map(([k, v]) => `${k} ${v}`).join(", ")}.`,
     `Hidden stems (地藏干) = latent potential inside the branches, not counted above: ${ch.hiddenSpots.map((h) => `${h.element} ${h.amount} in ${h.branch} ${h.animal}`).join(", ") || "none beyond the surface elements"}. Totals: ${Object.entries(ch.hidden).map(([k, v]) => `${k} ${v}`).join(", ")}.`,
     ...(() => {
