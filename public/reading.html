@@ -115,7 +115,7 @@
     e.preventDefault();
     var err = $('r-err'); err.hidden = true;
     var body = { name: $('r-name').value.trim(), birthday: $('r-date').value, time: WS.timeOf($('r-time')), timeUnknown: $('r-time').value === 'unknown', gender: gender, email: $('r-email').value.trim() };
-    var miss = !body.name ? 'your name' : !body.birthday ? 'your birthday' : (!body.time && !body.timeUnknown) ? 'your birth time (or pick "I don\u2019t know")' : !body.gender ? 'your gender' : (mode !== 'test' && !body.email) ? 'your email' : '';
+    var miss = !body.name ? 'your name' : !body.birthday ? 'your birthday' : (!body.time && !body.timeUnknown) ? 'your birth time (or pick "I don\u2019t know")' : !body.gender ? 'your gender' : (mode === 'reserve' && !body.email) ? 'your email' : '';
     if (miss) { err.textContent = 'ERROR // Add ' + miss + '.'; err.hidden = false; return; }
     $('rBtn').disabled = true;
     try {
