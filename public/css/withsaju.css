@@ -350,3 +350,6 @@ body.has-dock footer{padding-bottom:110px}
 .rc .chart-art{display:grid;grid-template-columns:180px 1fr;gap:16px;align-items:center;margin-bottom:18px}
 .rc .chart-art .art{line-height:0}.rc .chart-art svg{width:100%;height:auto}
 @media (max-width:560px){ .rc .chart-art{grid-template-columns:1fr} .rc .chart-art .art{width:min(70vw,260px);margin:0 auto} }
+
+.kname .ttl-a{display:block;font-size:.62em;letter-spacing:.02em;color:var(--ac,var(--el));text-shadow:0 0 14px var(--ac,transparent)}
+.kname .ttl-of{font-size:.55em;font-weight:500;color:var(--mute-2);letter-spacing:0}

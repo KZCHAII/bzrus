@@ -208,9 +208,9 @@
       var art = WSArt.svg({ animal: s.animal.name, element: s.element, yang: s.yang, season: s.season, hanja: s.dayPillar ? s.dayPillar.han : s.hanja });
       ['g-han', 'o-han'].forEach(function (id) { $(id).classList.add('art'); $(id).innerHTML = art; });
     } else $('g-han').textContent = $('o-han').textContent = s.hanja;
-    $('g-osign').textContent = $('o-meta').textContent = s.name + ' · ' + s.zodiac;
-    $('o-sign').textContent = s.name;
-    $('o-tag').textContent = s.tagline + (s.animal ? ' Spirit animal: ' + s.animal.color + ' ' + s.animal.name + ' of ' + s.season + '.' : '');
+    $('g-osign').textContent = $('o-meta').textContent = (s.title || s.name) + ' · ' + s.zodiac;
+    $('o-sign').textContent = s.title || s.name;
+    $('o-tag').textContent = s.tagline;
   }
 
   // 마이페이지: 오각형·친구 통계·내 리포트·공유
@@ -283,7 +283,7 @@
   $('g-story').addEventListener('click', function () {
     if (!lastMatch) return;
     var R = WS.REL[lastMatch.relation.kind];
-    WSCharts.shareImage(WSCharts.storyImage({ top: mine.name + ' + ' + lastMatch.owner.name, hanja: mySign.hanja, name: 'I\u2019m ' + lastMatch.owner.name + '\u2019s ' + R.n, sub: lastMatch.owner.sign.name + ' + ' + mySign.name + ', in Korean Saju', extra: 'CHEMISTRY ' + lastMatch.relation.score, foot: 'WHAT ARE YOU TO ME? ' + location.host.toUpperCase(), color: WSCharts.cv(R.c) }), 'our-korean-match.png', 'I\u2019m ' + lastMatch.owner.name + '\u2019s ' + R.n + ' in Korean Saju.');
+    WSCharts.shareImage(WSCharts.storyImage({ top: mine.name + ' + ' + lastMatch.owner.name, hanja: mySign.hanja, name: 'I\u2019m ' + lastMatch.owner.name + '\u2019s ' + R.n, sub: (lastMatch.owner.sign.title || lastMatch.owner.sign.name) + ' + ' + (mySign.title || mySign.name), extra: 'CHEMISTRY ' + lastMatch.relation.score, foot: 'WHAT ARE YOU TO ME? ' + location.host.toUpperCase(), color: WSCharts.cv(R.c) }), 'our-korean-match.png', 'I\u2019m ' + lastMatch.owner.name + '\u2019s ' + R.n + ' in Korean Saju.');
   });
 
   // 친구 → 자기 페이지 바로 만들기 (입력한 정보 그대로)

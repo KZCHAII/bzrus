@@ -78,7 +78,7 @@
   }
   function header(d) {
     $('v-title').innerHTML = WS.esc(d.name) + '\u2019s <span class="accent">Korean Saju reading</span>';
-    $('v-sign').textContent = d.chart.sign.name.toUpperCase() + ' ' + d.chart.sign.hanja;
+    $('v-sign').textContent = (d.chart.sign.title || d.chart.sign.name).toUpperCase();
     $('v-meta').textContent = d.birthday + (d.time ? ' ' + d.time : ' · time unknown') + ' · ' + d.gender;
     document.title = d.name + '\u2019s reading — WITHSAJU';
   }

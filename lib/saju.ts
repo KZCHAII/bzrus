@@ -167,6 +167,8 @@ export interface KoreanSign {
   stem: number;
   /** 일지 동물 + 일간 색 (네온 그림) */
   animal: { name: string; color: string; line: string };
+  /** 전체 이름: "Black Dog of the Winter Ocean" */
+  title: string;
   /** 네 기둥 (시간을 모르면 hour = null) */
   pillars: { year: PillarView; month: PillarView; day: PillarView; hour: PillarView | null };
 }
@@ -191,6 +193,7 @@ export function signOf(b: BirthInput): KoreanSign {
     tagline: SEASON_LINE[stem]?.[c.season] ?? t.tagline,
     element, yang: stem % 2 === 0, season: c.season, strength,
     animal: { name: ANIMAL[c.day.branch], color: ELEMENT_COLOR[element], line: ANIMAL_LINE[ANIMAL[c.day.branch]] },
+    title: `${ELEMENT_COLOR[element]} ${ANIMAL[c.day.branch]} of the ${c.season} ${t.name}`,
     dayPillar: { han: pillarHan(c.day), roman: `${STEM_ROMAN[stem]}-${BRANCH_ROMAN[c.day.branch]}` },
     zodiac: zodiacOf(c.sunLongitude),
     sunLongitude: Math.round(c.sunLongitude * 10) / 10,

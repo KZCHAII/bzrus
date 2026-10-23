@@ -55,10 +55,11 @@
     set('coord', 'SUN <b>' + s.sunLongitude.toFixed(1) + '°</b> · PILLAR <b>' + esc(s.dayPillar.han) + '</b>');
     set('w-line', (name ? esc(name) + ', you' : 'You') + '’re a <b>' + (ZG[s.zodiac] || '') + '︎ ' + esc(s.zodiac) + '</b> in the West,');
     var art = $(p + 'k-han');
+    if (window.WSArt && s.animal) card.style.setProperty('--ac', WSArt.COLOR[s.element][s.yang ? 'yang' : 'yin']);
     if (art && window.WSArt && s.animal) { art.className = 'art'; art.innerHTML = WSArt.svg({ animal: s.animal.name, element: s.element, yang: s.yang, season: s.season, hanja: s.dayPillar ? s.dayPillar.han : s.hanja }); }
     else set('k-han', esc(s.hanja));
-    set('k-animal', s.animal ? 'Spirit animal: <b>' + esc(s.animal.color + ' ' + s.animal.name) + '</b> of ' + esc(s.season) + ' · ' + esc(s.animal.line) : '');
-    set('k-name', esc(s.season) + ' <em>' + esc(TYPE_WORD(s)) + '</em>');
+    set('k-animal', s.animal ? 'The ' + esc(s.animal.name.toLowerCase()) + ' in you: ' + esc(s.animal.line) + '.' : '');
+    set('k-name', s.animal ? '<span class="ttl-a">' + esc(s.animal.color + ' ' + s.animal.name) + '</span> <span class="ttl-of">of the</span> ' + esc(s.season) + ' <em>' + esc(TYPE_WORD(s)) + '</em>' : esc(s.season) + ' <em>' + esc(TYPE_WORD(s)) + '</em>');
     set('k-meta', (s.yang ? 'Yang' : 'Yin') + ' ' + esc(s.element) + ' ' + EL_H[s.element] + ' · day pillar ' + esc(s.dayPillar.roman));
     set('k-tag', esc(s.tagline));
     set('k-stats', '<div><dt>Element</dt><dd>' + (s.yang ? 'Yang' : 'Yin') + ' ' + esc(s.element) + '</dd></div><div><dt>Season</dt><dd>' + esc(s.season) + '</dd></div><div><dt>Strength</dt><dd class="hot">' + STRENGTH[s.strength] + '</dd></div>');
@@ -204,8 +205,8 @@
   function signStory(s, name) {
     if (!window.WSCharts) return;
     var go = function (img) {
-      var c = WSCharts.storyImage({ top: (name ? name + ', ' : '') + 'a ' + s.zodiac + ' in the West. In Korea:', hanja: s.hanja, art: img, name: s.name, sub: (s.animal ? s.animal.color + ' ' + s.animal.name + ' of ' + s.season + '. ' : '') + s.tagline, foot: "WHAT'S YOURS? " + location.host.toUpperCase(), color: WSCharts.cv(EL_VAR[s.element]) });
-      WSCharts.shareImage(c, 'my-korean-sign.png', 'My Korean sign is ' + s.name + '. What\u2019s yours?');
+      var c = WSCharts.storyImage({ top: (name ? name + ', ' : '') + 'a ' + s.zodiac + ' in the West. In Korea:', hanja: s.hanja, art: img, name: s.title || s.name, sub: s.tagline, foot: "WHAT'S YOURS? " + location.host.toUpperCase(), color: WSCharts.cv(EL_VAR[s.element]) });
+      WSCharts.shareImage(c, 'my-korean-sign.png', 'In Korean Saju I\u2019m the ' + (s.title || s.name) + '. What\u2019s yours?');
     };
     if (window.WSArt && s.animal) WSArt.toImage({ animal: s.animal.name, element: s.element, yang: s.yang, season: s.season, hanja: s.dayPillar ? s.dayPillar.han : s.hanja }, 760, go); else go(null);
   }

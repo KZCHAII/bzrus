@@ -130,5 +130,6 @@ describe("계절별 타입·스피릿 애니멀", () => {
   });
   it("1996-11-21 壬戌 → Black Dog", () => {
     expect(signOf({ year: 1996, month: 11, day: 21 }).animal).toMatchObject({ name: "Dog", color: "Black" });
+    expect(signOf({ year: 1996, month: 11, day: 21 }).title).toBe("Black Dog of the Winter Ocean");
   });
 });

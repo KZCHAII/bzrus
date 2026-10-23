@@ -96,9 +96,10 @@
     x.fillStyle = '#aaa'; x.font = '500 40px Inter, Arial, sans-serif'; wrap(x, o.top, 540, 330, 900, 54);
     if (o.art) x.drawImage(o.art, 160, 430, 760, 760);
     else { x.shadowColor = o.color; x.shadowBlur = 60; x.fillStyle = o.color; x.font = '700 420px "Noto Serif KR", serif'; x.fillText(o.hanja, 540, 800); x.shadowBlur = 0; }
-    var ny = o.art ? 1270 : 1150;
-    x.fillStyle = '#fff'; x.font = '800 96px Inter, Arial, sans-serif'; wrap(x, o.name, 540, ny, 960, 104);
-    x.fillStyle = '#bbb'; x.font = '500 40px Inter, Arial, sans-serif'; wrap(x, o.sub, 540, ny + 120, 900, 54);
+    var ny = o.art ? 1250 : 1150;
+    x.fillStyle = '#fff'; x.font = '800 ' + (o.name.length > 22 ? 76 : 96) + 'px Inter, Arial, sans-serif';
+    var nl = wrap(x, o.name, 540, ny, 960, o.name.length > 22 ? 86 : 104);
+    x.fillStyle = '#bbb'; x.font = '500 40px Inter, Arial, sans-serif'; wrap(x, o.sub, 540, ny + nl * (o.name.length > 22 ? 86 : 104) + 30, 900, 54);
     if (o.extra) { x.fillStyle = o.color; x.font = '700 60px "JetBrains Mono", monospace'; x.fillText(o.extra, 540, 1590); }
     x.fillStyle = '#00f0ff'; x.fillRect(190, 1660, 700, 110);
     x.fillStyle = '#000'; x.font = '700 40px "JetBrains Mono", monospace'; x.fillText(o.foot, 540, 1716);
@@ -110,6 +111,7 @@
     words.forEach(function (w) { var t = line ? line + ' ' + w : w; if (x.measureText(t).width > maxW && line) { lines.push(line); line = w; } else line = t; });
     if (line) lines.push(line);
     lines.forEach(function (l, i) { x.fillText(l, cx, y + i * lh); });
+    return lines.length;
   }
 
   /** 이미지 저장·공유 (폰: 공유 시트에 이미지, PC: 파일 저장) */

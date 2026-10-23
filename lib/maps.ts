@@ -58,13 +58,13 @@ export function publicSign(s: KoreanSign) {
     elements: elementsOfSign(s),
     key: s.key, name: s.name, hanja: s.hanja, tagline: s.tagline, element: s.element, yang: s.yang,
     season: s.season, strength: s.strength, dayPillar: s.dayPillar, zodiac: s.zodiac, sunLongitude: s.sunLongitude,
-    pillars: s.pillars, animal: s.animal,
+    pillars: s.pillars, animal: s.animal, title: s.title,
   };
 }
 
 /** 다른 사람에게 보여 줄 때: 생일을 거꾸로 알아낼 수 있는 값(기둥·황경)은 뺀다 */
 export function sharedSign(s: KoreanSign) {
-  return { key: s.key, name: s.name, hanja: s.hanja, tagline: s.tagline, element: s.element, yang: s.yang, season: s.season, strength: s.strength, zodiac: s.zodiac, elements: elementsOfSign(s), animal: s.animal };
+  return { key: s.key, name: s.name, hanja: s.hanja, tagline: s.tagline, element: s.element, yang: s.yang, season: s.season, strength: s.strength, zodiac: s.zodiac, elements: elementsOfSign(s), animal: s.animal, title: s.title };
 }
 
 const newSlug = () => {
