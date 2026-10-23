@@ -82,18 +82,26 @@
     $('v-meta').textContent = d.birthday + (d.time ? ' ' + d.time : ' · time unknown') + ' · ' + d.gender;
     document.title = d.name + '\u2019s reading — WITHSAJU';
   }
+  // 다시 확인 예약. 다른 앱 갔다 돌아오면(폰은 뒤에 있는 탭의 타이머를 멈춤) 기다리지 않고 바로 확인
+  var waiting = null;
+  function later(ms) { clearTimeout(waiting); waiting = setTimeout(load, ms); }
+  function wake() { if (waiting && document.visibilityState === 'visible') { clearTimeout(waiting); waiting = null; load(); } }
+  document.addEventListener('visibilitychange', wake);
+  window.addEventListener('pageshow', wake);
+  window.addEventListener('focus', wake);
   async function load() {
+    waiting = null;
     var d;
     try { d = await WS.api('/api/readings?id=' + encodeURIComponent(id) + '&k=' + encodeURIComponent(key)); }
-    catch (x) { if (x.status === 404) { $('v-wait').classList.add('hide'); $('v-missing').classList.remove('hide'); return; } return setTimeout(load, 5000); }
+    catch (x) { if (x.status === 404) { $('v-wait').classList.add('hide'); $('v-missing').classList.remove('hide'); return; } return later(5000); }
     header(d);
-    if (d.status === 'generating') { $('v-wait').classList.remove('hide'); return setTimeout(load, 4000); }
+    if (d.status === 'generating') { $('v-wait').classList.remove('hide'); return later(4000); }
     clearInterval(timer);
     $('v-wait').classList.add('hide');
     if (d.status === 'failed') { $('v-fail').classList.remove('hide'); return; }
     var sig = (d.cards ? 'c' : 't') + d.text.length;
     if (sig !== rendered) { rendered = sig; WSReading.render($('v-body'), d); }
-    if (!d.cards && d.cardsPending) setTimeout(load, 5000);
+    if (!d.cards && d.cardsPending) later(5000); else waiting = null;
   }
   if (!id || !key) { $('v-wait').classList.add('hide'); $('v-missing').classList.remove('hide'); }
   else { timer = setInterval(tick, 1000); tick(); load(); }
