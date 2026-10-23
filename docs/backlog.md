@@ -1,7 +1,7 @@
 # 백로그
 
 ## 오픈 전 (돈 받기 전 꼭)
-- [사장님] 도메인 구입 (withsaju.com 등) → Vercel 연결, SITE_URL
+- ~~도메인~~ withsaju.com 구입·연결 완료 (2026-10-23)
 - [사장님] Lemon Squeezy 가입·상점 심사 → 상품($9.99)·API 키·웹훅 만들고 Vercel에 LEMONSQUEEZY_* 4개 + READINGS_MODE=paid → [Claude] 테스트 결제로 끝까지 확인 (결제 코드는 완료)
 - [사장님] 실제 결제 전환: LEMONSQUEEZY_TEST_MODE=0 + 실제(live) API 키·웹훅
 - [사장님] 약관 검토: 판매자 이름(브랜드 vs 법적 이름), 환불 정책 확정 — 페이지는 완료(/terms /privacy /refund)

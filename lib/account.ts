@@ -19,7 +19,7 @@ export function siteBase(req?: Request): string {
   const s = envOptional("SITE_URL");
   if (s) return s.replace(/\/+$/, "");
   if (req) { const u = new URL(req.url); return `${u.protocol}//${u.host}`; }
-  return "https://bzrus.vercel.app";
+  return "https://withsaju.com";
 }
 
 /** 내 페이지에 이메일 저장 (주인만). 확인 메일에 페이지 링크와 찾는 법을 적어 보낸다 */

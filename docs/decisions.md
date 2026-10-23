@@ -102,3 +102,9 @@ BZR 원본은 섹션당 1,500자·3문단이었지만, 화면에서 너무 길�
 - 결제 이메일을 리포트에 자동 연결(이미 저장한 이메일이 있으면 그대로) → 유료 손님은 영수증·리포트 링크 메일로 다시 보기 가능.
 - 환불(order_refunded): 결제사 확인 후 refunded_at 기록, 리포트는 계속 열림. 판매·환불·불일치는 텔레그램.
 - 모드: READINGS_MODE=paid + LEMONSQUEEZY_* 4개가 다 있어야 결제 모드. 하나라도 없으면 화면은 예약 모드. LEMONSQUEEZY_TEST_MODE가 '0'이 아니면 테스트 결제(실제 돈 X). 실제 전환은 사장님.
+
+## D24. 도메인 withsaju.com (2026-10-23)
+- 이름은 WITHSAJU 유지(사장님). Vercel에서 구입 → 자동 연결. 대표 주소는 www 없는 withsaju.com(공유 링크가 짧게), www는 308로 넘김.
+- 예전 bzrus.vercel.app 화면 주소는 withsaju.com으로 308 이동. /api/* 는 이동하지 않음(결제사·크론 호출이 끊기지 않게).
+- 메일·결제 후 돌아오는 주소의 기본값도 withsaju.com (SITE_URL로 덮어쓸 수 있음).
+- 브라우저 저장(내 페이지 열쇠 등)은 주소별이라 bzrus.vercel.app에서 만든 테스트 페이지는 withsaju.com에서 주인으로 안 보임 → 오픈 전이라 영향 없음. 필요하면 Find(이메일)나 private link로 옮김.

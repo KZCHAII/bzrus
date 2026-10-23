@@ -9,6 +9,12 @@ const htmlHeaders = [
 
 const nextConfig: NextConfig = {
   // 화면은 public/의 HTML 그대로 (BZR과 같은 방식). 첫 화면은 index.html, 지도는 /m/<slug>.
+  // 예전 주소(bzrus.vercel.app)로 들어오면 withsaju.com 으로. API는 그대로 둔다 (결제사 알림 등이 끊기지 않게)
+  async redirects() {
+    return [
+      { source: "/:path((?!api/).*)", has: [{ type: "host", value: "bzrus.vercel.app" }], destination: "https://withsaju.com/:path", permanent: true },
+    ];
+  },
   async rewrites() {
     return [
       { source: "/", destination: "/index.html" },
