@@ -14,8 +14,13 @@ export interface Section {
   qa: { q: string; a: string }[];
   highlight: string;
 }
+export const AREAS = ["Work", "Money", "Love", "Health", "Growth"] as const;
 export interface Cards {
   layout: "generic";
+  /** 지금 대운이 각 영역에 미치는 영향 (글의 "Current 10-Year Cycle" 섹션에서) */
+  cycle?: { theme: string; areas: { area: (typeof AREAS)[number]; score: number; note: string }[] };
+  /** 나에게 맞는 사람 (글의 "Who Fits You" 섹션에서) */
+  fit?: { summary: string; traits: Pair[]; avoid: string };
   core: { headline: string; body: string; strength: Pair; caution: Pair };
   sections: Section[];
   final: { conclusion: string; last_line: string };
@@ -42,8 +47,10 @@ export const CARDS_SCHEMA = {
       },
     },
     final: { type: "OBJECT", properties: { conclusion: S, last_line: S }, required: ["conclusion", "last_line"] },
+    cycle: { type: "OBJECT", properties: { theme: S, areas: { type: "ARRAY", items: { type: "OBJECT", properties: { area: { type: "STRING", enum: [...AREAS] }, score: { type: "INTEGER" }, note: S }, required: ["area", "score", "note"] } } }, required: ["theme", "areas"] },
+    fit: { type: "OBJECT", properties: { summary: S, traits: { type: "ARRAY", items: PAIR }, avoid: S }, required: ["summary", "traits", "avoid"] },
   },
-  required: ["core", "sections", "final"],
+  required: ["core", "sections", "final", "cycle", "fit"],
 };
 
 /** 리포트 글의 ## 제목들 (순서대로) */
@@ -74,6 +81,10 @@ sections: one per section in the "Section headings" list, in the same order. Put
   - Use [] for arrays that do not apply.
 - summary: the section in 1-2 sentences, under 35 words.
 - highlight: the single sharpest sentence in the section body that would make a reader stop, copied character for character. "" if none fits.
+
+cycle: from the "Your Current 10-Year Cycle" section. theme: the energy that dominates now, under 8 words. areas: exactly five entries, Work, Money, Love, Health, Growth, each with score (how favorable this cycle is for that area, 1-5, as the text implies) and note (one sentence under 15 words). If the section is missing, theme "" and areas [].
+
+fit: from the "Who Fits You" section. summary: one sentence on who fits this person. traits: 2-3 personality traits of people who fit (title + desc). avoid: one sentence on the type that drains this person. If the section is missing, all empty.
 
 final: conclusion is the closing recommendation in one or two sentences; last_line is the very last sentence of the text, copied exactly (if the text ends with a heading in parentheses, that sentence).
 
@@ -115,6 +126,12 @@ export function parseCards(raw: string, report: string): Cards {
       highlight: (() => { const h = s(x.highlight, 400); return h && flat.includes(h.replace(/\s+/g, " ")) ? h : ""; })(),
     })).filter((x) => heads.has(x.heading)),
     final: { conclusion: s(j.final?.conclusion, 400), last_line: s(j.final?.last_line, 300) },
+    cycle: {
+      theme: s(j.cycle?.theme, 80),
+      areas: AREAS.map((a) => { const x = (Array.isArray(j.cycle?.areas) ? j.cycle.areas : []).find((y: Record<string, unknown>) => y?.area === a); return x ? { area: a, score: clampInt(x.score, 1, 5, 3), note: s(x.note, 160) } : null; })
+        .filter((x): x is { area: (typeof AREAS)[number]; score: number; note: string } => !!x),
+    },
+    fit: { summary: s(j.fit?.summary, 300), traits: arr(j.fit?.traits, 3, (p) => pair(p)).filter((p) => p.title), avoid: s(j.fit?.avoid, 300) },
   };
   if (!c.core.headline || c.sections.length === 0) throw new Error("CARDS_INCOMPLETE");
   return c;

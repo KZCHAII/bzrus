@@ -323,3 +323,19 @@ body.has-dock footer{padding-bottom:110px}
 .rlist span{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--purple);text-transform:uppercase}
 .twocol{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media (max-width:560px){ .twocol{grid-template-columns:1fr} .kpis dd{font-size:17px} }
+
+.rc .energy{display:flex;gap:16px;align-items:center}
+.rc .eh{font-family:var(--han);font-weight:700;font-size:64px;line-height:1;flex-shrink:0;text-shadow:0 0 18px rgba(0,240,255,.25)}
+.rc .et{min-width:0}
+.rc .impact{display:grid;gap:10px;margin-top:6px}
+.rc .im .ir{display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--white)}
+.rc .im p{font-size:13.5px;margin-top:3px}
+.rc .im .meter b{width:18px;height:6px}
+.rc .im .meter b.on.s1,.rc .im .meter b.on.s2{background:#ffb547}
+.rc .im .meter b.on.s4,.rc .im .meter b.on.s5{background:var(--wood)}
+.rc .fits{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+.rc .fitc{border:1px solid color-mix(in srgb,var(--fc) 45%,transparent);background:color-mix(in srgb,var(--fc) 6%,#000);padding:12px;min-width:0}
+.rc .fitc .fh{font-family:var(--han);font-weight:700;font-size:30px;color:var(--fc);display:block;line-height:1.1}
+.rc .fitc b{display:block;color:var(--white);font-size:15px;margin:4px 0 2px}
+.rc .fitc p{font-size:12.5px}
+@media (max-width:560px){ .rc .eh{font-size:52px} }

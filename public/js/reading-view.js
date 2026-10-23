@@ -52,9 +52,46 @@
     return h.join("");
   }
 
+  // 지금 대운: 지배하는 에너지 + 원국에 더해진 오행 + 영역별 영향
+  function energyHtml(d, c) {
+    var cur = d.chart.current; if (!cur) return "";
+    var p = cur.cycle.pillar, h = [];
+    h.push('<div class="energy"><div class="eh"><span style="color:var(' + EL_VAR[p.stem.element] + ')">' + esc(p.stem.han) + '</span><span style="color:var(' + EL_VAR[p.branch.element] + ')">' + esc(p.branch.han) + "</span></div>");
+    h.push('<div class="et"><div class="label" style="color:var(--cyan)">Now · ages ' + cur.cycle.startAge + "–" + cur.cycle.endAge + "</div>");
+    h.push('<div class="big" style="font-size:20px">' + esc((c && c.cycle && c.cycle.theme) || (p.stem.element + " over " + p.branch.element)) + "</div>");
+    h.push("<p>" + esc(p.stem.yang ? "Yang " : "Yin ") + esc(p.stem.element) + " brings " + esc(cur.plain[0]) + ". " + esc(p.branch.animal) + " " + esc(p.branch.element) + " brings " + esc(cur.plain[1]) + ".</p></div></div>");
+    var areas = (c && c.cycle && c.cycle.areas) || [];
+    h.push('<div class="twocol mt"><div><div class="label">Your elements, with this cycle added</div>' + WSCharts.elementsPentagon([{ name: "Your chart", elements: d.chart.elements }, { name: "This cycle", elements: cur.withCycle }]) + "</div>");
+    if (areas.length) {
+      h.push('<div><div class="label">How this cycle hits each area</div><div class="impact">' + areas.map(function (a) {
+        var m = ""; for (var k = 1; k <= 5; k++) m += "<b" + (k <= a.score ? ' class="on s' + a.score + '"' : "") + "></b>";
+        return '<div class="im"><div class="ir"><span>' + esc(a.area) + '</span><span class="meter">' + m + '</span></div><p>' + esc(a.note) + "</p></div>";
+      }).join("") + "</div></div>");
+    }
+    h.push("</div>");
+    return h.join("");
+  }
+
+  // 나에게 맞는 사람: 계산된 추천 사인 + 글에서 뽑은 성향
+  function fitHtml(d, c) {
+    var m = d.chart.match; if (!m || !m.signs || !m.signs.length) return "";
+    var h = ['<div class="label">Korean signs that fit you · your chart needs ' + esc(m.needs.join(" + ")) + '</div><div class="fits">'];
+    m.signs.forEach(function (x) { h.push('<div class="fitc" style="--fc:var(' + EL_VAR[x.element] + ')"><span class="fh">' + esc(x.hanja) + "</span><b>" + esc(x.name) + "</b><p>" + esc(x.why) + "</p></div>"); });
+    h.push("</div>");
+    var f = c && c.fit;
+    if (f && f.summary) {
+      h.push('<div class="big mt" style="font-size:18px">' + esc(f.summary) + "</div>");
+      if (f.traits && f.traits.length) h.push('<div class="grid2 mt">' + f.traits.map(function (t) { return mini("good", "", t); }).join("") + "</div>");
+      if (f.avoid) h.push('<div class="mini warn mt"><div class="label">Drains you</div><p>' + esc(f.avoid) + "</p></div>");
+    }
+    var maps = WS.me.maps();
+    h.push('<p class="note mt" style="text-align:left">Know someone with one of these signs? ' + (maps.length ? '<a href="/m/' + esc(maps[0].slug) + '" style="color:var(--cyan)">Send them your page</a> and see your match.' : '<a href="/" style="color:var(--cyan)">Make your page</a> and send it to them.') + "</p>");
+    return h.join("");
+  }
+
   /** d: /api/readings 응답 (status done) */
   function render(el, d) {
-    NO = 0;
+    NO = 0; var usedEnergy = false, usedFit = false;
     var c = d.cards || null, secs = allSections(d.text), h = [];
     var byHead = {}; ((c && c.sections) || []).forEach(function (x) { byHead[x.heading] = x; });
     var first = secs.length && /report/i.test(secs[0].title) && !byHead[secs[0].title] ? secs.shift() : null;
@@ -98,7 +135,10 @@
     secs.forEach(function (sec, i) {
       var cd = byHead[sec.title];
       h.push(head(sec.title, "s" + i) + '<div class="card">');
-      if (cd) {
+      var special = false;
+      if (/^Your Current 10-Year Cycle/i.test(sec.title) && window.WSCharts) { h.push(energyHtml(d, c)); usedEnergy = special = true; }
+      if (/^Who Fits You/i.test(sec.title)) { h.push(fitHtml(d, c)); usedFit = special = true; }
+      if (cd && !special) {
         if (cd.summary) h.push('<p style="font-size:15.5px;color:var(--text-1)">' + esc(cd.summary) + "</p>");
         if (cd.kind === "timeline" && cd.timeline && cd.timeline.length) {
           h.push('<div class="tl mt">');
@@ -119,6 +159,9 @@
       h.push(details(sec.paras, q) + "</div></section>");
     });
 
+    // 예전 리포트(이 섹션들이 없던 때)에도 그래프는 보여 준다
+    if (!usedEnergy && d.chart.current && window.WSCharts) h.push(head("Your current 10-year energy", "energy") + '<div class="card">' + energyHtml(d, null) + "</div></section>");
+    if (!usedFit) h.push(head("Who fits you", "fit") + '<div class="card">' + fitHtml(d, null) + "</div></section>");
     h.push(head("Last word", "end"));
     if (c && c.final && c.final.conclusion) h.push('<div class="card"><div class="label">In one line</div><p style="font-size:16px;color:var(--text-1)">' + esc(c.final.conclusion) + "</p></div>");
     if (lastLine) h.push('<div class="card final"><span class="corner"></span><span class="corner-br"></span><div class="label">One sentence to carry with you</div><div class="line">' + esc(lastLine) + "</div></div>");

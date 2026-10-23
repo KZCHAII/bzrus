@@ -32,6 +32,8 @@ const CARDS = JSON.stringify({
     { heading: "Made Up Section", kind: "points", summary: "x", points: [], timeline: [], qa: [], highlight: "" },
   ],
   final: { conclusion: "Keep the speed.", last_line: "You don't have to win every room." },
+  cycle: { theme: "Pressure that builds status", areas: [{ area: "Work", score: 9, note: "Big push." }, { area: "Bogus", score: 2, note: "x" }] },
+  fit: { summary: "Calm planners.", traits: [{ title: "Patient", desc: "Slows you down." }], avoid: "Constant critics." },
 });
 const calls: string[] = [];
 const fakeAi = (fail = 0) => {
@@ -68,6 +70,9 @@ describe("test 모드 생성", () => {
     if (v2.status !== "done") throw 0;
     expect(v2.cards!.sections.map((s) => s.heading)).toEqual(["Your Core Design: Temperament and Wiring"]);
     expect(v2.chart.pillars.day.han).toBe("庚寅");
+    expect(v2.cards!.cycle).toEqual({ theme: "Pressure that builds status", areas: [{ area: "Work", score: 5, note: "Big push." }] });
+    expect(v2.chart.match.signs.length).toBeGreaterThan(0);
+    expect(v2.chart.current?.cycle.startAge).toBeLessThanOrEqual(34);
     const [row] = await sql`select is_test, prompt_version from readings where id = ${id}`;
     expect(row.is_test).toBe(true);
   });
@@ -126,6 +131,8 @@ describe("프롬프트", () => {
     expect(prompt).toContain("Day pillar (the self; the branch is the partner palace): 庚寅");
     expect(prompt).toContain("##Looking Back: 2021-2025");
     expect(prompt).toContain("##The Next Five Years: 2026-2030");
+    expect(prompt).toContain("##Your Current 10-Year Cycle: Ages 33-42");
+    expect(prompt).toContain("Recommended Korean signs:");
     expect(prompt).toContain("Today is October 22, 2026");
     expect(prompt).not.toMatch(/\{\{\w+\}\}/);
     expect(prompt).not.toContain("<!--");

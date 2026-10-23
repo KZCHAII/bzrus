@@ -51,7 +51,7 @@ function yearsAround(now: Date) {
 export function buildPrompt(r: Pick<Row, "name" | "birth_date" | "birth_time" | "gender">, now = new Date()): { prompt: string; chart: FullChart } {
   const b = birthOf(r);
   const { y0, list } = yearsAround(now);
-  const chart = fullChart(b, r.gender, list);
+  const chart = fullChart(b, r.gender, list, y0);
   const tpl = (PROMPTS.reading ?? "").replace(/^<!--[\s\S]*?-->\s*/, "");
   const vars: Record<string, string> = {
     chart: chartText(chart, r.name, { iso: b.iso, time: b.time }, r.gender, y0),
@@ -59,6 +59,7 @@ export function buildPrompt(r: Pick<Row, "name" | "birth_date" | "birth_time" | 
     today: now.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "America/New_York" }),
     now_ym: now.toLocaleDateString("en-US", { year: "numeric", month: "long", timeZone: "America/New_York" }),
     yp5: String(y0 - 5), yp1: String(y0 - 1), y0: String(y0), y4: String(y0 + 4),
+    cur_ages: chart.current ? `Ages ${chart.current.cycle.startAge}-${chart.current.cycle.endAge}` : "Before Your First Cycle",
   };
   return { prompt: tpl.replace(/\{\{(\w+)\}\}/g, (_, k) => vars[k] ?? ""), chart };
 }
@@ -146,7 +147,7 @@ export async function viewReading(id: string, key: string, start: (fn: () => Pro
   const { chart } = buildPrompt(r);
   const base = {
     id: r.id, name: r.name, birthday: b.iso, time: b.time, gender: r.gender, created: r.created_at.toISOString(),
-    chart: { sign: chart.sign, pillars: chart.pillars, elements: chart.elements, luck: chart.luck },
+    chart: { sign: chart.sign, pillars: chart.pillars, elements: chart.elements, luck: chart.luck, current: chart.current, match: chart.match },
   };
   if (r.status === "generating") {
     const stale = !r.started_at || Date.now() - r.started_at.getTime() > STALE_MIN * 60_000;
