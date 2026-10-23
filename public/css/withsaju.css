@@ -395,3 +395,4 @@ select.sel:invalid{color:var(--mute-2)}
 .up-btn{background:var(--purple)!important;box-shadow:0 0 20px rgba(168,85,247,.35)!important;color:#000}
 .up-btn:hover{background:#fff!important}
 .up-price{display:block;text-align:center;margin-top:10px;font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;color:var(--mute-1)}
+#g-result,#card{scroll-margin-top:76px}

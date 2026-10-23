@@ -184,3 +184,18 @@ describe("지장간 잠재력", () => {
     expect(hiddenOf([2]).hidden).toMatchObject({ Earth: 0.2, Fire: 0.2, Wood: 0 });
   });
 });
+
+describe("궁합 점수 분포", () => {
+  it("70~80점대에 몰리지 않고 넓게 퍼진다", () => {
+    let seed = 3; const rnd = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648;
+    const rb = () => { const d = new Date(Date.UTC(1965, 0, 1) + rnd() * 40 * 365.25 * 864e5); return { year: d.getUTCFullYear(), month: d.getUTCMonth() + 1, day: d.getUTCDate() }; };
+    const xs: number[] = [];
+    for (let i = 0; i < 2000; i++) xs.push(relationOf(signOf(rb()), signOf(rb())).score);
+    xs.sort((a, b) => a - b);
+    const q = (p: number) => xs[Math.floor(p * (xs.length - 1))];
+    expect(new Set(xs).size).toBeGreaterThan(40);
+    expect(q(0.1)).toBeLessThan(63);
+    expect(q(0.9)).toBeGreaterThan(84);
+    expect(xs.filter((x) => x === 99).length / xs.length).toBeLessThan(0.03);
+  });
+});

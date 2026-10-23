@@ -252,6 +252,7 @@ export function signOf(b: BirthInput): KoreanSign {
 
 // ── 두 사람 관계 (오행 생극) ──
 export type RelationKind = "mirror" | "battery" | "spark" | "copilot" | "coach";
+export const SCORE_MID = 74, RAW_MID = 82, SCORE_SPREAD = 1.4;
 export const RELATIONS: Record<RelationKind, { name: string; base: number }> = {
   mirror: { name: "Mirror", base: 74 },     // 비겁: 같은 오행
   battery: { name: "Battery", base: 88 },   // 인성: 상대가 나를 생함
@@ -299,11 +300,37 @@ export function stemLinks(a: number, b: number): LinkKind[] {
 }
 
 /** owner 입장에서 본 friend의 관계. 오행 생극 + 일간 합·충 + 일지 합·충·형·파·해. 같은 두 사람이면 항상 같은 점수 */
+/** 원국 오행 개수 (기둥 6~8글자) */
+function elementCount(s: KoreanSign): Record<Element, number> {
+  const out: Record<Element, number> = { Wood: 0, Fire: 0, Earth: 0, Metal: 0, Water: 0 };
+  for (const p of [s.pillars.year, s.pillars.month, s.pillars.day, s.pillars.hour]) if (p) { out[p.stemElement]++; out[p.branchElement]++; }
+  return out;
+}
+const branchOfPillar = (p: PillarView) => BRANCH_H.indexOf(p.han[1]);
+
+/**
+ * 궁합 점수 (30~99). 일간 오행 관계가 뼈대, 그 위에
+ * 일간 합충 + 일지 합충형파해(칩으로 보여 줌) + 띠(연지) 합충 + 서로 빈 오행을 채워 주는지 + 음양.
+ * 원점수를 넓게 펴서 70~80점대에 몰리지 않게 한다.
+ */
 export function relationOf(owner: KoreanSign, friend: KoreanSign): { kind: RelationKind; name: string; score: number; links: LinkKind[] } {
   const a = owner.element, b = friend.element;
   const kind: RelationKind = a === b ? "mirror" : FEEDS[b] === a ? "battery" : FEEDS[a] === b ? "spark" : CHECKS[a] === b ? "copilot" : "coach";
   const links = [...stemLinks(owner.stem, friend.stem), ...branchLinks(owner.branch, friend.branch)];
-  const bonus = links.reduce((n, l) => n + LINKS[l].score, 0);
-  const score = RELATIONS[kind].base + (owner.yang !== friend.yang ? 5 : 0) + (owner.season === friend.season ? 3 : 0) - ((owner.stem + friend.stem) % 4) + bonus;
+  let raw = RELATIONS[kind].base + links.reduce((n, l) => n + LINKS[l].score, 0);
+  raw += owner.yang !== friend.yang ? 3 : -1;
+  // 띠(연지) 관계: 일지의 절반 무게
+  raw += branchLinks(branchOfPillar(owner.pillars.year), branchOfPillar(friend.pillars.year)).reduce((n, l) => n + LINKS[l].score, 0) * 0.5;
+  // 오행 보완: 내게 없는 오행을 상대가 가졌으면 +, 둘 다 없는 오행이면 -
+  const ea = elementCount(owner), eb = elementCount(friend);
+  for (const e of Object.keys(ea) as Element[]) {
+    if (!ea[e] && eb[e]) raw += Math.min(2, eb[e]) * 2;
+    if (!eb[e] && ea[e]) raw += Math.min(2, ea[e]);
+    if (!ea[e] && !eb[e]) raw -= 3;
+    if (ea[e] >= 4 && eb[e] >= 3) raw -= 2; // 같은 기운이 둘 다 넘침
+  }
+  let score = SCORE_MID + (raw - RAW_MID) * SCORE_SPREAD;
+  if (score > 88) score = 88 + (score - 88) * 0.45; // 90점대는 드물게
+  score = Math.round(score);
   return { kind, name: RELATIONS[kind].name, score: Math.max(30, Math.min(99, score)), links };
 }
