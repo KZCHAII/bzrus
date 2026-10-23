@@ -69,9 +69,23 @@
         <p class="note" id="g-added"></p>
         <div class="sharebar" style="justify-content:center;margin-top:10px"><button type="button" data-a="img" id="g-story">Save our match as a story image</button></div>
       </div>
-      <div class="actions" style="margin-top:14px">
+      <a class="panel upsell" id="g-up" href="/reading">
+        <span class="corner"></span><span class="corner-br"></span>
+        <span class="tag">NEXT <em>// YOUR FULL KOREAN SAJU</em></span>
+        <h3 id="g-up-h">That was one pillar. You have four.</h3>
+        <p class="up-sub" id="g-up-sub">Your sign comes from the day you were born. The full reading reads all of your chart.</p>
+        <p class="up-hook" id="g-up-hook" hidden></p>
+        <ul class="locked">
+          <li><b>Your 10-year luck cycle</b><span>What is driving you right now, and how it hits work, money and love</span></li>
+          <li><b>Your next five years</b><span>Year by year: the opening, the risk, what to do</span></li>
+          <li><b>Who fits you</b><span>Signs and spirit animals that work for you, and the ones to watch</span></li>
+          <li><b>Hidden potential + luck boosters</b><span>What sleeps in your chart and how to wake it up</span></li>
+        </ul>
+        <span class="btn up-btn">See my full Korean Saju <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M1 7h11m0 0L7 2m5 5L7 12" stroke="currentColor" stroke-width="1.8"/></svg></span>
+        <span class="up-price" id="g-up-price">$9.99 one-time · your details carry over</span>
+      </a>
+      <div class="actions" style="margin-top:14px;grid-template-columns:1fr">
         <button class="act" type="button" id="g-own"><span class="k">Free // Your page</span><b>Make your own page</b><span class="d">Get a link like this one. See what your friends are to you. Your details carry over.</span></button>
-        <a class="act paid" href="/reading"><span class="k">Full reading</span><b>Your whole chart in plain English</b><span class="pr">$9.99</span></a>
       </div>
       <p class="err" id="g-own-err" hidden></p>
       <article class="panel sign hide" id="card" aria-live="polite">
@@ -89,6 +103,7 @@
       <div id="k-penta" style="margin:0 0 14px"></div>
       <div class="why" id="k-why"></div>
       <div class="sharebar" style="margin-top:14px;justify-content:center"><button type="button" data-a="img" id="k-story">Save my sign as a story image</button></div>
+      <a class="btn up-btn" href="/reading" style="text-decoration:none;margin-top:18px">See my full Korean Saju <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M1 7h11m0 0L7 2m5 5L7 12" stroke="currentColor" stroke-width="1.8"/></svg></a>
     </article>
     </div>
   </section>
@@ -286,6 +301,7 @@
       $('g-penta').innerHTML = WSCharts.elementsPentagon([{ name: r.owner.name, elements: r.owner.sign.elements }, { name: nick, elements: r.sign.elements }]);
       $('g-rel').innerHTML = WS.relHtml(r.relation, r.owner.sign, r.sign, 'You are ' + esc(r.owner.name) + '’s {R}', r.owner.name);
       $('g-added').textContent = r.added ? 'You’re on ' + r.owner.name + '’s page now.' : 'You’re not on the page. Only you saw this.';
+      fillUpsell(nick, r.sign);
       $('gForm').classList.add('hide'); show('g-result');
       $('g-result').scrollIntoView({ block: 'start' });
       WS.dock(true);
@@ -293,6 +309,15 @@
     } catch (x) { err.textContent = 'ERROR // ' + x.message; err.hidden = false; $('gBtn').disabled = false; }
   });
 
+  // 친구용 유료 안내: 이름·사인으로 개인화, 빠진 오행이 있으면 그걸 미끼로
+  function fillUpsell(nick, sg) {
+    $('g-up-h').textContent = nick + ', that was one pillar. You have four.';
+    $('g-up-sub').textContent = 'The ' + (sg.title || sg.name) + ' comes from the day you were born. The full reading reads your whole chart: year, month, day and hour.';
+    var EL = ['Wood', 'Fire', 'Earth', 'Metal', 'Water'], miss = EL.filter(function (k) { return sg.elements && !sg.elements[k]; });
+    var hook = miss.length ? 'Your chart has no ' + miss.join(' and no ') + ' on the surface.' + (sg.hidden && miss.some(function (k) { return sg.hidden[k] > 0; }) ? ' Some of it is hiding inside. The full reading shows when it wakes up and what fills the gap.' : ' The full reading shows what fills the gap: people, places, habits.') : '';
+    $('g-up-hook').textContent = hook; $('g-up-hook').hidden = !hook;
+  }
+  WS.api('/api/readings/mode').then(function (m) { if (m.mode === 'test') $('g-up-price').textContent = 'Free while we test · your details carry over'; }).catch(function () {});
   $('k-story').addEventListener('click', function () { if (mySign) WS.signStory(mySign, mine && mine.name); });
   $('g-story').addEventListener('click', function () {
     if (!lastMatch) return;

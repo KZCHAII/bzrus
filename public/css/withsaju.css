@@ -379,3 +379,19 @@ body.has-dock footer{padding-bottom:110px}
 select.sel{width:100%;min-width:0;appearance:none;-webkit-appearance:none;background:var(--bg-1) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%2300f0ff' stroke-width='1.6'/%3E%3C/svg%3E") no-repeat right 14px center;border:1px solid var(--border-3);border-radius:0;color:var(--white);font:500 16px var(--sans);padding:13px 40px 13px 14px;outline:none;color-scheme:dark;cursor:pointer}
 select.sel:focus-visible{border-color:var(--cyan);box-shadow:0 0 0 1px var(--cyan),0 0 16px rgba(0,240,255,.2)}
 select.sel:invalid{color:var(--mute-2)}
+
+/* 친구 결과 → 유료 리포트 안내 */
+.upsell{display:block;margin-top:14px;text-decoration:none;color:inherit;border-color:rgba(168,85,247,.55);background:linear-gradient(180deg,#120a1c,#070707);--el:var(--purple)}
+.upsell:hover{border-color:var(--purple)}
+.upsell .tag em{color:var(--purple)}
+.upsell h3{font-size:22px;line-height:1.2;color:var(--white);margin:16px 0 8px;letter-spacing:-.01em}
+.upsell .up-sub{font-size:14.5px;color:var(--mute-1);margin:0 0 10px;line-height:1.5}
+.upsell .up-hook{font-size:14.5px;color:var(--white);margin:0 0 12px;padding:10px 12px;border-left:2px solid var(--purple);background:rgba(168,85,247,.08);line-height:1.5}
+.locked{list-style:none;margin:6px 0 4px;padding:0;display:grid;gap:8px}
+.locked li{display:grid;grid-template-columns:22px 1fr;column-gap:8px;font-size:14px;line-height:1.4}
+.locked li::before{content:"";grid-row:span 2;width:14px;height:14px;margin-top:3px;background:no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Crect x='2' y='6' width='10' height='7' fill='none' stroke='%23a855f7' stroke-width='1.4'/%3E%3Cpath d='M4.5 6V4.2a2.5 2.5 0 0 1 5 0V6' fill='none' stroke='%23a855f7' stroke-width='1.4'/%3E%3C/svg%3E")}
+.locked b{color:var(--white);font-weight:600}
+.locked span{color:var(--mute-2);font-size:13px}
+.up-btn{background:var(--purple)!important;box-shadow:0 0 20px rgba(168,85,247,.35)!important;color:#000}
+.up-btn:hover{background:#fff!important}
+.up-price{display:block;text-align:center;margin-top:10px;font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;color:var(--mute-1)}
