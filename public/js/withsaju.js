@@ -143,8 +143,8 @@
       // 사람 점: 칸 안에 고르게, 점수 높을수록 가까이
       list.forEach(function (e, j) {
         var ang = a0 + span * (j + 1) / (list.length + 1);
-        var dist = Math.max(.34, Math.min(.92, 1 - (e.score - 60) / 45)) + (list.length > 4 ? (j % 2 ? .08 : -.04) : 0);
-        e._p = { x: cx + Math.cos(ang) * R * dist, y: cy + Math.sin(ang) * R * dist, col: col };
+        var dist = Math.max(.34, Math.min(.84, 1 - (e.score - 60) / 45)) + (list.length > 4 ? (j % 2 ? .08 : -.04) : 0);
+        e._p = { x: cx + Math.cos(ang) * R * dist, y: cy + Math.sin(ang) * R * dist, col: col, outer: dist > .6 };
       });
     });
     // 칸 나누는 선 + 동심원
@@ -162,7 +162,8 @@
       var p = e._p; if (!p) return;
       x.strokeStyle = rgba(p.col, .35); x.setLineDash([2, 4]); x.beginPath(); x.moveTo(cx, cy); x.lineTo(p.x, p.y); x.stroke(); x.setLineDash([]);
       x.shadowColor = p.col; x.shadowBlur = 14; x.fillStyle = p.col; x.beginPath(); x.arc(p.x, p.y, 10, 0, TAU); x.fill(); x.shadowBlur = 0;
-      var right = p.x < cx;
+      // 이름은 바깥쪽 칸 이름과 겹치지 않게: 바깥 점이면 안쪽으로, 안쪽 점이면 바깥쪽으로
+      var right = p.outer ? p.x >= cx : p.x < cx;
       x.textAlign = right ? 'right' : 'left'; x.fillStyle = '#fff'; x.font = '700 19px "JetBrains Mono", monospace';
       x.fillText(String(e.nickname).slice(0, 10).toUpperCase(), p.x + (right ? -16 : 16), p.y - 2);
       x.fillStyle = p.col; x.font = '500 16px "JetBrains Mono", monospace';

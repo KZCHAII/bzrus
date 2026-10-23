@@ -69,6 +69,11 @@
         <p class="note" id="g-added"></p>
         <div class="sharebar" style="justify-content:center;margin-top:10px"><button type="button" data-a="img" id="g-story">Save our match as a story image</button></div>
       </div>
+      <div class="actions" style="margin-top:14px">
+        <button class="act" type="button" id="g-own"><span class="k">Free // Your page</span><b>Make your own page</b><span class="d">Get a link like this one. See what your friends are to you. Your details carry over.</span></button>
+        <a class="act paid" href="/reading"><span class="k">Full reading</span><b>Your whole chart in plain English</b><span class="pr">$9.99</span></a>
+      </div>
+      <p class="err" id="g-own-err" hidden></p>
       <article class="panel sign hide" id="card" aria-live="polite">
       <span class="corner"></span><span class="corner-br"></span>
       <div class="sign-top"><span class="tag">YOUR <em>// KOREAN SIGN</em></span><span class="coord" id="coord"></span></div>
@@ -85,11 +90,6 @@
       <div class="why" id="k-why"></div>
       <div class="sharebar" style="margin-top:14px;justify-content:center"><button type="button" data-a="img" id="k-story">Save my sign as a story image</button></div>
     </article>
-      <div class="actions">
-        <button class="act" type="button" id="g-own"><span class="k">Free // Your page</span><b>Make your own page</b><span class="d">Get a link like this one. See what your friends are to you. Your details carry over.</span></button>
-        <a class="act paid" href="/reading"><span class="k">Full reading</span><b>Your whole chart in plain English</b><span class="pr">$9.99</span></a>
-      </div>
-      <p class="err" id="g-own-err" hidden></p>
     </div>
   </section>
 
@@ -97,6 +97,14 @@
   <section class="hero hide" id="owner">
     <p class="eyebrow">My page</p>
     <h1><span id="o-name"></span>'s <span class="accent">page</span></h1>
+    <div class="panel" style="margin:0 0 14px">
+      <span class="corner"></span><span class="corner-br"></span>
+      <span class="tag">SHARE <em>// MY PAGE</em></span>
+      <p class="sub" style="margin:14px 0 10px">Anyone who opens this link adds a birthday and sees what they are to you. They land on your map below.</p>
+      <div class="share" style="margin-bottom:10px"><input id="o-link" type="text" readonly aria-label="Your page link"></div>
+      <div id="o-share"></div>
+      <p class="note" style="text-align:left">This browser is your key to manage the page. On another phone or computer? <button type="button" class="linkbtn" id="o-key">Copy my private link</button> and open it there. Keep that one to yourself.</p>
+    </div>
     <div class="twocol">
       <div class="panel" style="--el:var(--cyan)">
         <span class="corner"></span><span class="corner-br"></span>
@@ -112,14 +120,6 @@
       </div>
     </div>
 
-    <div class="panel" style="margin-top:14px">
-      <span class="corner"></span><span class="corner-br"></span>
-      <span class="tag">SHARE <em>// MY PAGE</em></span>
-      <p class="sub" style="margin:14px 0 10px">Anyone who opens this link adds a birthday and sees what they are to you. They land on your map below.</p>
-      <div class="share" style="margin-bottom:10px"><input id="o-link" type="text" readonly aria-label="Your page link"></div>
-      <div id="o-share"></div>
-      <p class="note">This browser is your key to manage the page. Keep using it.</p>
-    </div>
 
     <div class="panel" style="margin-top:14px">
       <span class="corner"></span><span class="corner-br"></span>
@@ -174,7 +174,10 @@
   var $ = WS.$, esc = WS.esc;
   WS.initNav();
   var slug = (location.pathname.toLowerCase().match(/^\/m\/([a-z0-9]{10})\/?$/) || [])[1] || new URLSearchParams(location.search).get('slug') || '';
-  var token = WS.store.get('ws_owner_' + slug) || '';
+  // 개인 관리 링크(/m/<slug>#k=<token>)로 들어오면 이 기기도 주인으로. 주소창에서는 바로 지운다
+  var hashKey = (location.hash.match(/[#&]k=([A-Za-z0-9_-]{10,100})/) || [])[1] || '';
+  if (hashKey) history.replaceState(null, '', location.pathname + location.search);
+  var token = hashKey || WS.store.get('ws_owner_' + slug) || '';
   var data = null, mine = null, lastMatch = null, mySign = null;
   function show(id) { $(id).classList.remove('hide'); }
 
@@ -245,6 +248,11 @@
       if (window.WSArt && s.animal) WSArt.toImage({ animal: s.animal.name, element: s.element, yang: s.yang, season: s.season, hanja: s.dayPillar ? s.dayPillar.han : s.hanja }, 760, go); else go(null);
     });
   }
+  $('o-key').addEventListener('click', function () {
+    var u = location.origin + '/m/' + slug + '#k=' + token, b = $('o-key');
+    var done = function () { b.textContent = 'Copied. Paste it on your other device'; setTimeout(function () { b.textContent = 'Copy my private link'; }, 2600); };
+    if (navigator.clipboard) navigator.clipboard.writeText(u).then(done, function () { window.prompt('Your private link', u); }); else window.prompt('Your private link', u);
+  });
   $('o-story').addEventListener('click', function () { WS.signStory(data.sign, data.name); });
 
   async function load() {
@@ -252,7 +260,7 @@
     catch (x) { $('loading').classList.add('hide'); show('missing'); return; }
     $('loading').classList.add('hide');
     fillOwnerBits();
-    if (data.isOwner) { show('owner'); ownerShare(); renderOwner(); WS.dock(true); }
+    if (data.isOwner) { if (hashKey) WS.me.addMap(slug, data.name, hashKey); show('owner'); ownerShare(); renderOwner(); WS.dock(true); }
     else {
       show('guest');
       var saved = WS.me.get();   // 전에 입력한 적 있으면 미리 채움

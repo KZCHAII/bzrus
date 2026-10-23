@@ -372,3 +372,4 @@ body.has-dock footer{padding-bottom:110px}
 .rc .elbar .nm b small{font-size:11px;color:var(--mute-1);font-family:var(--mono)}
 .hnote{font-size:13px;line-height:1.55;color:var(--mute-1);margin:8px 0 0;text-align:left}
 .hnote b{color:var(--white)}.hnote span{font-size:11.5px;color:var(--mute-3)}
+.linkbtn{background:none;border:0;padding:0;color:var(--cyan);font:inherit;text-decoration:underline;cursor:pointer}
