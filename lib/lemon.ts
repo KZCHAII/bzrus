@@ -7,7 +7,9 @@ const API = "https://api.lemonsqueezy.com/v1";
 
 export interface LsConfig { apiKey: string; storeId: string; variantId: string; webhookSecret: string; testMode: boolean }
 export function lsConfig(): LsConfig | null {
-  const apiKey = envOptional("LEMONSQUEEZY_API_KEY"), storeId = envOptional("LEMONSQUEEZY_STORE_ID"), variantId = envOptional("LEMONSQUEEZY_VARIANT_ID"), webhookSecret = envOptional("LEMONSQUEEZY_WEBHOOK_SECRET");
+  // 붙여넣을 때 끼어든 앞뒤 공백·줄바꿈은 무시 (서명 불일치의 흔한 원인)
+  const t = (v: string | undefined) => v?.trim() || undefined;
+  const apiKey = t(envOptional("LEMONSQUEEZY_API_KEY")), storeId = t(envOptional("LEMONSQUEEZY_STORE_ID")), variantId = t(envOptional("LEMONSQUEEZY_VARIANT_ID")), webhookSecret = t(envOptional("LEMONSQUEEZY_WEBHOOK_SECRET"));
   if (!apiKey || !storeId || !variantId || !webhookSecret) return null;
   return { apiKey, storeId, variantId, webhookSecret, testMode: envOptional("LEMONSQUEEZY_TEST_MODE") !== "0" };
 }

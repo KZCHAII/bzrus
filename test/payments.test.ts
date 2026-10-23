@@ -115,3 +115,14 @@ describe("결제", () => {
     expect(codes[10]).toBe(429);
   });
 });
+
+describe("결제 설정 값의 앞뒤 공백", () => {
+  it("비밀 값에 줄바꿈이 붙어 있어도 서명 확인은 된다", async () => {
+    const { verifyLsSignature, lsConfig } = await import("@/lib/lemon");
+    Object.assign(process.env, { LEMONSQUEEZY_API_KEY: "k", LEMONSQUEEZY_STORE_ID: " 1 ", LEMONSQUEEZY_VARIANT_ID: "42\n", LEMONSQUEEZY_WEBHOOK_SECRET: "whsec_x \n" });
+    const c = lsConfig()!;
+    expect(c).toMatchObject({ storeId: "1", variantId: "42", webhookSecret: "whsec_x" });
+    const raw = '{"a":1}';
+    expect(verifyLsSignature(raw, createHmac("sha256", "whsec_x").update(raw).digest("hex"), c.webhookSecret)).toBe(true);
+  });
+});
