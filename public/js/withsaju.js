@@ -244,5 +244,26 @@
   function timeOf(el) { return el.value && el.value !== 'unknown' ? el.value : ''; }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initTimeSelects); else initTimeSelects();
 
-  window.WS = { api: api, esc: esc, $: $, store: store, fillSign: fillSign, relHtml: relHtml, drawMap: drawMap, legendHtml: legendHtml, REL: REL, EL_VAR: EL_VAR, me: me, initNav: initNav, dock: dock, signStory: signStory, setTime: setTime, timeOf: timeOf };
+  // 통계: 쿠키 없음. 정해진 이벤트 이름만, 실패해도 조용히
+  function srcOf() {
+    try {
+      var q = new URLSearchParams(location.search), u = q.get('utm_source') || q.get('ref');
+      if (u) return u.slice(0, 60);
+      if (document.referrer) { var h = new URL(document.referrer).hostname.replace(/^www\./, ''); if (h && h !== location.hostname) return h; }
+    } catch (e) { /* ignore */ }
+    return '';
+  }
+  function track(n, r, p) {
+    try {
+      var body = JSON.stringify({ n: n, r: r || '', p: p || '', s: n === 'page_view' ? srcOf() : '' });
+      if (navigator.sendBeacon) navigator.sendBeacon('/api/e', new Blob([body], { type: 'text/plain' }));
+      else fetch('/api/e', { method: 'POST', body: body, keepalive: true }).catch(function () {});
+    } catch (e) { /* ignore */ }
+  }
+  // 아래 고정 유료 안내(dock) 클릭
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('#dock a'); if (a) track('upsell_click', 'dock');
+  });
+
+  window.WS = { api: api, esc: esc, $: $, store: store, fillSign: fillSign, relHtml: relHtml, drawMap: drawMap, legendHtml: legendHtml, REL: REL, EL_VAR: EL_VAR, me: me, initNav: initNav, dock: dock, signStory: signStory, setTime: setTime, timeOf: timeOf, track: track };
 })();

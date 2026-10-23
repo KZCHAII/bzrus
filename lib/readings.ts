@@ -11,6 +11,8 @@ import { services } from "./services";
 import { extractCards, MODEL, type Cards } from "./cards";
 import { PROMPTS } from "./prompts.generated";
 import { mailReadingReady } from "./account";
+import { track } from "./events";
+import { escHtml, notify } from "./notify";
 
 export const MAX_ATTEMPTS = 3;
 const STALE_MIN = 6;              // 이 시간 넘게 '만드는 중'이면 끊긴 것으로 보고 다시
@@ -92,6 +94,8 @@ export async function createReading(
     insert into readings (view_key, email, name, birth_date, birth_time, time_unknown, gender, sign_key, prompt_version, ip_hash, is_test)
     values (${key}, ${email}, ${name}, ${b.iso}, ${b.time}, ${timeUnknown}, ${gender}, ${signOf(b).key}, ${PROMPT_VERSION}, ${ipHash}, true)
     returning id`;
+  await track("reading_created", { ref: mode, isTest: true });
+  start(() => notify(`🧪 무료 리포트 생성 시작: <b>${escHtml(name)}</b> (${gender}, ${b.iso}${b.time ? " " + b.time : ""})`));
   start(() => generateReading(row.id));
   return { id: row.id, key };
 }
@@ -111,12 +115,17 @@ export async function generateReading(id: string): Promise<void> {
     if (content.length < 500 || !content.includes("##")) throw new Error("REPORT_TOO_SHORT");
     await sql`update readings set status = 'done', content = ${content}, completed_at = now(), cards = null, cards_status = null where id = ${id} and status = 'generating'`;
     await mailReadingReady(r).catch((e) => console.error("[reading mail]", id, e instanceof Error ? e.message : e));
+    await track("reading_done", { isTest: r.is_test });
   } catch (e) {
     const msg = (e instanceof Error ? e.message : String(e)).slice(0, 300);
     console.error("[reading]", id, msg);
-    await sql`update readings set error = ${msg}, started_at = null,
+    const [f] = await sql<{ status: string }[]>`update readings set error = ${msg}, started_at = null,
               status = case when attempts >= ${MAX_ATTEMPTS} then 'failed' else status end
-              where id = ${id} and status = 'generating'`;
+              where id = ${id} and status = 'generating' returning status`;
+    if (f?.status === "failed") {
+      await track("reading_failed", { isTest: r.is_test });
+      await notify(`⚠️ 리포트 최종 실패 (${MAX_ATTEMPTS}번 시도): <b>${escHtml(r.name)}</b>\n${escHtml(msg.slice(0, 200))}\nid ${id}`);
+    } else await notify(`↻ 리포트 생성 실패, 다시 시도 예정 (${r.attempts}/${MAX_ATTEMPTS}): ${escHtml(msg.slice(0, 120))}`);
     return;
   }
   await generateCards(id);
@@ -179,5 +188,6 @@ export async function saveReadingEmail(id: string, key: string, emailIn: unknown
   await sql`update readings set email = ${email} where id = ${id}`;
   // 이미 다 쓴 리포트면 지금 링크를 보낸다 (아직 쓰는 중이면 다 쓴 뒤 자동으로 감)
   if (r.status === "done") await mailReadingReady({ ...r, email });
+  await track("reading_email_saved", { isTest: r.is_test });
   return { saved: true, email: maskEmail(email) };
 }

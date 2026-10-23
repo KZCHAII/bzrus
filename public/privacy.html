@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Serif+KR:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/withsaju.css">
+<title>Privacy Policy — WITHSAJU</title>
+
+</head>
+<body>
+<nav>
+  <a class="logo" href="/" style="text-decoration:none"><div class="logo-mark"><span></span><span></span><span></span><span></span></div><div class="logo-text">WITH<em>SAJU</em></div></a>
+  <div class="nav-right">
+    <a class="nav-link opt" id="nav-myreading" href="/" hidden>My reading</a>
+    <a class="nav-link" id="nav-mymap" href="/" hidden>My map</a>
+    <a class="nav-cta" href="/reading">Full reading</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <article class="hero legal">
+    <p class="eyebrow">Legal</p>
+    <h1>Privacy <span class="accent">Policy</span></h1>
+    <p class="updated">Last updated: October 23, 2026</p>
+
+    <p>This policy explains what WITHSAJU collects, why, and the choices you have. Short version: we only use your birth data to calculate your sign and readings, we don't sell or share your personal information for advertising, and birthdays are never shown to other people.</p>
+
+    <h2>1. What we collect</h2>
+    <ul>
+      <li><b>What you enter:</b> your name or nickname, birthday, and optionally your birth time. For a full reading, also gender (used only to set the direction of your 10-year luck cycles).</li>
+      <li><b>Email (optional):</b> if you save your page or reading, or reserve a reading. Used only to send you links to your page and readings, and messages about your purchase.</li>
+      <li><b>Payment:</b> handled by Paddle, our Merchant of Record. We don't see or store your card details.</li>
+      <li><b>Technical data:</b> your IP address is turned into a one-way code (a hash) to stop spam and abuse; we don't store the IP itself. We count page visits and button taps (like "share") without cookies and without identifying you, to see what works.</li>
+      <li><b>On your device:</b> your browser's local storage remembers your sign, your page key and your reading links so they open again on that device. This stays on your device; you can clear it in your browser settings.</li>
+    </ul>
+
+    <h2>2. How we use it</h2>
+    <ul>
+      <li>To calculate your Korean sign, compatibility scores and readings.</li>
+      <li>To show your page to people you share it with (names, signs and relationship types only, never birthdays).</li>
+      <li>To deliver and let you reopen your readings, and to provide support and refunds.</li>
+      <li>To keep the Service safe and working.</li>
+    </ul>
+    <p>We don't sell your personal information, and we don't share it for cross-context behavioral advertising. We don't use it for automated decisions with legal or similar effects.</p>
+
+    <h2>3. Who processes it for us</h2>
+    <p>We use a small set of service providers who process data only on our instructions:</p>
+    <ul>
+      <li>Vercel (website hosting) and Neon (database), in the United States.</li>
+      <li>Google (Gemini AI) to write readings: we send your chart, name, birthday, birth time and gender. We don't send your email.</li>
+      <li>Resend, to send emails (once email sending is turned on).</li>
+      <li>Paddle, to take payments, as Merchant of Record.</li>
+    </ul>
+
+    <h2>4. How long we keep it</h2>
+    <p>We keep your page, entries and readings until you ask us to delete them, so your links keep working. Spam-prevention codes and visit counts are kept for up to 12 months. Payment records are kept as long as tax law requires.</p>
+
+    <h2>5. Your choices and rights</h2>
+    <ul>
+      <li>You can remove friends from your page at any time. Friends can choose not to appear on your page when they add their birthday.</li>
+      <li>You can ask us to access, correct or delete your data, including your page and readings. Write to us at <span class="contact">the support email listed on this page (being set up for launch)</span> with the link to your page or reading so we can find it.</li>
+      <li><b>California residents</b> have the right to know, delete, correct and opt out of the sale or sharing of personal information under the CCPA/CPRA. We don't sell or share personal information, and we won't treat you differently for using your rights. Residents of other US states with similar laws have the same rights.</li>
+    </ul>
+
+    <h2>6. Children</h2>
+    <p>WITHSAJU isn't meant for children under 13, and we don't knowingly collect their data. If you think a child has given us information, contact us and we'll delete it. Buying a reading requires being 18 or older.</p>
+
+    <h2>7. Security</h2>
+    <p>We use HTTPS everywhere, keep page and login keys only as one-way codes, and limit database access to our server. No system is perfectly secure, so keep your private links to yourself.</p>
+
+    <h2>8. Changes and contact</h2>
+    <p>If we change this policy, we'll update the date at the top. Questions or requests: <span class="contact">the support email listed on this page (being set up for launch)</span>.</p>
+
+    <p class="legal-nav"><a href="/terms">Terms</a> · <a href="/privacy">Privacy</a> · <a href="/refund">Refunds</a></p>
+  </article>
+</div>
+
+<footer>
+  <a href="/find" style="color:var(--cyan);text-decoration:none">Lost your page or reading? Find it →</a><br><br>
+  WITHSAJU · KOREAN SAJU × WESTERN ASTROLOGY<br>
+  Animal art based on icons by game-icons.net (CC BY 3.0).<br>
+  For entertainment purposes only. Not medical, legal or financial advice.<br>
+  <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a> · <a href="/refund">Refunds</a><br>
+  © 2026 WITHSAJU
+</footer>
+
+<script src="/js/withsaju.js"></script>
+<script>
+(function () {
+  WS.initNav();
+  WS.track('page_view', '', 'legal_privacy');
+  // 연락처는 서버 설정(CONTACT_EMAIL)에서. 아직 없으면 안내 문구
+  WS.api('/api/site').then(function (s) {
+    document.querySelectorAll('.contact').forEach(function (el) {
+      if (s.contactEmail) { el.innerHTML = ''; var a = document.createElement('a'); a.href = 'mailto:' + s.contactEmail; a.textContent = s.contactEmail; el.appendChild(a); }
+    });
+  }).catch(function () {});
+})();
+</script>
+</body>
+</html>

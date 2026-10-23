@@ -8,6 +8,11 @@ export const ENV_NAMES = [
   "TEST_DAILY_CAP", // test 모드 하루 전체 생성 상한 (기본 10)
   "EMAIL_MODE",     // 'test'(기본: 보내지 않고 email_outbox에만 기록) | 'live'(Resend로 실제 발송 — 사장님이 켬)
   "RESEND_API_KEY", // 메일 발송 (Resend)
+  "TELEGRAM_BOT_TOKEN", // 판매·오류·매일 요약 알림 (없으면 안 보냄)
+  "TELEGRAM_CHAT_ID",
+  "ADMIN_KEY",      // /admin 통계 화면 열쇠 (사장님만 앎, 없으면 화면 잠김)
+  "CRON_SECRET",    // Vercel 매일 요약 호출 확인용
+  "CONTACT_EMAIL",  // 약관·환불 화면에 보이는 고객 문의 메일 (공개)
   "EMAIL_FROM",     // 보내는 주소 (예: WITHSAJU <hello@withsaju.com>) — 도메인 인증 필요
 ] as const;
 

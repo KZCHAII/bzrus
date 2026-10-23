@@ -3,10 +3,10 @@
 ## 오픈 전 (돈 받기 전 꼭)
 - [사장님] 도메인 구입 (withsaju.com 등) → Vercel 연결, SITE_URL
 - [사장님] Paddle 가입·심사 (사업자 정보, 사이트에 약관·환불·가격 필요) → [Claude] 결제 연결, READINGS_MODE=paid (결제 확인 후 생성, payment_id 한 번만, 결제 이메일을 리포트에 연결)
-- [Claude] 약관·개인정보 처리방침·환불 정책 페이지 (미국 기준: CCPA, COPPA, 18세 이상, For entertainment purposes only) — Paddle 심사에 필요
+- [사장님] 약관 검토: 판매자 이름(브랜드 vs 법적 이름), 환불 정책 확정 — 페이지는 완료(/terms /privacy /refund)
 - [사장님] 실제 메일 켜기: Resend 무료 가입 → 도메인 인증(DNS) → Vercel에 RESEND_API_KEY, EMAIL_FROM, EMAIL_MODE=live
-- [Claude] 방문·공유 통계 (몇 명 오고, 몇 명 링크 만들고, 친구 몇 명 들어오는지)
-- [Claude] 판매·실패 알림 (텔레그램), 간단한 관리자 화면
+- [사장님] Vercel 환경 변수: ADMIN_KEY(통계 화면 열쇠), TELEGRAM_BOT_TOKEN·TELEGRAM_CHAT_ID(알림), CONTACT_EMAIL(도메인 후)
+- [Claude] 결제 붙으면 판매 텔레그램 알림
 
 ## 오픈 후
 - 지도에 친구가 올라오면 주인에게 알림 메일

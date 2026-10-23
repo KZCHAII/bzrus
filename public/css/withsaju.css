@@ -406,3 +406,31 @@ select.sel:invalid{color:var(--mute-2)}
 .share button:disabled{opacity:.6}
 #o-email{font-size:16px}
 .vs-email{font-size:16px!important}
+/* 약관 */
+.legal{max-width:720px}
+.legal .updated{font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--mute-2);margin:4px 0 26px}
+.legal h2{font-size:19px;color:var(--white);margin:30px 0 10px;letter-spacing:-.01em}
+.legal p,.legal li{font-size:15.5px;line-height:1.65;color:var(--text-1)}
+.legal ul{padding-left:20px;margin:8px 0}
+.legal li{margin:6px 0}
+.legal a{color:var(--cyan)}
+.legal-nav{margin-top:36px;font-family:var(--mono);font-size:13px}
+footer a{color:var(--mute-1)}
+/* 관리자 통계 */
+.adm-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;color:var(--mute-1);margin-bottom:12px;flex-wrap:wrap}
+.adm-bar button{background:transparent;border:1px solid var(--border-3);color:var(--mute-1);font:inherit;padding:6px 10px;cursor:pointer;margin-left:4px}
+.adm-bar button.on{border-color:var(--cyan);color:var(--cyan)}
+.adm-kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.adm-kpi div{border:1px solid var(--border-2);background:var(--bg-1);padding:14px}
+.adm-kpi dt{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--mute-2)}
+.adm-kpi dd{margin:6px 0 0;font-size:26px;font-weight:700;color:var(--white)}
+.fn{display:grid;grid-template-columns:130px 1fr 44px 86px;align-items:center;gap:10px;margin:6px 0;font-size:14px}
+.fn i{display:block;height:10px;background:var(--cyan);box-shadow:0 0 8px rgba(0,240,255,.4)}
+.fn b{color:var(--white);text-align:right}.fn em{font-style:normal;font-family:var(--mono);font-size:12px;color:var(--mute-1)}
+.adm-t{width:100%;border-collapse:collapse;font-size:13.5px}
+.adm-t td,.adm-t th{padding:7px 8px;border-bottom:1px solid var(--border);text-align:right;color:var(--text-1)}
+.adm-t td:first-child,.adm-t th:first-child{text-align:left}
+.adm-t th{font-family:var(--mono);font-size:11px;color:var(--mute-2);font-weight:500;white-space:nowrap}
+.adm-t.wide{min-width:760px}
+.adm-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px}
+@media (max-width:700px){.adm-3{grid-template-columns:1fr}.adm-kpi{grid-template-columns:repeat(2,1fr)}.fn{grid-template-columns:100px 1fr 36px 70px;font-size:13px}}

@@ -8,6 +8,7 @@ import { envOptional } from "./env";
 import { hashIp, isOwner, loadMap, maskEmail, sha } from "./maps";
 import { cleanEmail } from "./reading";
 import { mailHtml, sendEmail } from "./email";
+import { track } from "./events";
 
 const LINK_MIN = 30;
 const PER_EMAIL_PER_HOUR = 4;
@@ -34,6 +35,7 @@ export async function saveMapEmail(slug: string, ownerToken: string, emailIn: un
     text: `Your page is saved to this email.\n\nShare this link with friends: ${page}\n\nOn a new phone or browser, go to ${find}, enter this email, and tap the link we send. Your page and your readings come back.`,
     html: mailHtml("Your page is saved", ["Share this link with friends. Every birthday they add lands on your map.", `On a new phone or browser, go to ${find} and enter this email. We'll send you a link that opens your page and your readings.`], { label: "Open my page", url: page }, "You got this because someone saved a WITHSAJU page with this email. If it wasn't you, ignore it."),
   }, isTest);
+  await track("page_email_saved", { isTest });
   return { saved: true, email: maskEmail(email) };
 }
 
@@ -62,6 +64,7 @@ export async function requestLogin(emailIn: unknown, ip: string, base: string, i
       html: mailHtml("Open your page and readings", ["Tap the button on the phone or computer where you want to open them."], { label: "Open on this device", url }, `The link works once, for ${LINK_MIN} minutes. If you didn't ask for it, ignore this email.`),
     }, isTest);
   }
+  await track("login_requested", { ref: has ? "known" : "unknown", isTest });
   return { sent: true };
 }
 
@@ -82,6 +85,7 @@ export async function redeemLogin(tokenIn: unknown) {
   }
   const readings = await sql<{ id: string; view_key: string; name: string; status: string; created_at: Date }[]>`
     select id, view_key, name, status, created_at from readings where email = ${l.email} order by created_at desc limit 20`;
+  await track("login_used");
   return {
     email: maskEmail(l.email),
     maps: outMaps,

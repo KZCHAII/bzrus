@@ -75,6 +75,7 @@
   WITHSAJU · KOREAN SAJU × WESTERN ASTROLOGY<br>
   Animal art based on icons by game-icons.net (CC BY 3.0).<br>
   For entertainment purposes only. Not medical, legal or financial advice.<br>
+  <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a> · <a href="/refund">Refunds</a><br>
   © 2026 WITHSAJU
 </footer>
 
@@ -87,6 +88,7 @@
 (function () {
   var $ = WS.$;
   WS.initNav();
+  WS.track('page_view', '', 'reading');
   var id = (location.pathname.match(/^\/r\/([0-9a-f-]{36})$/i) || [])[1] || new URLSearchParams(location.search).get('id') || '';
   var key = new URLSearchParams(location.search).get('k') || WS.me.readingKey(id) || '';
   var t0 = Date.now(), rendered = '', timer = null;

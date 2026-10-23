@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Serif+KR:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/withsaju.css">
+<title>Terms of Service — WITHSAJU</title>
+
+</head>
+<body>
+<nav>
+  <a class="logo" href="/" style="text-decoration:none"><div class="logo-mark"><span></span><span></span><span></span><span></span></div><div class="logo-text">WITH<em>SAJU</em></div></a>
+  <div class="nav-right">
+    <a class="nav-link opt" id="nav-myreading" href="/" hidden>My reading</a>
+    <a class="nav-link" id="nav-mymap" href="/" hidden>My map</a>
+    <a class="nav-cta" href="/reading">Full reading</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <article class="hero legal">
+    <p class="eyebrow">Legal</p>
+    <h1>Terms of <span class="accent">Service</span></h1>
+    <p class="updated">Last updated: October 23, 2026</p>
+
+    <p>These terms cover your use of WITHSAJU (the "Service"), a website that turns your birthday into a Korean Saju sign, lets friends compare signs on a shared page, and sells written readings. The Service is operated by WITHSAJU ("we", "us"). By using it, you agree to these terms.</p>
+
+    <h2>1. For entertainment only</h2>
+    <p>Saju is a traditional Korean system of reading birthdays through the five elements. Everything on WITHSAJU, including signs, compatibility scores and readings, is <b>for entertainment purposes only</b>. It is not medical, legal, financial, psychological or other professional advice, and it does not predict the future. Don't make important decisions based on it.</p>
+
+    <h2>2. Who can use it</h2>
+    <p>You must be at least 18 years old to buy a reading, and at least 13 to use the Service at all. If you add your birthday to someone's page, you confirm it is your own birthday.</p>
+
+    <h2>3. What you get</h2>
+    <ul>
+      <li><b>Free:</b> your Korean sign, your five elements, a personal page link, and compatibility with friends who add their birthday to your page.</li>
+      <li><b>Full reading (paid):</b> a written reading of your full chart, including your four pillars, your current 10-year cycle, the years ahead, who fits you and luck boosters. Readings are written by an AI model from values our server calculates from your birth data, and are delivered on a private web link, usually within a few minutes. The price is shown before you pay.</li>
+    </ul>
+
+    <h2>4. Payments</h2>
+    <p>Our order process is conducted by our online reseller <b>Paddle.com</b>. Paddle.com is the Merchant of Record for all our orders. Paddle provides all customer service inquiries and handles returns. Paddle's buyer terms also apply to your purchase.</p>
+
+    <h2>5. Your page and what friends see</h2>
+    <ul>
+      <li>Anyone with your page link can see your name, your Korean sign and the nicknames, signs, relationship types and scores of friends who chose to appear on it.</li>
+      <li>Birthdays and birth times are never shown to anyone else.</li>
+      <li>When a friend adds their birthday, they choose whether to appear on your page. You can remove anyone from your page.</li>
+      <li>Don't put anything offensive, unlawful or someone else's personal information into names or nicknames. We may remove content or pages that break these terms.</li>
+    </ul>
+
+    <h2>6. Keeping access</h2>
+    <p>We don't use passwords. Your page and readings open on the device you used, and on other devices through a link we email to you if you saved your email. Keep your private links to yourself: anyone with them can open your reading or manage your page.</p>
+
+    <h2>7. Acceptable use</h2>
+    <p>Don't misuse the Service: no automated sign-ups or mass submissions, no attempts to break, overload or reverse-engineer it, no scraping, and no reselling readings.</p>
+
+    <h2>8. Our content</h2>
+    <p>The site, designs, sign descriptions and readings belong to us or our licensors. Your reading is for your personal, non-commercial use; you're welcome to share it with friends. Animal art is based on icons by game-icons.net (CC BY 3.0).</p>
+
+    <h2>9. No warranty and limits of liability</h2>
+    <p>The Service is provided "as is" and "as available". To the fullest extent the law allows, we make no warranties about accuracy or fitness for a purpose, and we are not liable for indirect or consequential losses. Our total liability for any claim is limited to the amount you paid us in the 12 months before the claim. Some places don't allow these limits, so they may not apply to you.</p>
+
+    <h2>10. Changes and ending</h2>
+    <p>We may change the Service or these terms. If we make a significant change, we'll update the date at the top. You can stop using the Service at any time, and ask us to delete your data (see our <a href="/privacy">Privacy Policy</a>).</p>
+
+    <h2>11. Contact</h2>
+    <p>Questions about these terms: <span class="contact">the support email listed on this page (being set up for launch)</span>.</p>
+
+    <p class="legal-nav"><a href="/terms">Terms</a> · <a href="/privacy">Privacy</a> · <a href="/refund">Refunds</a></p>
+  </article>
+</div>
+
+<footer>
+  <a href="/find" style="color:var(--cyan);text-decoration:none">Lost your page or reading? Find it →</a><br><br>
+  WITHSAJU · KOREAN SAJU × WESTERN ASTROLOGY<br>
+  Animal art based on icons by game-icons.net (CC BY 3.0).<br>
+  For entertainment purposes only. Not medical, legal or financial advice.<br>
+  <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a> · <a href="/refund">Refunds</a><br>
+  © 2026 WITHSAJU
+</footer>
+
+<script src="/js/withsaju.js"></script>
+<script>
+(function () {
+  WS.initNav();
+  WS.track('page_view', '', 'legal_terms');
+  // 연락처는 서버 설정(CONTACT_EMAIL)에서. 아직 없으면 안내 문구
+  WS.api('/api/site').then(function (s) {
+    document.querySelectorAll('.contact').forEach(function (el) {
+      if (s.contactEmail) { el.innerHTML = ''; var a = document.createElement('a'); a.href = 'mailto:' + s.contactEmail; a.textContent = s.contactEmail; el.appendChild(a); }
+    });
+  }).catch(function () {});
+})();
+</script>
+</body>
+</html>

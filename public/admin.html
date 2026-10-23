@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Serif+KR:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/withsaju.css">
+<title>Stats — WITHSAJU</title>
+<meta name="robots" content="noindex">
+</head>
+<body>
+<nav>
+  <a class="logo" href="/" style="text-decoration:none"><div class="logo-mark"><span></span><span></span><span></span><span></span></div><div class="logo-text">WITH<em>SAJU</em></div></a>
+  <div class="nav-right"><span class="nav-link" style="border:0">ADMIN</span></div>
+</nav>
+<div class="wrap">
+  <section class="hero adm" style="max-width:980px">
+    <p class="eyebrow">Admin // 통계</p>
+    <h1>방문·공유 <span class="accent">통계</span></h1>
+
+    <form class="panel" id="kForm" novalidate>
+      <span class="corner"></span><span class="corner-br"></span>
+      <span class="tag">ADMIN <em>// KEY</em></span>
+      <p class="sub" style="margin:14px 0 10px">Vercel 환경 변수 ADMIN_KEY 값을 넣으세요. 이 기기에만 기억해요.</p>
+      <div class="share"><input id="k-in" type="password" autocomplete="off" aria-label="Admin key" style="font-size:16px"><button type="submit">열기</button></div>
+      <p class="err" id="k-err" hidden></p>
+    </form>
+
+    <div class="hide" id="out">
+      <div class="adm-bar"><span id="o-range"></span>
+        <span><button type="button" data-d="7" class="on">7일</button><button type="button" data-d="30">30일</button> <button type="button" id="o-out">잠그기</button></span></div>
+      <div class="adm-kpi" id="o-kpi"></div>
+      <div class="panel" style="margin-top:14px"><span class="corner"></span><span class="corner-br"></span>
+        <span class="tag">FUNNEL <em>// 기간 합계</em></span><div id="o-funnel" style="margin-top:14px"></div></div>
+      <div class="panel" style="margin-top:14px;overflow-x:auto"><span class="corner"></span><span class="corner-br"></span>
+        <span class="tag">DAILY <em>// 한국 날짜</em></span><div id="o-days" style="margin-top:14px"></div></div>
+      <div class="adm-3">
+        <div class="panel"><span class="tag">유입 <em>// 방문자</em></span><div id="o-src" style="margin-top:12px"></div></div>
+        <div class="panel"><span class="tag">공유 <em>// 채널</em></span><div id="o-share" style="margin-top:12px"></div></div>
+        <div class="panel"><span class="tag">화면 <em>// 조회</em></span><div id="o-pages" style="margin-top:12px"></div></div>
+      </div>
+      <p class="note" style="text-align:left;margin-top:14px">쿠키 없이 셉니다. 방문자 수는 하루 단위(같은 사람이 이틀 오면 2명). 테스트 데이터는 페이지·친구 합계에서 빠져요.</p>
+    </div>
+  </section>
+</div>
+<script src="/js/withsaju.js"></script>
+<script>
+(function () {
+  var $ = WS.$, esc = WS.esc, KEY = 'ws_admin_key', days = 7;
+  var get = function () { try { return localStorage.getItem(KEY) || ''; } catch (e) { return ''; } };
+  var put = function (v) { try { v ? localStorage.setItem(KEY, v) : localStorage.removeItem(KEY); } catch (e) { /* ignore */ } };
+  async function load() {
+    var k = get(); if (!k) return;
+    var res = await fetch('/api/admin/stats?days=' + days, { headers: { 'x-admin-key': k } });
+    var d = await res.json().catch(function () { return {}; });
+    if (!res.ok) { put(''); $('out').classList.add('hide'); $('kForm').classList.remove('hide'); $('k-err').textContent = 'ERROR // ' + (d.message || res.status); $('k-err').hidden = false; return; }
+    $('kForm').classList.add('hide'); $('out').classList.remove('hide');
+    render(d);
+  }
+  function sum(d, k) { return d.days.reduce(function (a, x) { return a + x[k]; }, 0); }
+  function pct(a, b) { return b ? Math.round(a / b * 100) + '%' : '–'; }
+  function list(rows, k, v) { return rows.length ? '<table class="adm-t">' + rows.map(function (r) { return '<tr><td>' + esc(r[k]) + '</td><td>' + r[v] + '</td></tr>'; }).join('') + '</table>' : '<p class="note" style="text-align:left">아직 없음</p>'; }
+  function render(d) {
+    var t = d.days[0];
+    $('o-range').textContent = d.days[d.days.length - 1].day + ' ~ ' + t.day;
+    var V = sum(d, 'visitors'), S = sum(d, 'signs'), M = sum(d, 'maps'), E = sum(d, 'entries'), O = sum(d, 'ownFromGuest'), U = sum(d, 'upsell'), R = sum(d, 'readings');
+    var kpi = [['오늘 방문', t.visitors], ['기간 방문', V], ['페이지 생성', M], ['친구 입력', E], ['페이지당 친구(누적)', d.totals.entriesPerMap], ['리포트', R]];
+    $('o-kpi').innerHTML = kpi.map(function (x) { return '<div><dt>' + x[0] + '</dt><dd>' + x[1] + '</dd></div>'; }).join('');
+    var f = [['방문', V, ''], ['사인 보기', S, pct(S, V)], ['내 페이지 만들기', M, pct(M, S)], ['친구가 생일 입력', E, M ? (Math.round(E / M * 10) / 10) + '명/페이지' : '–'], ['친구 → 자기 페이지', O, pct(O, E)], ['유료 안내 클릭', U, pct(U, V)], ['리포트 생성', R, pct(R, U)]];
+    var max = Math.max.apply(null, f.map(function (x) { return x[1]; }).concat([1]));
+    $('o-funnel').innerHTML = f.map(function (x) { return '<div class="fn"><span>' + x[0] + '</span><i style="width:' + Math.max(2, Math.round(x[1] / max * 100)) + '%"></i><b>' + x[1] + '</b><em>' + x[2] + '</em></div>'; }).join('');
+    var cols = [['day', '날짜'], ['visitors', '방문'], ['views', '조회'], ['signs', '사인'], ['maps', '페이지'], ['entries', '친구'], ['shares', '공유'], ['ownFromGuest', '친구→페이지'], ['upsell', '유료클릭'], ['readings', '리포트'], ['readingsFailed', '실패'], ['emails', '이메일']];
+    $('o-days').innerHTML = '<table class="adm-t wide"><tr>' + cols.map(function (c) { return '<th>' + c[1] + '</th>'; }).join('') + '</tr>' + d.days.map(function (r) { return '<tr>' + cols.map(function (c) { return '<td>' + esc(String(r[c[0]])) + '</td>'; }).join('') + '</tr>'; }).join('') + '</table>';
+    $('o-src').innerHTML = list(d.sources, 'src', 'visitors');
+    $('o-share').innerHTML = list(d.shares, 'ref', 'n');
+    $('o-pages').innerHTML = list(d.pages, 'page', 'views');
+  }
+  $('kForm').addEventListener('submit', function (e) { e.preventDefault(); $('k-err').hidden = true; put($('k-in').value.trim()); load(); });
+  $('o-out').addEventListener('click', function () { put(''); location.reload(); });
+  document.querySelectorAll('[data-d]').forEach(function (b) { b.addEventListener('click', function () { days = +b.dataset.d; document.querySelectorAll('[data-d]').forEach(function (x) { x.classList.toggle('on', x === b); }); load(); }); });
+  load();
+})();
+</script>
+</body>
+</html>

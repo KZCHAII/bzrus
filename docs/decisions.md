@@ -81,3 +81,16 @@ BZR 원본은 섹션당 1,500자·3문단이었지만, 화면에서 너무 길�
 - 연결된 게 없는 이메일이면 보내지 않지만 응답은 같음(어떤 이메일이 가입했는지 알 수 없게). 이메일당 1시간 4번, IP당 10번.
 - 리포트 다 쓰이면 "Your reading is ready" 메일.
 - 발송: 기본 테스트 모드(email_outbox에 기록만). EMAIL_MODE=live + RESEND_API_KEY + EMAIL_FROM이 있어야 실제 발송(Resend 무료 월 3,000통). 실제 발송 기록엔 본문(로그인 링크)을 남기지 않음.
+
+## D21. 약관·개인정보·환불 (2026-10-23)
+- /terms /privacy /refund. Paddle 심사 요건(서비스 설명·가격·약관·환불·개인정보, 메뉴에서 닿을 것, 판매자 이름이 약관에) 기준. Paddle = Merchant of Record 문구 포함.
+- 판매자 이름은 지금 "WITHSAJU"(브랜드). Paddle은 개인사업자면 법적 이름을 더 선호 → 사장님이 심사 때 정하면 약관 1줄 바꿈.
+- 환불: 14일 안 — 안 나옴·실패·우리 실수·중복 결제·불만족(이유 받음, 반복 요청은 거절 가능). $9.99 디지털 상품이라 넉넉하게 해서 분쟁(차지백)과 심사 리스크를 줄임. 사장님이 바꾸고 싶으면 문구만 수정.
+- 연락처 메일은 CONTACT_EMAIL 환경 변수(도메인 생기면). 없으면 "준비 중" 문구.
+- 리포트 화면 버튼 아래 "18세 이상 + 약관 동의" 문구. 저는 변호사가 아니라서, 정식 오픈 전 한 번 검토 권장.
+
+## D22. 통계·알림 (2026-10-23)
+- 쿠키 없는 자체 통계(events 표). 방문자 = 하루마다 바뀌는 해시(날짜+IP해시+브라우저) → 쿠키 동의 배너 불필요, 개인 식별 불가.
+- 화면 이벤트는 정해진 이름만(page_view, sign_revealed, share_click, story_image, upsell_click, own_page_click, private_link_copy). 서버 이벤트: map_created, entry_added, reading_created/done/failed, 이메일 저장, 로그인 링크.
+- /admin: ADMIN_KEY(사장님이 Vercel에 넣음) 있어야 열림. 깔때기(방문→사인→페이지→친구→친구가 자기 페이지→유료 클릭→리포트), 날짜별 표, 유입, 공유 채널.
+- 텔레그램(TELEGRAM_BOT_TOKEN·TELEGRAM_CHAT_ID): 리포트 생성, 생성 실패(재시도·최종), 메일 실패, 매일 아침 9시 요약(Vercel 크론 /api/cron/daily). 결제 붙으면 판매 알림 추가.

@@ -85,7 +85,7 @@
         <p class="note" id="g-added"></p>
         <div class="sharebar" style="justify-content:center;margin-top:10px"><button type="button" data-a="img" id="g-story">Save our match as a story image</button></div>
       </div>
-      <a class="panel upsell" id="g-up" href="/reading">
+      <a class="panel upsell" id="g-up" href="/reading" onclick="WS.track('upsell_click','guest_card')">
         <span class="corner"></span><span class="corner-br"></span>
         <span class="tag">NEXT <em>// YOUR FULL KOREAN SAJU</em></span>
         <h3 id="g-up-h">That was one pillar. You have four.</h3>
@@ -182,6 +182,7 @@
   WITHSAJU · KOREAN SAJU × WESTERN ASTROLOGY<br>
   Animal art based on icons by game-icons.net (CC BY 3.0).<br>
   For entertainment purposes only. Not medical, legal or financial advice.<br>
+  <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a> · <a href="/refund">Refunds</a><br>
   © 2026 WITHSAJU
 </footer>
 <div class="dock" id="dock" role="complementary" aria-label="Full reading offer">
@@ -289,6 +290,7 @@
     $('o-save-btn').disabled = false;
   });
   $('o-key').addEventListener('click', function () {
+    WS.track('private_link_copy');
     var u = location.origin + '/m/' + slug + '#k=' + token, b = $('o-key');
     var done = function () { b.textContent = 'Copied. Paste it on your other device'; setTimeout(function () { b.textContent = 'Copy my private link'; }, 2600); };
     if (navigator.clipboard) navigator.clipboard.writeText(u).then(done, function () { window.prompt('Your private link', u); }); else window.prompt('Your private link', u);
@@ -300,9 +302,9 @@
     catch (x) { $('loading').classList.add('hide'); show('missing'); return; }
     $('loading').classList.add('hide');
     fillOwnerBits();
-    if (data.isOwner) { if (hashKey) WS.me.addMap(slug, data.name, hashKey); savedState(data.savedEmail); show('owner'); ownerShare(); renderOwner(); WS.dock(true); }
+    if (data.isOwner) { WS.track('page_view', '', 'owner'); if (hashKey) WS.me.addMap(slug, data.name, hashKey); savedState(data.savedEmail); show('owner'); ownerShare(); renderOwner(); WS.dock(true); }
     else {
-      show('guest');
+      show('guest'); WS.track('page_view', '', 'guest');
       var saved = WS.me.get();   // 전에 입력한 적 있으면 미리 채움
       if (saved && !$('g-date').value) { $('g-name').value = saved.name || ''; $('g-date').value = saved.birthday || ''; WS.setTime($('g-time'), saved.time); if (window.bzrRehydrateDatepickers) window.bzrRehydrateDatepickers(); }
     }
@@ -343,8 +345,10 @@
     $('g-up-hook').textContent = hook; $('g-up-hook').hidden = !hook;
   }
   WS.api('/api/readings/mode').then(function (m) { if (m.mode === 'test') $('g-up-price').textContent = 'Free while we test · your details carry over'; }).catch(function () {});
-  $('k-story').addEventListener('click', function () { if (mySign) WS.signStory(mySign, mine && mine.name); });
+  $('k-story').addEventListener('click', function () {
+    WS.track('story_image', 'sign'); if (mySign) WS.signStory(mySign, mine && mine.name); });
   $('g-story').addEventListener('click', function () {
+    WS.track('story_image', 'match');
     if (!lastMatch) return;
     var R = WS.REL[lastMatch.relation.kind];
     WSCharts.shareImage(WSCharts.storyImage({ top: mine.name + ' + ' + lastMatch.owner.name, hanja: mySign.hanja, name: 'I\u2019m ' + lastMatch.owner.name + '\u2019s ' + R.n, sub: (lastMatch.owner.sign.title || lastMatch.owner.sign.name) + ' + ' + (mySign.title || mySign.name), extra: 'CHEMISTRY ' + lastMatch.relation.score, foot: 'WHAT ARE YOU TO ME? ' + location.host + '/m/' + slug, color: WSCharts.cv(R.c) }), 'our-korean-match.png', 'I\u2019m ' + lastMatch.owner.name + '\u2019s ' + R.n + ' in Korean Saju.');
@@ -352,6 +356,7 @@
 
   // 친구 → 자기 페이지 바로 만들기 (입력한 정보 그대로)
   $('g-own').addEventListener('click', async function () {
+    WS.track('own_page_click');
     var err = $('g-own-err'); err.hidden = true; $('g-own').disabled = true;
     try {
       var r = await WS.api('/api/maps', { body: { name: mine.name, birthday: mine.birthday, time: mine.time } });

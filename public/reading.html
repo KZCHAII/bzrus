@@ -54,6 +54,7 @@
       <button class="btn" type="submit" id="rBtn" style="background:var(--purple);box-shadow:0 0 20px rgba(168,85,247,.3)"><span id="rBtnT">Get my reading</span> <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M1 7h11m0 0L7 2m5 5L7 12" stroke="currentColor" stroke-width="1.8"/></svg></button>
       <p class="err" id="r-err" hidden></p>
       <p class="note" id="r-note"></p>
+      <p class="note" style="margin-top:8px">By continuing you confirm you're 18 or older and agree to our <a href="/terms" style="color:var(--mute-1)">Terms</a>, <a href="/privacy" style="color:var(--mute-1)">Privacy Policy</a> and <a href="/refund" style="color:var(--mute-1)">Refund Policy</a>.</p>
     </form>
 
     <div class="panel hide" id="r-done" style="margin-top:18px">
@@ -71,6 +72,7 @@
   WITHSAJU · KOREAN SAJU × WESTERN ASTROLOGY<br>
   Animal art based on icons by game-icons.net (CC BY 3.0).<br>
   For entertainment purposes only. Not medical, legal or financial advice.<br>
+  <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a> · <a href="/refund">Refunds</a><br>
   © 2026 WITHSAJU
 </footer>
 
@@ -80,6 +82,7 @@
 (function () {
   var $ = WS.$, mode = 'reserve', gender = '';
   WS.initNav();
+  WS.track('page_view', '', 'reading_form');
   var saved = WS.me.get();
   if (saved) { $('r-name').value = saved.name || ''; $('r-date').value = saved.birthday || ''; WS.setTime($('r-time'), saved.time); gender = saved.gender || ''; if (window.bzrRehydrateDatepickers) window.bzrRehydrateDatepickers(); }
   function setGender(g) { gender = g; Array.prototype.forEach.call($('r-gender').children, function (b) { var on = b.dataset.g === g; b.classList.toggle('on', on); b.setAttribute('aria-checked', on ? 'true' : 'false'); }); }

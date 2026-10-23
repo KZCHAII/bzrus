@@ -78,7 +78,7 @@
         <p class="err" id="map-err" hidden></p>
       </div>
       <div class="actions" style="grid-template-columns:1fr">
-        <a class="act paid" href="/reading" id="readBtn"><span class="k">Full reading // $9.99</span><b>Your whole chart in plain English: four pillars, 10-year luck, your 2027</b></a>
+        <a class="act paid" href="/reading" id="readBtn" onclick="WS.track('upsell_click','landing')"><span class="k">Full reading // $9.99</span><b>Your whole chart in plain English: four pillars, 10-year luck, your 2027</b></a>
       </div>
     </div>
   </section>
@@ -126,6 +126,7 @@
   WITHSAJU · KOREAN SAJU × WESTERN ASTROLOGY<br>
   Animal art based on icons by game-icons.net (CC BY 3.0).<br>
   For entertainment purposes only. Not medical, legal or financial advice.<br>
+  <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a> · <a href="/refund">Refunds</a><br>
   © 2026 WITHSAJU
 </footer>
 <div class="dock" id="dock" role="complementary" aria-label="Full reading offer">
@@ -143,6 +144,7 @@
 (function () {
   var $ = WS.$, cur = null, lastSign = null;
   $('k-story').addEventListener('click', async function () {
+    WS.track('story_image', 'sign');
     if (!lastSign) return;
     var page = await ensurePage().catch(function () { return null; });
     WS.signStory(lastSign, cur && cur.name, page);
@@ -159,6 +161,7 @@
     return location.origin + '/m/' + r.slug;
   }
   $('k-share').addEventListener('click', async function () {
+    WS.track('share_click', 'sign');
     var out = $('k-share-out'); out.textContent = '';
     if (!lastSign) return;
     try {
@@ -169,6 +172,7 @@
     } catch (x) { out.textContent = 'ERROR // ' + x.message; $('me-name').focus(); }
   });
   WS.initNav();
+  WS.track('page_view', '', 'landing');
 
   async function reveal(name, d, t, scroll) {
     var r = await WS.api('/api/sign', { body: { birthday: d, time: t } });
@@ -179,7 +183,7 @@
     $('card').classList.remove('hide'); $('actions').classList.remove('hide');
     WS.dock(true);
     drawPreview(name);
-    if (scroll) $('card').scrollIntoView({ block: 'start' });
+    if (scroll) { $('card').scrollIntoView({ block: 'start' }); WS.track('sign_revealed'); }
   }
 
   $('meForm').addEventListener('submit', async function (e) {

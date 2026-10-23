@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Serif+KR:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/withsaju.css">
+<title>Refund Policy — WITHSAJU</title>
+
+</head>
+<body>
+<nav>
+  <a class="logo" href="/" style="text-decoration:none"><div class="logo-mark"><span></span><span></span><span></span><span></span></div><div class="logo-text">WITH<em>SAJU</em></div></a>
+  <div class="nav-right">
+    <a class="nav-link opt" id="nav-myreading" href="/" hidden>My reading</a>
+    <a class="nav-link" id="nav-mymap" href="/" hidden>My map</a>
+    <a class="nav-cta" href="/reading">Full reading</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <article class="hero legal">
+    <p class="eyebrow">Legal</p>
+    <h1>Refund <span class="accent">Policy</span></h1>
+    <p class="updated">Last updated: October 23, 2026</p>
+
+    <p>We want you to be happy with your reading. Payments are processed by Paddle, our Merchant of Record, which handles refunds on our behalf.</p>
+
+    <h2>Full refund, within 14 days</h2>
+    <p>You can get a full refund within <b>14 days</b> of purchase if:</p>
+    <ul>
+      <li>your reading didn't arrive, failed to generate, or is blank or broken;</li>
+      <li>it was made with the wrong birth details because of an error on our side;</li>
+      <li>you were charged more than once for the same reading; or</li>
+      <li>you're not satisfied with it. Tell us why, so we can do better. We may decline repeated requests from the same person.</li>
+    </ul>
+
+    <h2>How to ask</h2>
+    <p>Reply to your Paddle receipt email, or contact Paddle through <a href="https://paddle.net" rel="noopener">paddle.net</a>. You can also write to us at <span class="contact">the support email listed on this page (being set up for launch)</span> with the link to your reading. Refunds go back to your original payment method, usually within 5 to 10 business days.</p>
+
+    <h2>Before you buy</h2>
+    <p>Your sign, five elements and friend compatibility are free, so you can see what WITHSAJU is like before paying. Readings are for entertainment purposes only.</p>
+
+    <p class="legal-nav"><a href="/terms">Terms</a> · <a href="/privacy">Privacy</a> · <a href="/refund">Refunds</a></p>
+  </article>
+</div>
+
+<footer>
+  <a href="/find" style="color:var(--cyan);text-decoration:none">Lost your page or reading? Find it →</a><br><br>
+  WITHSAJU · KOREAN SAJU × WESTERN ASTROLOGY<br>
+  Animal art based on icons by game-icons.net (CC BY 3.0).<br>
+  For entertainment purposes only. Not medical, legal or financial advice.<br>
+  <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a> · <a href="/refund">Refunds</a><br>
+  © 2026 WITHSAJU
+</footer>
+
+<script src="/js/withsaju.js"></script>
+<script>
+(function () {
+  WS.initNav();
+  WS.track('page_view', '', 'legal_refund');
+  // 연락처는 서버 설정(CONTACT_EMAIL)에서. 아직 없으면 안내 문구
+  WS.api('/api/site').then(function (s) {
+    document.querySelectorAll('.contact').forEach(function (el) {
+      if (s.contactEmail) { el.innerHTML = ''; var a = document.createElement('a'); a.href = 'mailto:' + s.contactEmail; a.textContent = s.contactEmail; el.appendChild(a); }
+    });
+  }).catch(function () {});
+})();
+</script>
+</body>
+</html>

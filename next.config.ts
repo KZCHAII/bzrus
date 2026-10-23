@@ -15,6 +15,10 @@ const nextConfig: NextConfig = {
       { source: "/reading", destination: "/reading.html" },
       { source: "/r/:id", destination: "/r.html" },
       { source: "/find", destination: "/find.html" },
+      { source: "/admin", destination: "/admin.html" },
+      { source: "/refund", destination: "/refund.html" },
+      { source: "/privacy", destination: "/privacy.html" },
+      { source: "/terms", destination: "/terms.html" },
     ];
   },
   async headers() {
@@ -25,6 +29,10 @@ const nextConfig: NextConfig = {
       { source: "/reading", headers: htmlHeaders },
       { source: "/r/:id", headers: htmlHeaders },
       { source: "/find", headers: htmlHeaders },
+      { source: "/admin", headers: [...htmlHeaders, { key: "X-Robots-Tag", value: "noindex" }] },
+      { source: "/refund", headers: htmlHeaders },
+      { source: "/privacy", headers: htmlHeaders },
+      { source: "/terms", headers: htmlHeaders },
       { source: "/js/:path*", headers: [{ key: "Cache-Control", value: "no-cache" }] },
       { source: "/css/:path*", headers: [{ key: "Cache-Control", value: "no-cache" }] },
       { source: "/api/:path*", headers: [{ key: "Cache-Control", value: "no-store" }] },

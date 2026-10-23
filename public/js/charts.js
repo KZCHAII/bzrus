@@ -168,7 +168,10 @@
       '<a href="sms:?&body=' + t + '%20' + u + '">Text</a>' +
       '</div><p class="copied"></p>';
     el.addEventListener('click', function (e) {
+      var lk = e.target.closest('a');
+      if (lk && window.WS) WS.track('share_click', lk.textContent.trim().toLowerCase());
       var b = e.target.closest('button'); if (!b) return;
+      if (window.WS) WS.track(b.dataset.a === 'img' ? 'story_image' : 'share_click', b.dataset.a === 'img' ? 'page' : b.dataset.a);
       var out = el.querySelector('.copied');
       if (b.dataset.a === 'native') navigator.share({ title: text, text: text, url: url }).catch(function () {});
       if (b.dataset.a === 'copy') { try { navigator.clipboard.writeText(url).then(function () { out.textContent = 'COPIED // ' + url; }, function () { out.textContent = url; }); } catch (x) { out.textContent = url; } }

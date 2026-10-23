@@ -2,6 +2,7 @@
 // EMAIL_MODE=live + RESEND_API_KEY + EMAIL_FROM 이 다 있을 때만 실제 발송. 실제 발송 기록에는 본문(로그인 링크)을 남기지 않는다.
 import { getSql } from "./db";
 import { envOptional } from "./env";
+import { notify } from "./notify";
 
 export type EmailKind = "login" | "reading_ready" | "page_saved";
 export interface Mail { to: string; kind: EmailKind; subject: string; text: string; html: string }
@@ -27,7 +28,9 @@ export async function sendEmail(m: Mail, isTest = false): Promise<{ status: "tes
     await sql`update email_outbox set status = 'sent', provider_id = ${data.id ?? null}, sent_at = now() where id = ${row.id}`;
     return { status: "sent" };
   } catch (e) {
-    await sql`update email_outbox set status = 'failed', error = ${(e instanceof Error ? e.message : String(e)).slice(0, 300)} where id = ${row.id}`;
+    const msg = (e instanceof Error ? e.message : String(e)).slice(0, 300);
+    await sql`update email_outbox set status = 'failed', error = ${msg} where id = ${row.id}`;
+    await notify(`📧 메일 발송 실패 (${m.kind}): ${msg.slice(0, 150).replace(/[<>&]/g, "")}`);
     return { status: "failed" };
   }
 }

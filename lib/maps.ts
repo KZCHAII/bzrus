@@ -4,6 +4,7 @@ import { getSql } from "./db";
 import { HttpError, str } from "./http";
 import { envOptional } from "./env";
 import { relationOf, signOf, type KoreanSign, type RelationKind } from "./saju";
+import { track } from "./events";
 
 export const MAX_ENTRIES = 200;
 const MAPS_PER_IP_PER_DAY = 20;
@@ -87,6 +88,7 @@ export async function createMap(input: { name: unknown; birthday: unknown; time?
   const slug = newSlug();
   await sql`insert into maps (slug, owner_token_hash, name, birth_date, birth_time, sign_key, ip_hash, is_test)
             values (${slug}, ${sha(ownerToken)}, ${name}, ${b.iso}, ${b.time}, ${sign.key}, ${ipHash}, ${isTest})`;
+  await track("map_created", { isTest });
   return { slug, ownerToken, name, sign: publicSign(sign) };
 }
 
@@ -156,6 +158,7 @@ export async function addEntry(slug: string, input: { nickname: unknown; birthda
     });
     added = true;
   }
+  await track("entry_added", { ref: added ? "on_map" : "private", isTest });
   return { added, sign: publicSign(friend), relation: rel, owner: { name: m.name, sign: sharedSign(owner) } };
 }
 
