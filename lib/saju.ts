@@ -173,6 +173,50 @@ export interface KoreanSign {
   title: string;
   /** 네 기둥 (시간을 모르면 hour = null) */
   pillars: { year: PillarView; month: PillarView; day: PillarView; hour: PillarView | null };
+  /** 지장간 잠재력 (오행별 0~약 2) */
+  hidden: Record<Element, number>;
+  /** 어느 지지에 숨어 있는지 (본인에게만 보여 줌) */
+  hiddenSpots: HiddenSpot[];
+}
+
+// ── 지장간 (월률분야 일수: 여기·중기·정기, 30일 기준) ──
+/** [천간 번호, 일수] — 지지 안에 숨어 있는 천간 */
+export const HIDDEN_STEMS: [number, number][][] = [
+  [[8, 10], [9, 20]],           // 子 壬癸
+  [[9, 9], [7, 3], [5, 18]],    // 丑 癸辛己
+  [[4, 7], [2, 7], [0, 16]],    // 寅 戊丙甲
+  [[0, 10], [1, 20]],           // 卯 甲乙
+  [[1, 9], [9, 3], [4, 18]],    // 辰 乙癸戊
+  [[4, 7], [6, 7], [2, 16]],    // 巳 戊庚丙
+  [[2, 10], [5, 9], [3, 11]],   // 午 丙己丁
+  [[3, 9], [1, 3], [5, 18]],    // 未 丁乙己
+  [[4, 7], [8, 7], [6, 16]],    // 申 戊壬庚
+  [[6, 10], [7, 20]],           // 酉 庚辛
+  [[7, 9], [3, 3], [4, 18]],    // 戌 辛丁戊
+  [[4, 7], [0, 7], [8, 16]],    // 亥 戊甲壬
+];
+export interface HiddenSpot { element: Element; amount: number; branch: string; animal: string }
+/**
+ * 잠재력: 지지 속 지장간 중 겉(지지 본래 오행)과 다른 기운. 일수/30 으로 0~1.
+ * 겉 오행 개수(elements)와 겹치지 않게 본래 오행은 뺀다.
+ */
+export function hiddenOf(branches: number[]): { hidden: Record<Element, number>; spots: HiddenSpot[] } {
+  const hidden: Record<Element, number> = { Wood: 0, Fire: 0, Earth: 0, Metal: 0, Water: 0 };
+  const spots: HiddenSpot[] = [];
+  for (const b of branches) {
+    const per: Partial<Record<Element, number>> = {};
+    for (const [st, days] of HIDDEN_STEMS[b]) {
+      const e = STEM_ELEMENT[st];
+      if (e === BRANCH_ELEMENT[b]) continue;
+      per[e] = (per[e] ?? 0) + days / 30;
+    }
+    for (const [e, v] of Object.entries(per) as [Element, number][]) {
+      hidden[e] += v;
+      spots.push({ element: e, amount: Math.round(v * 10) / 10, branch: BRANCH_H[b], animal: ANIMAL[b] });
+    }
+  }
+  for (const e of Object.keys(hidden) as Element[]) hidden[e] = Math.round(hidden[e] * 10) / 10;
+  return { hidden, spots };
 }
 
 export interface PillarView { han: string; roman: string; stemElement: Element; branchElement: Element }
@@ -188,7 +232,9 @@ export function signOf(b: BirthInput): KoreanSign {
   const sEl = SEASON_ELEMENT[c.season];
   const strength: Strength = sEl === element ? "peak" : FEEDS[sEl] === element ? "fed" : "off";
   const t = STEM_TYPE[stem];
+  const hid = hiddenOf([c.year, c.month, c.day, c.hour].filter((x): x is Pillar => !!x).map((x) => x.branch));
   return {
+    hidden: hid.hidden, hiddenSpots: hid.spots,
     key: `${c.season}-${t.name}`.toLowerCase().replace(/\s+/g, "-"),
     name: `${c.season} ${t.name}`,
     hanja: STEM_H[stem],

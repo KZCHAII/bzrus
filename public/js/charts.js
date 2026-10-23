@@ -20,8 +20,8 @@
     axes.forEach(function (_, i) { var p = pt(i, R); h.push('<line x1="' + cx + '" y1="' + cy + '" x2="' + p[0] + '" y2="' + p[1] + '" stroke="rgba(255,255,255,.08)"/>'); });
     series.forEach(function (s) {
       var pts = s.values.map(function (v, i) { return pt(i, R * Math.max(.06, v / max)).join(','); }).join(' ');
-      h.push('<polygon points="' + pts + '" fill="' + s.color + '" fill-opacity="' + (s.fill == null ? .22 : s.fill) + '" stroke="' + s.color + '" stroke-width="2" stroke-linejoin="round"/>');
-      s.values.forEach(function (v, i) { var p = pt(i, R * Math.max(.06, v / max)); h.push('<circle cx="' + p[0] + '" cy="' + p[1] + '" r="3.5" fill="' + s.color + '"/>'); });
+      h.push('<polygon points="' + pts + '" fill="' + s.color + '" fill-opacity="' + (s.fill == null ? .22 : s.fill) + '" stroke="' + s.color + '" stroke-width="2" stroke-linejoin="round"' + (s.dash ? ' stroke-dasharray="5 4" stroke-opacity=".8"' : '') + '/>');
+      if (!s.dash) s.values.forEach(function (v, i) { var p = pt(i, R * Math.max(.06, v / max)); h.push('<circle cx="' + p[0] + '" cy="' + p[1] + '" r="3.5" fill="' + s.color + '"/>'); });
     });
     axes.forEach(function (a, i) {
       var p = pt(i, R + 26), anchor = Math.abs(p[0] - cx) < 8 ? 'middle' : p[0] > cx ? 'start' : 'end';
@@ -29,15 +29,39 @@
       if (a.sub != null) h.push('<text x="' + p[0] + '" y="' + (p[1] + 11) + '" text-anchor="' + anchor + '" fill="#aaa" font-family="JetBrains Mono, monospace" font-size="11">' + esc(a.sub) + '</text>');
     });
     h.push('</svg>');
-    var legend = series.length > 1 ? '<div class="pleg">' + series.map(function (s) { return '<span><i style="background:' + s.color + '"></i>' + esc(s.name) + '</span>'; }).join('') + '</div>' : '';
+    var legend = series.length > 1 ? '<div class="pleg">' + series.map(function (s) { return '<span><i style="' + (s.dash ? 'border:1px dashed ' + s.color + ';background:transparent' : 'background:' + s.color) + '"></i>' + esc(s.name) + '</span>'; }).join('') + '</div>' : '';
     return h.join('') + legend;
   }
 
   /** 오행 오각형: 한 사람 또는 두 사람 겹쳐서 */
   function elementsPentagon(list) {
     var colors = [cv('--cyan'), cv('--fire')];
-    var axes = EL.map(function (k) { return { label: k, color: cv(EL_C[k]), sub: list.length === 1 ? String(list[0].elements[k]) : null }; });
-    return pentagon(axes, list.map(function (p, i) { return { name: p.name, color: colors[i], values: EL.map(function (k) { return p.elements[k] || 0; }) }; }), { min: 3, label: 'Five elements' });
+    var one = list.length === 1 ? list[0] : null, hid = one && one.hidden && EL.some(function (k) { return one.hidden[k] > 0; }) ? one.hidden : null;
+    var axes = EL.map(function (k) { return { label: k, color: cv(EL_C[k]), sub: one ? String(one.elements[k]) + (hid && hid[k] ? ' +' + hid[k] : '') : null }; });
+    var series = list.map(function (p, i) { return { name: hid ? 'Visible' : p.name, color: colors[i], values: EL.map(function (k) { return p.elements[k] || 0; }) }; });
+    // 지장간 잠재력: 겉 + 숨은 기운을 점선으로
+    if (hid) series.unshift({ name: 'With hidden potential', color: '#b46bff', fill: .12, dash: true, values: EL.map(function (k) { return (one.elements[k] || 0) + (hid[k] || 0); }) });
+    return pentagon(axes, series, { min: 3, label: 'Five elements' });
+  }
+
+  /** 지장간 한 줄: 겉엔 없는데 속에 있는 기운(잠든 기운) 우선, 없으면 가장 큰 잠재력 */
+  function hiddenNote(s, mine) {
+    if (!s || !s.hidden) return '';
+    var y0 = new Date().getFullYear();
+    var wake = function (k) { for (var y = y0; y < y0 + 12; y++) { if (EL[Math.floor((((y - 4) % 10) + 10) % 10 / 2)] === k) return y; } return null; };
+    var where = function (k) { return mine && s.hiddenSpots ? s.hiddenSpots.filter(function (x) { return x.element === k; }).map(function (x) { return x.animal + ' ' + x.branch; }).filter(function (v, i, a) { return a.indexOf(v) === i; }) : []; };
+    var sleeping = EL.filter(function (k) { return !s.elements[k] && s.hidden[k] > 0; });
+    var col = function (k) { return '<b style="color:var(' + EL_C[k] + ')">' + k + '</b>'; };
+    if (sleeping.length) {
+      return sleeping.map(function (k) {
+        var w = where(k), y = wake(k);
+        return '<b>Hidden potential:</b> zero ' + col(k) + ' on the surface, but ' + s.hidden[k] + ' hidden' + (w.length ? ' inside your ' + esc(w.join(' and ')) : '') + '. It sleeps until a ' + k.toLowerCase() + ' year wakes it' + (y ? ' (next: ' + y + ')' : '') + '.';
+      }).join('<br>');
+    }
+    var top = EL.slice().sort(function (a, b) { return s.hidden[b] - s.hidden[a]; })[0];
+    if (!s.hidden[top]) return '';
+    var w = where(top);
+    return '<b>Hidden potential:</b> +' + s.hidden[top] + ' ' + col(top) + (w.length ? ' inside your ' + esc(w.join(' and ')) : '') + '. More ' + top.toLowerCase() + ' than your chart shows on the surface.';
   }
 
   /** 관계 오각형: 친구들이 다섯 관계에 몇 명씩 */
@@ -152,5 +176,5 @@
     });
   }
 
-  window.WSCharts = { pentagon: pentagon, elementsPentagon: elementsPentagon, relationsPentagon: relationsPentagon, yearsLine: yearsLine, storyImage: storyImage, shareImage: shareImage, shareBar: shareBar, cv: cv };
+  window.WSCharts = { pentagon: pentagon, elementsPentagon: elementsPentagon, hiddenNote: hiddenNote, relationsPentagon: relationsPentagon, yearsLine: yearsLine, storyImage: storyImage, shareImage: shareImage, shareBar: shareBar, cv: cv };
 })();

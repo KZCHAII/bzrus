@@ -64,7 +64,7 @@
     set('k-tag', esc(s.tagline));
     set('k-stats', '<div><dt>Element</dt><dd>' + (s.yang ? 'Yang' : 'Yin') + ' ' + esc(s.element) + '</dd></div><div><dt>Season</dt><dd>' + esc(s.season) + '</dd></div><div><dt>Strength</dt><dd class="hot">' + STRENGTH[s.strength] + '</dd></div>');
     set('k-pillars', pillarsHtml(s));
-    if (window.WSCharts && s.elements) set('k-penta', '<div class="label" style="font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--mute-3);margin:4px 0 0">YOUR FIVE ELEMENTS</div>' + WSCharts.elementsPentagon([{ name: name || 'You', elements: s.elements }]));
+    if (window.WSCharts && s.elements) set('k-penta', '<div class="label" style="font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--mute-3);margin:4px 0 0">YOUR FIVE ELEMENTS</div>' + WSCharts.elementsPentagon([{ name: name || 'You', elements: s.elements, hidden: s.hidden }]) + (WSCharts.hiddenNote(s, !!s.hiddenSpots) ? '<p class="hnote">' + WSCharts.hiddenNote(s, !!s.hiddenSpots) + '</p>' : ''));
     set('k-why', '<b>Why ' + esc(s.name) + '?</b> Saju names you after your <b>Day Master</b>, the heavenly stem of the day you were born. Yours is ' + esc(s.hanja) + ', ' + (s.yang ? 'Yang' : 'Yin') + ' ' + esc(s.element) + '. ' + whyText(s));
   }
 

@@ -39,11 +39,14 @@
     h.push(head("Your Saju chart", "chart") + '<div class="card" style="--el:var(' + EL_VAR[c.sign.element] + ')">');
     if (window.WSArt && c.sign.animal) h.push('<div class="chart-art"><div class="art">' + WSArt.svg({ animal: c.sign.animal.name, element: c.sign.element, yang: c.sign.yang, season: c.sign.season, hanja: c.sign.dayPillar.han }) + '</div><div><div class="label" style="color:var(--cyan)">' + esc(c.sign.name) + '</div><div class="big" style="font-size:20px">' + esc(c.sign.title || (c.sign.animal.color + " " + c.sign.animal.name)) + "</div><p>" + esc(c.sign.tagline) + " The " + esc(c.sign.animal.name.toLowerCase()) + ": " + esc(c.sign.animal.line) + ".</p></div></div>");
     h.push('<div class="label">Four pillars</div><dl class="pillars" style="margin-bottom:18px">' + cell("Year", P.year) + cell("Month", P.month) + cell("Day", P.day) + cell("Hour", P.hour) + "</dl>");
-    if (window.WSCharts) h.push('<div class="label">Five elements</div>' + WSCharts.elementsPentagon([{ name: d.name, elements: c.elements }]));
-    var max = Math.max.apply(null, Object.keys(c.elements).map(function (k) { return c.elements[k]; }).concat([1]));
+    if (window.WSCharts) h.push('<div class="label">Five elements</div>' + WSCharts.elementsPentagon([{ name: d.name, elements: c.elements, hidden: c.hidden }]));
+    var HD = c.hidden || {};
+    var max = Math.max.apply(null, Object.keys(c.elements).map(function (k) { return c.elements[k] + (HD[k] || 0); }).concat([1]));
     h.push('<div class="elbar" style="margin-top:6px">' + ["Wood", "Fire", "Earth", "Metal", "Water"].map(function (k) {
-      return '<div><div class="nm" style="color:var(' + EL_VAR[k] + ')"><span>' + k + "</span><b>" + c.elements[k] + '</b></div><div class="tr"><i style="width:' + Math.round(c.elements[k] / max * 100) + "%;background:var(" + EL_VAR[k] + ')"></i></div></div>';
+      var v = c.elements[k], hv = HD[k] || 0;
+      return '<div><div class="nm" style="color:var(' + EL_VAR[k] + ')"><span>' + k + "</span><b>" + v + (hv ? ' <small>+' + hv + '</small>' : '') + '</b></div><div class="tr"><i style="width:' + Math.round(v / max * 100) + "%;background:var(" + EL_VAR[k] + ')"></i>' + (hv ? '<i class="hid" style="left:' + Math.round(v / max * 100) + '%;width:' + Math.round(hv / max * 100) + '%;--c:var(' + EL_VAR[k] + ')"></i>' : '') + '</div></div>';
     }).join("") + "</div>");
+    if (c.hidden) { var hn = WSCharts.hiddenNote({ elements: c.elements, hidden: c.hidden, hiddenSpots: c.hiddenSpots }, true); h.push('<p class="hnote">' + (hn || '') + (hn ? '<br>' : '') + '<span>Solid = elements on the surface. Dashed / striped = hidden stems (地藏干) inside your branches: potential that shows up when a year or cycle calls it out.</span></p>'); }
     var age = new Date().getFullYear() - Number(d.birthday.slice(0, 4));
     h.push('<div class="label mt">10-year luck cycles · starts at age ' + c.luck.startAge + '</div><div class="luck">' + c.luck.cycles.map(function (x) {
       var now = age >= x.startAge && age <= x.endAge;

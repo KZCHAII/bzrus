@@ -147,7 +147,7 @@ export async function viewReading(id: string, key: string, start: (fn: () => Pro
   const { chart } = buildPrompt(r);
   const base = {
     id: r.id, name: r.name, birthday: b.iso, time: b.time, gender: r.gender, created: r.created_at.toISOString(),
-    chart: { sign: chart.sign, pillars: chart.pillars, elements: chart.elements, luck: chart.luck, current: chart.current, match: chart.match },
+    chart: { sign: chart.sign, pillars: chart.pillars, elements: chart.elements, hidden: chart.hidden, hiddenSpots: chart.hiddenSpots, luck: chart.luck, current: chart.current, match: chart.match },
   };
   if (r.status === "generating") {
     const stale = !r.started_at || Date.now() - r.started_at.getTime() > STALE_MIN * 60_000;

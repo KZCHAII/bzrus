@@ -38,7 +38,7 @@ First compute this person's age in each year from the birth year, and write what
 This report is a data asset built by parsing {{name}}'s Four Pillars, calculated from the exact moment of birth.
 
 ##Your Core Design: Temperament and Wiring
-(Start from the Day Master and the season of birth, then the day branch and hour pillar. The essential temperament, the main strength, its downside, and the one pattern that keeps repeating in work and relationships.)
+(Start from the Day Master and the season of birth, then the day branch and hour pillar. The essential temperament, the main strength, its downside, and the one pattern that keeps repeating in work and relationships. If the chart lists sleeping elements or strong hidden stems, name that hidden potential in one sentence: what it is and when it wakes up.)
 
 ##Your Current 10-Year Cycle: {{cur_ages}}
 (What energy dominates this person's life right now, from the current cycle data, and how it pushes them. Then one sentence each on work, money, love, health and personal growth during this cycle. If the first cycle has not started, say what childhood is shaped by instead.)

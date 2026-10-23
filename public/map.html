@@ -218,7 +218,8 @@
   // 마이페이지: 오각형·친구 통계·내 리포트·공유
   function renderOwner() {
     var s = data.sign, E = data.entries;
-    $('o-penta').innerHTML = WSCharts.elementsPentagon([{ name: data.name, elements: s.elements }]);
+    var hn = WSCharts.hiddenNote(s, !!s.hiddenSpots);
+    $('o-penta').innerHTML = WSCharts.elementsPentagon([{ name: data.name, elements: s.elements, hidden: s.hidden }]) + (hn ? '<p class="hnote">' + hn + '</p>' : '');
     $('o-rpenta').innerHTML = WSCharts.relationsPentagon(E);
     $('o-k1').textContent = E.length;
     $('o-k2').textContent = E.length ? Math.round(E.reduce(function (a, e) { return a + e.score; }, 0) / E.length) : '–';

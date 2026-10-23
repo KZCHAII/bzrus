@@ -169,3 +169,18 @@ describe("추천 띠·개운법", async () => {
     for (const p of ch.match.animals.picks) expect(p.han).toMatch(/^[甲丙戊庚壬][子寅辰午申戌]$|^[乙丁己辛癸][丑卯巳未酉亥]$/);
   });
 });
+
+describe("지장간 잠재력", () => {
+  it("본래 오행은 빼고 숨은 기운만 일수/30으로 센다", async () => {
+    const { hiddenOf } = await import("../lib/saju");
+    // 子·卯·酉는 겉과 속이 같아 잠재력 0
+    expect(Object.values(hiddenOf([0, 3, 9]).hidden).every((v) => v === 0)).toBe(true);
+    // 戌: 辛 9일(Metal 0.3) 丁 3일(Fire 0.1)
+    const d = hiddenOf([10]);
+    expect(d.hidden.Metal).toBe(0.3);
+    expect(d.hidden.Fire).toBe(0.1);
+    expect(d.hidden.Earth).toBe(0);
+    // 寅: 戊 0.2(7/30) 丙 0.2
+    expect(hiddenOf([2]).hidden).toMatchObject({ Earth: 0.2, Fire: 0.2, Wood: 0 });
+  });
+});

@@ -76,12 +76,13 @@ export const BOOSTERS: Record<Element, string[]> = {
   Metal: ["Declutter: clear desks, clean rooms, fewer things", "Wear white, silver or gold; wear a metal watch or ring", "Breathe: yoga, running, deep-breathing practice", "Travel west, or to dry, open places in autumn", "Set clear rules and deadlines for yourself"],
 };
 /** 나에게 맞는 사람: 원국에 부족한 오행(+ 약한 일간이면 일간을 생해 주는 오행)을 가진 일간 */
-export function matchesFor(elements: Record<Element, number>, dayStem: number, strength: "peak" | "fed" | "off", dayBranch = 0): { needs: Element[]; signs: MatchSign[]; animals: { best: MatchAnimal[]; avoid: MatchAnimal[]; picks: { title: string; han: string; element: Element; why: string }[] }; boosters: Booster[] } {
+export function matchesFor(elements: Record<Element, number>, dayStem: number, strength: "peak" | "fed" | "off", dayBranch = 0, hidden?: Record<Element, number>): { needs: Element[]; signs: MatchSign[]; animals: { best: MatchAnimal[]; avoid: MatchAnimal[]; picks: { title: string; han: string; element: Element; why: string }[] }; boosters: Booster[] } {
   const dm = STEM_ELEMENT[dayStem];
   const feeder = ORDER.find((e) => FEEDS[e] === dm)!;
   const min = Math.min(...ORDER.map((e) => elements[e]));
   const prio = (e: Element) => (e === feeder ? 0 : e === dm ? 1 : 2);
-  const needs: Element[] = ORDER.filter((e) => elements[e] === min).sort((a, b) => prio(a) - prio(b)).slice(0, 2);
+  // 겉으로 똑같이 부족하면 지장간에도 없는 쪽이 더 필요하다
+  const needs: Element[] = ORDER.filter((e) => elements[e] === min).sort((a, b) => (hidden ? hidden[a] - hidden[b] : 0) || prio(a) - prio(b)).slice(0, 2);
   if (strength === "off" && !needs.includes(feeder)) needs.splice(1, 1, feeder);
   const signs: MatchSign[] = [];
   for (const e of needs.slice(0, 2)) {
@@ -123,6 +124,9 @@ export interface FullChart {
   sign: ReturnType<typeof signOf>;
   pillars: { year: PillarDetail; month: PillarDetail; day: PillarDetail; hour: PillarDetail | null };
   elements: Record<Element, number>;
+  /** 지장간 잠재력 */
+  hidden: Record<Element, number>;
+  hiddenSpots: import("./saju").HiddenSpot[];
   luck: { forward: boolean; startAge: number; cycles: LuckCycle[] };
   years: { year: number; pillar: PillarDetail }[];
   /** 지금 대운: 원국에 이 대운 두 글자를 더하면 오행이 어떻게 바뀌는지 */
@@ -170,9 +174,9 @@ export function fullChart(b: BirthInput, gender: Gender, years: number[], nowYea
     current = { cycle: cyc, withCycle, plain: [TEN_GOD_PLAIN[cyc.pillar.stem.tenGod as TenGod], TEN_GOD_PLAIN[cyc.pillar.branch.tenGod]] };
   }
   return {
-    sign, pillars, elements, luck,
+    sign, pillars, elements, hidden: sign.hidden, hiddenSpots: sign.hiddenSpots, luck,
     years: years.map((y) => ({ year: y, pillar: detail(yearPillarOf(y), ds) })),
-    current, match: matchesFor(elements, ds, sign.strength, c.day.branch),
+    current, match: matchesFor(elements, ds, sign.strength, c.day.branch, sign.hidden),
   };
 }
 
@@ -194,6 +198,11 @@ export function chartText(ch: FullChart, name: string, birth: { iso: string; tim
     line("Hour pillar (inner self, later life, children)", ch.pillars.hour),
     `Day Master: ${ch.sign.hanja} = ${ch.sign.yang ? "Yang" : "Yin"} ${ch.sign.element}. Born in ${ch.sign.season}; seasonal strength: ${ch.sign.strength === "peak" ? "in season (strong)" : ch.sign.strength === "fed" ? "fed by the season (supported)" : "off season (weaker, needs support)"}.`,
     `Five elements count across the ${ch.pillars.hour ? "8" : "6"} characters: ${Object.entries(ch.elements).map(([k, v]) => `${k} ${v}`).join(", ")}.`,
+    `Hidden stems (地藏干) = latent potential inside the branches, not counted above: ${ch.hiddenSpots.map((h) => `${h.element} ${h.amount} in ${h.branch} ${h.animal}`).join(", ") || "none beyond the surface elements"}. Totals: ${Object.entries(ch.hidden).map(([k, v]) => `${k} ${v}`).join(", ")}.`,
+    ...(() => {
+      const sleeping = (Object.keys(ch.elements) as Element[]).filter((e) => ch.elements[e] === 0 && ch.hidden[e] > 0);
+      return sleeping.length ? [`Sleeping elements (zero on the surface, present hidden): ${sleeping.join(", ")}. They wake up in years and cycles whose stem is that element.`] : [];
+    })(),
     `10-year luck cycles (${ch.luck.forward ? "forward" : "backward"}, first cycle starts at age ${ch.luck.startAge}):`,
     ...ch.luck.cycles.map((x) => `- Ages ${x.startAge}-${x.endAge} (from ${x.startYear}): ${x.pillar.han} (${x.pillar.stem.element} ${TEN_GOD[x.pillar.stem.tenGod as TenGod]} / ${x.pillar.branch.animal} ${x.pillar.branch.element} ${TEN_GOD[x.pillar.branch.tenGod]})${x === cur ? "  <- CURRENT CYCLE" : ""}`),
     ch.current ? `Current 10-year cycle energy (ages ${ch.current.cycle.startAge}-${ch.current.cycle.endAge}): stem brings ${TEN_GOD_PLAIN[ch.current.cycle.pillar.stem.tenGod as TenGod]}; branch brings ${ch.current.plain[1]}. Element balance with this cycle added: ${Object.entries(ch.current.withCycle).map(([k, v]) => `${k} ${v}`).join(", ")}.` : `Current 10-year cycle: not started yet (childhood).`,
