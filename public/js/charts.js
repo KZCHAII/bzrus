@@ -101,8 +101,12 @@
     var nl = wrap(x, o.name, 540, ny, 960, o.name.length > 22 ? 86 : 104);
     x.fillStyle = '#bbb'; x.font = '500 40px Inter, Arial, sans-serif'; wrap(x, o.sub, 540, ny + nl * (o.name.length > 22 ? 86 : 104) + 30, 900, 54);
     if (o.extra) { x.fillStyle = o.color; x.font = '700 60px "JetBrains Mono", monospace'; x.fillText(o.extra, 540, 1590); }
-    x.fillStyle = '#00f0ff'; x.fillRect(190, 1660, 700, 110);
-    x.fillStyle = '#000'; x.font = '700 40px "JetBrains Mono", monospace'; x.fillText(o.foot, 540, 1716);
+    // 아래 버튼 모양: 위 줄은 질문, 아래 줄은 주소 (길면 글자를 줄여서 한 줄에)
+    var q = o.foot, url = '';
+    var m = /^(.*\?)\s+(\S+)$/.exec(o.foot); if (m) { q = m[1]; url = m[2]; }
+    x.fillStyle = '#00f0ff'; x.fillRect(140, 1640, 800, url ? 150 : 110);
+    x.fillStyle = '#000'; x.font = '800 44px "JetBrains Mono", monospace'; x.fillText(q, 540, url ? 1690 : 1696);
+    if (url) { var fs = 34; x.font = '600 ' + fs + 'px "JetBrains Mono", monospace'; while (x.measureText(url).width > 740 && fs > 18) { fs -= 2; x.font = '600 ' + fs + 'px "JetBrains Mono", monospace'; } x.fillText(url, 540, 1748); }
     return c;
   }
   function hexA(col, a) { var m = /^#?([0-9a-f]{6})$/i.exec(col.trim()); if (!m) return 'rgba(0,240,255,' + a + ')'; var n = parseInt(m[1], 16); return 'rgba(' + (n >> 16 & 255) + ',' + (n >> 8 & 255) + ',' + (n & 255) + ',' + a + ')'; }

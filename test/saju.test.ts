@@ -133,3 +133,39 @@ describe("계절별 타입·스피릿 애니멀", () => {
     expect(signOf({ year: 1996, month: 11, day: 21 }).title).toBe("Black Dog of the Winter Ocean");
   });
 });
+
+describe("합·충·형·파·해", async () => {
+  const { branchLinks, stemLinks, relationOf, signOf: so } = await import("@/lib/saju");
+  it("일지 관계", () => {
+    expect(branchLinks(10, 3)).toEqual(["sixHarmony"]);          // 戌卯 육합
+    expect(branchLinks(10, 2)).toEqual(["trine"]);                // 戌寅 삼합
+    expect(branchLinks(10, 4)).toEqual(["clash"]);                // 戌辰 충
+    expect(branchLinks(10, 7)).toEqual(expect.arrayContaining(["punish", "break"])); // 戌未 형·파
+    expect(branchLinks(9, 10)).toEqual(["harm"]);                 // 酉戌 해
+    expect(branchLinks(2, 11)).toEqual(["sixHarmony"]);           // 寅亥: 합이면 파는 무시
+  });
+  it("일간 합·충", () => {
+    expect(stemLinks(0, 5)).toEqual(["stemHarmony"]);  // 甲己
+    expect(stemLinks(2, 8)).toEqual(["stemClash"]);    // 丙壬
+    expect(stemLinks(4, 0)).toEqual([]);
+  });
+  it("점수에 반영되고 30~99", () => {
+    const a = so({ year: 1996, month: 11, day: 21 });
+    for (let t = Date.UTC(1990, 0, 1); t < Date.UTC(1990, 3, 1); t += 86400000) {
+      const d = new Date(t), r = relationOf(a, so({ year: d.getUTCFullYear(), month: d.getUTCMonth() + 1, day: d.getUTCDate() }));
+      expect(r.score).toBeGreaterThanOrEqual(30); expect(r.score).toBeLessThanOrEqual(99);
+    }
+  });
+});
+
+describe("추천 띠·개운법", async () => {
+  const { fullChart } = await import("@/lib/saju-chart");
+  it("1996-11-21(戌): 卯 육합 먼저, 辰 충은 조심, 부족한 오행 개운법", () => {
+    const ch = fullChart({ year: 1996, month: 11, day: 21 }, "man", [2026], 2026);
+    expect(ch.match.animals.best[0]).toMatchObject({ animal: "Rabbit", link: "sixHarmony" });
+    expect(ch.match.animals.avoid.map((a) => a.animal)).toContain("Dragon");
+    expect(ch.match.boosters.length).toBeGreaterThan(0);
+    // 추천 일주는 실제로 있는 조합 (음양 일치)
+    for (const p of ch.match.animals.picks) expect(p.han).toMatch(/^[甲丙戊庚壬][子寅辰午申戌]$|^[乙丁己辛癸][丑卯巳未酉亥]$/);
+  });
+});

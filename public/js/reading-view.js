@@ -79,6 +79,14 @@
     var h = ['<div class="label">Korean signs that fit you · your chart needs ' + esc(m.needs.join(" + ")) + '</div><div class="fits">'];
     m.signs.forEach(function (x) { h.push('<div class="fitc" style="--fc:var(' + EL_VAR[x.element] + ')"><span class="fh">' + esc(x.hanja) + "</span><b>" + esc(x.name) + "</b><p>" + esc(x.why) + "</p></div>"); });
     h.push("</div>");
+    var A = m.animals;
+    if (A && A.best && A.best.length) {
+      h.push('<div class="label mt">Spirit animals that fit yours</div><div class="chipsrow">' + A.best.map(function (a) { return '<span class="lchip good"><b>' + esc(a.han) + " " + esc(a.animal) + "</b> " + esc(a.label) + "</span>"; }).join("") + "</div>");
+      if (A.picks && A.picks.length) h.push('<div class="label mt">Your best pairings · the color you need × an animal that fits</div><div class="fits">' + A.picks.map(function (p) {
+        return '<div class="fitc" style="--fc:var(' + EL_VAR[p.element] + ')">' + (window.WSArt ? '<div class="fart">' + WSArt.svg({ animal: p.title.split(" ")[1], element: p.element, yang: "甲丙戊庚壬".indexOf(p.han.charAt(0)) >= 0, season: ({ Wood: "Spring", Fire: "Summer", Earth: "Summer", Metal: "Autumn", Water: "Winter" })[p.element], hanja: p.han, bare: true }) + "</div>" : "") + "<b>" + esc(p.title) + " " + esc(p.han) + "</b><p>" + esc(p.why.charAt(0).toUpperCase() + p.why.slice(1)) + ".</p></div>";
+      }).join("") + "</div>");
+      if (A.avoid && A.avoid.length) h.push('<div class="label mt">Be careful with</div><div class="chipsrow">' + A.avoid.map(function (a) { return '<span class="lchip bad"><b>' + esc(a.han) + " " + esc(a.animal) + "</b> " + esc(a.label) + "</span>"; }).join("") + "</div>");
+    }
     var f = c && c.fit;
     if (f && f.summary) {
       h.push('<div class="big mt" style="font-size:18px">' + esc(f.summary) + "</div>");
@@ -90,9 +98,17 @@
     return h.join("");
   }
 
+  // 개운법: 부족한 오행을 채우는 방법
+  function boostHtml(d) {
+    var m = d.chart.match; if (!m || !m.boosters || !m.boosters.length) return "";
+    return '<div class="boosts">' + m.boosters.map(function (b) {
+      return '<div class="boost" style="--fc:var(' + EL_VAR[b.element] + ')"><div class="label" style="color:var(--fc)">Add ' + esc(b.element) + " · wear " + esc(b.color.toLowerCase()) + "</div><ul>" + b.items.map(function (i) { return "<li>" + esc(i) + "</li>"; }).join("") + "</ul></div>";
+    }).join("") + "</div>";
+  }
+
   /** d: /api/readings 응답 (status done) */
   function render(el, d) {
-    NO = 0; var usedEnergy = false, usedFit = false;
+    NO = 0; var usedEnergy = false, usedFit = false, usedBoost = false;
     var c = d.cards || null, secs = allSections(d.text), h = [];
     var byHead = {}; ((c && c.sections) || []).forEach(function (x) { byHead[x.heading] = x; });
     var first = secs.length && /report/i.test(secs[0].title) && !byHead[secs[0].title] ? secs.shift() : null;
@@ -139,6 +155,7 @@
       var special = false;
       if (/^Your Current 10-Year Cycle/i.test(sec.title) && window.WSCharts) { h.push(energyHtml(d, c)); usedEnergy = special = true; }
       if (/^Who Fits You/i.test(sec.title)) { h.push(fitHtml(d, c)); usedFit = special = true; }
+      if (/^Boost Your Luck/i.test(sec.title)) { h.push(boostHtml(d)); usedBoost = special = true; }
       if (cd && !special) {
         if (cd.summary) h.push('<p style="font-size:15.5px;color:var(--text-1)">' + esc(cd.summary) + "</p>");
         if (cd.kind === "timeline" && cd.timeline && cd.timeline.length) {
@@ -163,6 +180,7 @@
     // 예전 리포트(이 섹션들이 없던 때)에도 그래프는 보여 준다
     if (!usedEnergy && d.chart.current && window.WSCharts) h.push(head("Your current 10-year energy", "energy") + '<div class="card">' + energyHtml(d, null) + "</div></section>");
     if (!usedFit) h.push(head("Who fits you", "fit") + '<div class="card">' + fitHtml(d, null) + "</div></section>");
+    if (!usedBoost) h.push(head("Boost your luck", "boost") + '<div class="card">' + boostHtml(d) + "</div></section>");
     h.push(head("Last word", "end"));
     if (c && c.final && c.final.conclusion) h.push('<div class="card"><div class="label">In one line</div><p style="font-size:16px;color:var(--text-1)">' + esc(c.final.conclusion) + "</p></div>");
     if (lastLine) h.push('<div class="card final"><span class="corner"></span><span class="corner-br"></span><div class="label">One sentence to carry with you</div><div class="line">' + esc(lastLine) + "</div></div>");

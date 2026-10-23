@@ -56,10 +56,13 @@ This report is a data asset built by parsing {{name}}'s Four Pillars, calculated
 (This chart's own relationship pattern: what you give, what you expect, where it breaks.)
 
 ##Who Fits You
-(Use the computed compatible types. Describe the personality of the people who fit this person best and why, in everyday terms, and name the recommended Korean signs from the data. Then one line on the type that drains this person.)
+(Use the computed compatible types and spirit animals. Describe the personality of the people who fit this person best and why, in everyday terms. Name the best pairings from the data (for example "a Red Horse") and say in one line why each fits. Then one line on the animal or type to be careful with, and why.)
 
 ##Body and Mind
 (Physical and mental tendencies and how to look after them. Tendencies only, not diagnoses.)
+
+##Boost Your Luck
+(Use the computed luck boosters for the elements this chart needs. Pick the 3 or 4 that fit this person's life best and make them concrete: places to go, things to do, what to wear, when. 70 to 110 words.)
 
 ##Core Diagnosis: The One Drive Behind Everything
 (The single drive behind the whole chart. It must come from the Day Master and the season of birth, never from the year pillar. If the conclusion starts to become "control, safety, isolation, a fortress", check whether it truly comes from this chart. Begin with "Everything about you comes back to ___", then one specific strength it creates, one specific trap, and the core task of this life. 80 to 130 words.)

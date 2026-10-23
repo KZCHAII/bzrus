@@ -86,6 +86,16 @@
   };
 
   /** 관계 상자. ownerSign 입장의 관계(rel). guestName을 주면 친구 시점 문장. headline은 화면별 문장 */
+  var LINK_INFO = {
+    stemHarmony: ['天干合', 'Heavenly pull', 'your core selves are drawn together', 1], sixHarmony: ['六合', 'Natural pair', 'you fit together without trying', 1],
+    trine: ['三合', 'Same team', 'you move toward the same goals', 1], stemClash: ['天干沖', 'Core friction', 'you want different things at the core', 0],
+    clash: ['沖', 'Head-on clash', 'opposites that collide, then learn from it', 0], punish: ['刑', 'Friction', 'you rub each other the wrong way under stress', 0],
+    harm: ['害', 'Small hurts', 'little misunderstandings pile up', 0], break: ['破', 'Cracks', 'plans you make together can fall apart', 0]
+  };
+  function linksHtml(links) {
+    if (!links || !links.length) return '';
+    return '<div class="rlinks">' + links.map(function (l) { var i = LINK_INFO[l]; return i ? '<span class="lchip ' + (i[3] ? 'good' : 'bad') + '"><b>' + i[0] + ' ' + i[1] + '</b> ' + i[2] + '</span>' : ''; }).join('') + '</div>';
+  }
   function relHtml(rel, ownerSign, friendSign, headline, ownerName) {
     var R = REL[rel.kind];
     var text = ownerName
@@ -93,7 +103,7 @@
       : REL_TEXT[rel.kind](ownerSign.element, friendSign.element);
     return '<div class="score" style="--rc:var(' + R.c + ')"><span class="corner"></span><span class="corner-br"></span><b>' + rel.score + '</b><small>CHEMISTRY</small></div>' +
       '<div style="--rc:var(' + R.c + ')"><p class="rel-pair">' + esc(ownerSign.name) + ' + ' + esc(friendSign.name) + '</p><p class="rel-name">' + headline.replace('{R}', '<em>' + R.n + '</em>') + '</p>' +
-      '<p class="rel-text">' + esc(text) + '</p></div>';
+      '<p class="rel-text">' + esc(text) + '</p>' + linksHtml(rel.links) + '</div>';
   }
 
   function cssVar(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
@@ -202,10 +212,10 @@
   }
 
   /** 내 사인 스토리 이미지 */
-  function signStory(s, name) {
+  function signStory(s, name, pageUrl) {
     if (!window.WSCharts) return;
     var go = function (img) {
-      var c = WSCharts.storyImage({ top: (name ? name + ', ' : '') + 'a ' + s.zodiac + ' in the West. In Korea:', hanja: s.hanja, art: img, name: s.title || s.name, sub: s.tagline, foot: "WHAT'S YOURS? " + location.host.toUpperCase(), color: WSCharts.cv(EL_VAR[s.element]) });
+      var c = WSCharts.storyImage({ top: (name ? name + ', ' : '') + 'a ' + s.zodiac + ' in the West. In Korea:', hanja: s.hanja, art: img, name: s.title || s.name, sub: s.tagline, foot: "WHAT'S YOURS? " + (pageUrl ? pageUrl.replace(/^https?:\/\//, '') : location.host), color: WSCharts.cv(EL_VAR[s.element]) });
       WSCharts.shareImage(c, 'my-korean-sign.png', 'In Korean Saju I\u2019m the ' + (s.title || s.name) + '. What\u2019s yours?');
     };
     if (window.WSArt && s.animal) WSArt.toImage({ animal: s.animal.name, element: s.element, yang: s.yang, season: s.season, hanja: s.dayPillar ? s.dayPillar.han : s.hanja }, 760, go); else go(null);

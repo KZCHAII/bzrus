@@ -61,7 +61,8 @@
       <dl class="pillars" id="k-pillars" aria-label="Your four pillars"></dl>
       <div id="k-penta" style="margin:0 0 14px"></div>
       <div class="why" id="k-why"></div>
-      <div class="sharebar" style="margin-top:14px;justify-content:center"><button type="button" data-a="img" id="k-story">Save my sign as a story image</button></div>
+      <div class="sharebar" style="margin-top:14px;justify-content:center"><button type="button" data-a="native" id="k-share">Share my sign: what's yours?</button><button type="button" id="k-story">Story image</button></div>
+      <p class="copied" id="k-share-out" style="text-align:center"></p>
     </article>
 
     <div class="hide" id="actions">
@@ -140,7 +141,32 @@
 <script>
 (function () {
   var $ = WS.$, cur = null, lastSign = null;
-  $('k-story').addEventListener('click', function () { if (lastSign) WS.signStory(lastSign, cur && cur.name); });
+  $('k-story').addEventListener('click', async function () {
+    if (!lastSign) return;
+    var page = await ensurePage().catch(function () { return null; });
+    WS.signStory(lastSign, cur && cur.name, page);
+  });
+  // 공유 = 내 페이지 링크. 받은 사람은 "Alex is the … What's yours?" 화면에서 자기 생일을 넣고 바로 궁합까지 본다
+  async function ensurePage() {
+    var maps = WS.me.maps();
+    if (maps.length) return location.origin + '/m/' + maps[0].slug;
+    var name = (cur && cur.name) || $('me-name').value.trim();
+    if (!name) throw new Error('Add your name at the top first. Friends will see it.');
+    var r = await WS.api('/api/maps', { body: { name: name, birthday: cur.birthday, time: cur.time } });
+    WS.me.addMap(r.slug, r.name, r.ownerToken);
+    WS.initNav();
+    return location.origin + '/m/' + r.slug;
+  }
+  $('k-share').addEventListener('click', async function () {
+    var out = $('k-share-out'); out.textContent = '';
+    if (!lastSign) return;
+    try {
+      var url = await ensurePage();
+      var text = 'In Korean Saju I\u2019m the ' + (lastSign.title || lastSign.name) + '. What\u2019s yours? Find out and see our match:';
+      if (navigator.share) { navigator.share({ title: 'What\u2019s your Korean sign?', text: text, url: url }).catch(function () {}); }
+      else { try { await navigator.clipboard.writeText(text + ' ' + url); out.textContent = 'COPIED // ' + url; } catch (x) { out.textContent = url; } }
+    } catch (x) { out.textContent = 'ERROR // ' + x.message; $('me-name').focus(); }
+  });
   WS.initNav();
 
   async function reveal(name, d, t, scroll) {

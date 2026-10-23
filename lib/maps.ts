@@ -92,7 +92,8 @@ export async function createMap(input: { name: unknown; birthday: unknown; time?
 
 interface MapRow { id: string; slug: string; owner_token_hash: string; name: string; birth_date: string; birth_time: string | null }
 
-async function loadMap(slug: string): Promise<MapRow> {
+async function loadMap(slugIn: string): Promise<MapRow> {
+  const slug = slugIn.toLowerCase();
   if (!/^[a-z0-9]{10}$/.test(slug)) throw new HttpError(404, "MAP_NOT_FOUND");
   const [m] = await getSql()<MapRow[]>`select id, slug, owner_token_hash, name, to_char(birth_date, 'YYYY-MM-DD') birth_date, to_char(birth_time, 'HH24:MI') birth_time from maps where slug = ${slug}`;
   if (!m) throw new HttpError(404, "MAP_NOT_FOUND", { error: "MAP_NOT_FOUND", message: "This map doesn't exist." });

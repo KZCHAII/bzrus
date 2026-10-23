@@ -1,5 +1,5 @@
 // 네온 "스피릿 애니멀" 그림: 일지 동물 + 일간 색(오방색) + 태어난 계절. 코드로 그려서 무료·즉시.
-(function () {
+(function (root) {
   // 오방색: 목=푸른, 화=붉은, 토=노란, 금=흰, 수=검은(네온에서는 보라빛)
   var COLOR = {
     Wood: { name: "Blue", yang: "#29c4ff", yin: "#7fdcff" },
@@ -30,7 +30,7 @@
   /** o: {animal, element, yang, season, hanja} → SVG 문자열 */
   function svg(o, size) {
     var col = (COLOR[o.element] || COLOR.Water)[o.yang ? "yang" : "yin"], sc = SEASON_C[o.season] || "#fff";
-    var R = rnd(seedOf(o.hanja + o.season)), id = "a" + seedOf(o.hanja + o.season + Math.random());
+    var R = rnd(seedOf(o.hanja + o.season)), id = "a" + seedOf(o.hanja + o.season + (o.bare ? "b" : "") + String(Math.random()).slice(2, 8));
     var h = ['<svg viewBox="0 0 600 600" width="' + (size || 600) + '" height="' + (size || 600) + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="' + (COLOR[o.element] || {}).name + " " + o.animal + " of " + o.season + '">'];
     h.push('<defs><filter id="' + id + 'g" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="7" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>' +
       '<filter id="' + id + 's" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>' +
@@ -57,7 +57,7 @@
     // 네온 원 + 동물
     h.push('<circle cx="300" cy="300" r="228" fill="none" stroke="' + col + '" stroke-width="3" filter="url(#' + id + 'g)" opacity=".9"/>');
     h.push('<circle cx="300" cy="300" r="214" fill="none" stroke="' + col + '" stroke-width="1" opacity=".35"/>');
-    var body = (window.WS_ANIMALS || {})[o.animal] || "";
+    var body = (root.WS_ANIMALS || {})[o.animal] || "";
     h.push('<g transform="translate(120 112) scale(0.703)" filter="url(#' + id + 'g)"><g fill="' + col + '" fill-opacity=".14" stroke="' + col + '" stroke-width="5" stroke-linejoin="round">' + body + "</g></g>");
     h.push('<text x="300" y="566" text-anchor="middle" font-family="Noto Serif KR, serif" font-weight="700" font-size="30" fill="' + col + '" letter-spacing="6" filter="url(#' + id + 's)">' + o.hanja + "</text>");
     h.push("</svg>");
@@ -72,5 +72,5 @@
     img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg(Object.assign({ bare: true }, o), size));
   }
 
-  window.WSArt = { svg: svg, toImage: toImage, COLOR: COLOR };
-})();
+  root.WSArt = { svg: svg, toImage: toImage, COLOR: COLOR };
+})(typeof window !== "undefined" ? window : globalThis);

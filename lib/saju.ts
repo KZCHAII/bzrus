@@ -165,6 +165,8 @@ export interface KoreanSign {
   zodiac: (typeof ZODIAC)[number];
   sunLongitude: number;
   stem: number;
+  /** 일지 (0=子 … 11=亥) */
+  branch: number;
   /** 일지 동물 + 일간 색 (네온 그림) */
   animal: { name: string; color: string; line: string };
   /** 전체 이름: "Black Dog of the Winter Ocean" */
@@ -197,7 +199,7 @@ export function signOf(b: BirthInput): KoreanSign {
     dayPillar: { han: pillarHan(c.day), roman: `${STEM_ROMAN[stem]}-${BRANCH_ROMAN[c.day.branch]}` },
     zodiac: zodiacOf(c.sunLongitude),
     sunLongitude: Math.round(c.sunLongitude * 10) / 10,
-    stem,
+    stem, branch: c.day.branch,
     pillars: { year: pillarView(c.year), month: pillarView(c.month), day: pillarView(c.day), hour: c.hour ? pillarView(c.hour) : null },
   };
 }
@@ -212,10 +214,50 @@ export const RELATIONS: Record<RelationKind, { name: string; base: number }> = {
   coach: { name: "Coach", base: 69 },       // 관성: 상대가 나를 극함
 };
 
-/** owner 입장에서 본 friend의 관계. 점수는 같은 두 사람이면 항상 같다 */
-export function relationOf(owner: KoreanSign, friend: KoreanSign): { kind: RelationKind; name: string; score: number } {
+// ── 합·충·형·파·해 (일간끼리, 일지끼리) ──
+const SIX_HARMONY: [number, number][] = [[0, 1], [2, 11], [3, 10], [4, 9], [5, 8], [6, 7]];
+const TRINES = [[8, 0, 4], [11, 3, 7], [2, 6, 10], [5, 9, 1]];
+const HARM: [number, number][] = [[0, 7], [1, 6], [2, 5], [3, 4], [8, 11], [9, 10]];
+const BREAK: [number, number][] = [[0, 9], [3, 6], [4, 1], [7, 10], [2, 11], [5, 8]];
+const PUNISH_GROUPS = [[2, 5, 8], [1, 10, 7], [0, 3]];
+const SELF_PUNISH = [4, 6, 9, 11];
+const pairIn = (list: [number, number][], a: number, b: number) => list.some(([x, y]) => (x === a && y === b) || (x === b && y === a));
+
+export type LinkKind = "stemHarmony" | "stemClash" | "sixHarmony" | "trine" | "clash" | "punish" | "harm" | "break";
+export const LINKS: Record<LinkKind, { name: string; han: string; plain: string; score: number; good: boolean }> = {
+  stemHarmony: { name: "Heavenly pull", han: "天干合", plain: "your core selves are drawn together", score: 7, good: true },
+  sixHarmony: { name: "Natural pair", han: "六合", plain: "you fit together without trying", score: 8, good: true },
+  trine: { name: "Same team", han: "三合", plain: "you move toward the same goals", score: 6, good: true },
+  stemClash: { name: "Core friction", han: "天干沖", plain: "you want different things at the core", score: -4, good: false },
+  clash: { name: "Head-on clash", han: "沖", plain: "opposites that collide, then learn from it", score: -9, good: false },
+  punish: { name: "Friction", han: "刑", plain: "you rub each other the wrong way under stress", score: -5, good: false },
+  harm: { name: "Small hurts", han: "害", plain: "little misunderstandings pile up", score: -4, good: false },
+  break: { name: "Cracks", han: "破", plain: "plans you make together can fall apart", score: -3, good: false },
+};
+
+/** 두 일지 사이의 관계들 (합이 있으면 같은 쌍의 파는 무시) */
+export function branchLinks(a: number, b: number): LinkKind[] {
+  const out: LinkKind[] = [];
+  if (pairIn(SIX_HARMONY, a, b)) out.push("sixHarmony");
+  if (a !== b && TRINES.some((g) => g.includes(a) && g.includes(b))) out.push("trine");
+  if ((a + 6) % 12 === b) out.push("clash");
+  if ((a !== b && PUNISH_GROUPS.some((g) => g.includes(a) && g.includes(b))) || (a === b && SELF_PUNISH.includes(a))) out.push("punish");
+  if (pairIn(HARM, a, b)) out.push("harm");
+  if (pairIn(BREAK, a, b) && !out.includes("sixHarmony")) out.push("break");
+  return out;
+}
+export function stemLinks(a: number, b: number): LinkKind[] {
+  if (Math.abs(a - b) === 5) return ["stemHarmony"];
+  if (Math.min(a, b) <= 3 && Math.abs(a - b) === 6) return ["stemClash"];
+  return [];
+}
+
+/** owner 입장에서 본 friend의 관계. 오행 생극 + 일간 합·충 + 일지 합·충·형·파·해. 같은 두 사람이면 항상 같은 점수 */
+export function relationOf(owner: KoreanSign, friend: KoreanSign): { kind: RelationKind; name: string; score: number; links: LinkKind[] } {
   const a = owner.element, b = friend.element;
   const kind: RelationKind = a === b ? "mirror" : FEEDS[b] === a ? "battery" : FEEDS[a] === b ? "spark" : CHECKS[a] === b ? "copilot" : "coach";
-  const score = RELATIONS[kind].base + (owner.yang !== friend.yang ? 5 : 0) + (owner.season === friend.season ? 3 : 0) - ((owner.stem + friend.stem) % 4);
-  return { kind, name: RELATIONS[kind].name, score: Math.min(99, score) };
+  const links = [...stemLinks(owner.stem, friend.stem), ...branchLinks(owner.branch, friend.branch)];
+  const bonus = links.reduce((n, l) => n + LINKS[l].score, 0);
+  const score = RELATIONS[kind].base + (owner.yang !== friend.yang ? 5 : 0) + (owner.season === friend.season ? 3 : 0) - ((owner.stem + friend.stem) % 4) + bonus;
+  return { kind, name: RELATIONS[kind].name, score: Math.max(30, Math.min(99, score)), links };
 }

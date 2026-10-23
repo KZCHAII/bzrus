@@ -37,10 +37,11 @@
 
   <!-- 손님 화면 -->
   <section class="hero hide" id="guest">
-    <p class="eyebrow"><span id="g-owner-ey"></span>'s page</p>
-    <h1>What are you <span class="accent">to <span id="g-owner"></span>?</span></h1>
-    <p class="sub">Add your birthday. You'll get your Korean sign and your relationship type with <strong id="g-owner2"></strong>.</p>
-    <div class="mini"><div class="h" id="g-han"></div><div><b id="g-oname"></b><span id="g-osign"></span></div></div>
+    <p class="eyebrow"><span id="g-owner-ey"></span></p>
+    <div class="g-art" id="g-han"></div>
+    <h1 style="text-align:center"><span id="g-owner"></span> is the <span class="accent" id="g-title"></span>.<br>What's yours?</h1>
+    <p class="sub" style="text-align:center;margin-left:auto;margin-right:auto">Add your birthday. You'll get your own Korean sign and your match with <strong id="g-owner2"></strong>: score, relationship type and how your animals get along.</p>
+    <span id="g-oname" hidden></span><span id="g-osign" hidden></span>
 
     <form class="panel" id="gForm" novalidate>
       <span class="corner"></span><span class="corner-br"></span>
@@ -54,7 +55,7 @@
         <div class="field"><label for="g-time">Birth time <span class="opt">(opt.)</span></label><input id="g-time" type="time"></div>
       </div>
       <label class="check" for="g-consent"><input type="checkbox" id="g-consent" checked><span>Put my nickname and relationship type on <b id="g-owner3"></b>'s page. Anyone with the link can see it. Your birthday and birth time stay private.</span></label>
-      <button class="btn" type="submit" id="gBtn">Show what we are <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M1 7h11m0 0L7 2m5 5L7 12" stroke="currentColor" stroke-width="1.8"/></svg></button>
+      <button class="btn" type="submit" id="gBtn">Show my sign and our match <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M1 7h11m0 0L7 2m5 5L7 12" stroke="currentColor" stroke-width="1.8"/></svg></button>
       <p class="err" id="g-err" hidden></p>
     </form>
 
@@ -172,7 +173,7 @@
 (function () {
   var $ = WS.$, esc = WS.esc;
   WS.initNav();
-  var slug = (location.pathname.match(/^\/m\/([a-z0-9]{10})$/) || [])[1] || new URLSearchParams(location.search).get('slug') || '';
+  var slug = (location.pathname.toLowerCase().match(/^\/m\/([a-z0-9]{10})\/?$/) || [])[1] || new URLSearchParams(location.search).get('slug') || '';
   var token = WS.store.get('ws_owner_' + slug) || '';
   var data = null, mine = null, lastMatch = null, mySign = null;
   function show(id) { $(id).classList.remove('hide'); }
@@ -201,15 +202,16 @@
   function fillOwnerBits() {
     var s = data.sign;
     ['g-owner', 'g-owner2', 'g-owner3', 'g-owner4', 'o-name', 'g-oname'].forEach(function (id) { $(id).textContent = data.name; });
-    $('g-owner-ey').textContent = data.name.toUpperCase();
+    $('g-owner-ey').textContent = data.name.toUpperCase() + '\u2019S PAGE';
     document.title = data.isOwner ? 'My page — WITHSAJU' : 'What are you to ' + data.name + '? — WITHSAJU';
     document.documentElement.style.setProperty('--el', 'var(' + WS.EL_VAR[s.element] + ')');
     if (window.WSArt && s.animal) {
       var art = WSArt.svg({ animal: s.animal.name, element: s.element, yang: s.yang, season: s.season, hanja: s.dayPillar ? s.dayPillar.han : s.hanja });
-      ['g-han', 'o-han'].forEach(function (id) { $(id).classList.add('art'); $(id).innerHTML = art; });
+      $('o-han').classList.add('art'); $('o-han').innerHTML = art; $('g-han').innerHTML = art;
     } else $('g-han').textContent = $('o-han').textContent = s.hanja;
     $('g-osign').textContent = $('o-meta').textContent = (s.title || s.name) + ' · ' + s.zodiac;
     $('o-sign').textContent = s.title || s.name;
+    $('g-title').textContent = s.title || s.name;
     $('o-tag').textContent = s.tagline;
   }
 
@@ -236,7 +238,10 @@
     $('o-link').value = url;
     WSCharts.shareBar($('o-share'), url, 'What are you to me? Add your birthday and find out, in Korean Saju.', function () {
       var s = data.sign;
-      WSCharts.shareImage(WSCharts.storyImage({ top: 'What are you to me? Find out in Korean Saju.', hanja: s.hanja, name: data.name + ' · ' + s.name, sub: 'Add your birthday at the link. You\u2019ll land on my map.', foot: location.host.toUpperCase() + '/M/' + data.slug.toUpperCase(), color: WSCharts.cv(WS.EL_VAR[s.element]) }), 'what-are-you-to-me.png', 'What are you to me? ' + url);
+      var go = function (img) {
+        WSCharts.shareImage(WSCharts.storyImage({ top: data.name + ' is the', hanja: s.hanja, art: img, name: s.title || s.name, sub: 'What\u2019s your Korean sign? And what are you to me? Add your birthday at the link.', foot: 'WHAT\u2019S YOURS? ' + location.host + '/m/' + data.slug, color: WSCharts.cv(WS.EL_VAR[s.element]) }), 'whats-yours.png', 'What\u2019s your Korean sign? ' + url);
+      };
+      if (window.WSArt && s.animal) WSArt.toImage({ animal: s.animal.name, element: s.element, yang: s.yang, season: s.season, hanja: s.dayPillar ? s.dayPillar.han : s.hanja }, 760, go); else go(null);
     });
   }
   $('o-story').addEventListener('click', function () { WS.signStory(data.sign, data.name); });
@@ -283,7 +288,7 @@
   $('g-story').addEventListener('click', function () {
     if (!lastMatch) return;
     var R = WS.REL[lastMatch.relation.kind];
-    WSCharts.shareImage(WSCharts.storyImage({ top: mine.name + ' + ' + lastMatch.owner.name, hanja: mySign.hanja, name: 'I\u2019m ' + lastMatch.owner.name + '\u2019s ' + R.n, sub: (lastMatch.owner.sign.title || lastMatch.owner.sign.name) + ' + ' + (mySign.title || mySign.name), extra: 'CHEMISTRY ' + lastMatch.relation.score, foot: 'WHAT ARE YOU TO ME? ' + location.host.toUpperCase(), color: WSCharts.cv(R.c) }), 'our-korean-match.png', 'I\u2019m ' + lastMatch.owner.name + '\u2019s ' + R.n + ' in Korean Saju.');
+    WSCharts.shareImage(WSCharts.storyImage({ top: mine.name + ' + ' + lastMatch.owner.name, hanja: mySign.hanja, name: 'I\u2019m ' + lastMatch.owner.name + '\u2019s ' + R.n, sub: (lastMatch.owner.sign.title || lastMatch.owner.sign.name) + ' + ' + (mySign.title || mySign.name), extra: 'CHEMISTRY ' + lastMatch.relation.score, foot: 'WHAT ARE YOU TO ME? ' + location.host + '/m/' + slug, color: WSCharts.cv(R.c) }), 'our-korean-match.png', 'I\u2019m ' + lastMatch.owner.name + '\u2019s ' + R.n + ' in Korean Saju.');
   });
 
   // 친구 → 자기 페이지 바로 만들기 (입력한 정보 그대로)

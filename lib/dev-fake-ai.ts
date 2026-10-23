@@ -29,6 +29,9 @@ ${para("People with steady water calm you down.")}
 ##Body and Mind
 ${para("Your energy runs hot, then crashes.")}
 
+##Boost Your Luck
+${para("Swim more, and plan a winter trip north.")}
+
 ##Core Diagnosis: The One Drive Behind Everything
 Everything about you comes back to the need to prove your own judgment. ${para("That drive makes you fast.")}
 
