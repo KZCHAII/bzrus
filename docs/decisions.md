@@ -113,3 +113,8 @@ BZR 원본은 섹션당 1,500자·3문단이었지만, 화면에서 너무 길�
 - 아이폰에서 팝업(iframe) 결제창이 403: Lemon Squeezy가 결제를 장바구니로 바꾸며 쿠키를 쓰는데 사파리는 다른 사이트 iframe 쿠키를 막음. 애플페이·구글페이도 iframe 안에서는 잘 안 뜸.
 - 그래서 결제는 항상 Lemon Squeezy 결제 페이지로 이동(같은 창) → 결제 후 redirect_url로 그 손님 리포트 화면에 돌아옴. lemon.js 제거.
 - 참고: Lemon Squeezy 테스트 모드에서 만든 상품은 판매 모드로 자동으로 안 넘어감 → 실제 전환 때 상품 복사 + 새 Variant ID·판매용 API 키·웹훅.
+
+## D26. 메일 실제 발송 켬 (2026-10-23)
+- Resend(무료 월 3,000통), 도메인 withsaju.com — Resend "Auto configure"로 Vercel DNS에 메일 기록 자동 추가, us-east-1, 클릭·열람 추적 끔.
+- EMAIL_FROM=WITHSAJU <hello@withsaju.com>, EMAIL_MODE=live (사장님 결정: 오픈 전이라 손님 발송도 바로 켬). 첫 발송(Find 링크) Delivered 확인.
+- 남은 것: hello@withsaju.com 받는 메일함 없음 → 답장 받으려면 무료 전달(ImprovMX 등) 설정, CONTACT_EMAIL.
