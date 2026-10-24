@@ -1,7 +1,7 @@
 # 백로그
 
 ## 오픈 전 (돈 받기 전 꼭)
-- [사장님] Vercel Pro 업그레이드(월 $20) — Hobby는 상업용 금지 + 한도 넘으면 사이트 정지
+- ~~[사장님] Vercel Pro 업그레이드(월 $20)~~ ✅ 2026-10-24 완료 (팀 maeil-gukeo, 월 $20 크레딧 포함)
 - ~~Neon Launch 전환~~ 완료 (2026-10-24). 지출 알림은 아직
 - ~~도메인~~ withsaju.com 구입·연결 완료 (2026-10-23)
 - [사장님] Lemon Squeezy 가입·상점 심사 → 상품($9.99)·API 키·웹훅 만들고 Vercel에 LEMONSQUEEZY_* 4개 + READINGS_MODE=paid → [Claude] 테스트 결제로 끝까지 확인 (결제 코드는 완료)
