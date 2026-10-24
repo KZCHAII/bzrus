@@ -1,8 +1,14 @@
 // 매일 요약 (텔레그램): 어제 하루 + 최근 7일
 import { stats } from "./events";
 import { notify } from "./notify";
+import { getSql } from "./db";
 
 export async function dailyDigest() {
+  // 하루(한국 날짜) 한 번만. 이미 보냈으면 그냥 끝
+  const [first] = await getSql()<{ job: string }[]>`
+    insert into cron_runs (job, day) values ('daily_digest', (now() at time zone 'Asia/Seoul')::date)
+    on conflict do nothing returning job`;
+  if (!first) return { sent: false, reason: "already_sent_today" };
   const s = await stats(8);
   const y = s.days[1]; // [0] = 오늘(한국 시간), [1] = 어제
   const week = s.days.slice(1).reduce((a, d) => ({ visitors: a.visitors + d.visitors, maps: a.maps + d.maps, entries: a.entries + d.entries, readings: a.readings + d.readings, paid: a.paid + d.paid, rev: a.rev + d.revenueCents }), { visitors: 0, maps: 0, entries: 0, readings: 0, paid: 0, rev: 0 });

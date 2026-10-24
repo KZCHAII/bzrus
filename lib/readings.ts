@@ -36,10 +36,10 @@ export function parseGender(v: unknown): Gender {
 interface Row {
   id: string; view_key: string; name: string; birth_date: string; birth_time: string | null; time_unknown: boolean; gender: Gender;
   status: "awaiting_payment" | "generating" | "done" | "failed"; attempts: number; started_at: Date | null; completed_at: Date | null;
-  content: string | null; error: string | null; cards: Cards | null; cards_status: string | null; created_at: Date; is_test: boolean; email: string | null; checkout_url: string | null; refunded_at: Date | null;
+  content: string | null; error: string | null; cards: Cards | null; cards_status: string | null; created_at: Date; is_test: boolean; email: string | null; checkout_url: string | null; refunded_at: Date | null; paid_at: Date | null;
 }
 const COLS = `id, view_key, name, to_char(birth_date, 'YYYY-MM-DD') birth_date, to_char(birth_time, 'HH24:MI') birth_time, time_unknown, gender,
-  status, attempts, started_at, completed_at, content, error, cards, cards_status, created_at, is_test, email, checkout_url, refunded_at`;
+  status, attempts, started_at, completed_at, content, error, cards, cards_status, created_at, is_test, email, checkout_url, refunded_at, paid_at`;
 
 const birthOf = (r: Pick<Row, "birth_date" | "birth_time">): Birth => {
   const [y, m, d] = r.birth_date.split("-").map(Number);
@@ -183,13 +183,15 @@ export async function viewReading(id: string, key: string, start: (fn: () => Pro
     savedEmail: r.email ? maskEmail(r.email) : null,
     chart: { sign: chart.sign, pillars: chart.pillars, elements: chart.elements, hidden: chart.hidden, hiddenSpots: chart.hiddenSpots, luck: chart.luck, current: chart.current, match: chart.match },
   };
+  // 환불된 리포트는 잠근다 (사서 읽고 환불하는 것 방지)
+  if (r.refunded_at) return { status: "refunded" as const, id: r.id, name: r.name };
   if (r.status === "awaiting_payment") return { status: "awaiting_payment" as const, ...base, checkoutUrl: r.checkout_url };
   if (r.status === "generating") {
     const stale = !r.started_at || Date.now() - r.started_at.getTime() > STALE_MIN * 60_000;
     if (stale && r.attempts < MAX_ATTEMPTS) start(() => generateReading(r.id));
     return { status: "generating" as const, ...base };
   }
-  if (r.status === "failed") return { status: "failed" as const, ...base };
+  if (r.status === "failed") return { status: "failed" as const, ...base, paid: !!r.paid_at };
   if (!r.cards_status) start(() => generateCards(r.id));
   return {
     status: "done" as const, ...base, text: r.content!,
@@ -212,4 +214,21 @@ export async function saveReadingEmail(id: string, key: string, emailIn: unknown
   if (r.status === "done") await mailReadingReady({ ...r, email });
   await track("reading_email_saved", { isTest: r.is_test });
   return { saved: true, email: maskEmail(email) };
+}
+
+/** 멈춘 리포트 되살리기 (몇 분마다 자동 작업): 손님이 창을 닫아도 끝까지 만들어 메일까지 보낸다 */
+export async function sweepReadings(start: (fn: () => Promise<unknown>) => void) {
+  const sql = getSql();
+  const stuck = await sql<{ id: string }[]>`
+    select id from readings
+     where status = 'generating' and attempts < ${MAX_ATTEMPTS}
+       and (started_at is null or started_at < now() - make_interval(mins => ${STALE_MIN}))
+     order by created_at limit 10`;
+  for (const r of stuck) start(() => generateReading(r.id));
+  const noCards = await sql<{ id: string }[]>`
+    select id from readings
+     where status = 'done' and cards_status is null and completed_at < now() - interval '10 minutes'
+     order by completed_at limit 10`;
+  for (const r of noCards) start(() => generateCards(r.id));
+  return { readings: stuck.length, cards: noCards.length };
 }

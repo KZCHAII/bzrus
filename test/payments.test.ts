@@ -9,6 +9,7 @@ import type { LsOrder } from "@/lib/lemon";
 import { POST as createRoute, GET as viewRoute } from "@/app/api/readings/route";
 import { GET as modeRoute } from "@/app/api/readings/mode/route";
 import { POST as webhook } from "@/app/api/pay/webhook/route";
+import { GET as sweep } from "@/app/api/cron/sweep/route";
 import type { Sql } from "@/lib/db";
 
 let sql: Sql, drop: () => Promise<void>;
@@ -106,6 +107,48 @@ describe("결제", () => {
     expect((await call(webhook, hook("order_refunded", "3001", r.id))).data.result).toBe("refunded");
     expect((await sql`select refunded_at from readings where id = ${r.id}`)[0].refunded_at).not.toBeNull();
     expect((await sql`select count(*)::int n from payment_events where order_id = '3001'`)[0].n).toBe(2);
+  });
+
+  it("환불된 리포트는 잠긴다", async () => {
+    const r = await newReading("4.4.7.2");
+    order("3002");
+    await call(webhook, hook("order_created", "3002", r.id)); await flush();
+    expect((await view(r.id, r.key)).status).toBe("done");
+    order("3002", { status: "refunded" });
+    await call(webhook, hook("order_refunded", "3002", r.id));
+    const v = await view(r.id, r.key);
+    expect(v).toEqual({ status: "refunded", id: r.id, name: "Alex" });
+    expect(JSON.stringify(v)).not.toContain("##");
+  });
+
+  it("결제 후 멈춘 리포트는 손님이 다시 안 와도 자동 작업이 끝까지 만든다", async () => {
+    let fail = 1;
+    setServices({
+      ai: { generate: async (_m, _p, o) => { if (!o?.schema && fail-- > 0) throw new Error("AI_DOWN"); return o?.schema ? JSON.stringify({ core: { headline: "h", body: "b", strength: { title: "t", desc: "d" }, caution: { title: "t", desc: "d" } }, sections: [] }) : REPORT; } },
+      pay: { createCheckout: async ({ readingId }) => `https://x/${readingId}`, getOrder: async (id) => orders[id] ?? null },
+    });
+    const r = await newReading("4.4.7.3");
+    order("3003");
+    await call(webhook, hook("order_created", "3003", r.id)); await flush();
+    expect((await sql`select status, attempts from readings where id = ${r.id}`)[0]).toMatchObject({ status: "generating", attempts: 1 });
+    expect((await call(sweep, req("/api/cron/sweep"))).status).toBe(401);
+    const s = await call(sweep, req("/api/cron/sweep", { headers: { "user-agent": "vercel-cron/1.0" } }));
+    expect(s.data.readings).toBeGreaterThanOrEqual(1);
+    await flush();
+    expect((await sql`select status from readings where id = ${r.id}`)[0].status).toBe("done");
+    expect((await sql`select count(*)::int n from email_outbox where kind = 'reading_ready' and to_email = 'buyer@example.com'`)[0].n).toBeGreaterThanOrEqual(1);
+  });
+
+  it("결제 후 최종 실패면 '청구 안 됨' 대신 연락 안내", async () => {
+    setServices({
+      ai: { generate: async () => { throw new Error("AI_DOWN"); } },
+      pay: { createCheckout: async ({ readingId }) => `https://x/${readingId}`, getOrder: async (id) => orders[id] ?? null },
+    });
+    const r = await newReading("4.4.7.4");
+    order("3004");
+    await call(webhook, hook("order_created", "3004", r.id)); await flush();
+    for (let i = 0; i < 3; i++) { await call(sweep, req("/api/cron/sweep", { headers: { "user-agent": "vercel-cron/1.0" } })); await flush(); }
+    expect(await view(r.id, r.key)).toMatchObject({ status: "failed", paid: true });
   });
 
   it("결제 대기 리포트는 IP당 하루 10개까지", async () => {

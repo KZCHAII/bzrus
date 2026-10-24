@@ -42,7 +42,9 @@ describe("통계", () => {
     expect((await call(cron, req("/api/cron/daily", { headers: { "user-agent": "vercel-cron/1.0" } }))).status).toBe(200);
     process.env.CRON_SECRET = "s3cret-value";
     expect((await call(cron, req("/api/cron/daily", { headers: { "user-agent": "vercel-cron/1.0" } }))).status).toBe(401);
-    expect((await call(cron, req("/api/cron/daily", { headers: { authorization: "Bearer s3cret-value" } }))).status).toBe(200);
+    const again = await call(cron, req("/api/cron/daily", { headers: { authorization: "Bearer s3cret-value" } }));
+    expect(again.status).toBe(200);
+    expect(again.data).toEqual({ sent: false, reason: "already_sent_today" }); // 여러 번 불러도 하루 한 번만
   });
 });
 

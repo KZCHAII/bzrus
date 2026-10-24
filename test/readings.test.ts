@@ -154,7 +154,7 @@ describe("리포트 다시 보기: 이메일은 나중에", () => {
     await expect(saveReadingEmail(id, "wrong", "me@example.com")).rejects.toMatchObject({ status: 404 });
     await expect(saveReadingEmail(id, key, "nope")).rejects.toMatchObject({ status: 400 });
     expect(await saveReadingEmail(id, key, "Me@Example.com")).toEqual({ saved: true, email: "m*@example.com" });
-    expect((await viewReading(id, key, bg)).savedEmail).toBe("m*@example.com");
+    expect(((await viewReading(id, key, bg)) as { savedEmail?: string }).savedEmail).toBe("m*@example.com");
     const mails = await sql`select to_email, status from email_outbox where kind = 'reading_ready' and body_text like ${"%/r/" + id + "?k=%"}`;
     expect(mails).toEqual([{ to_email: "me@example.com", status: "test" }]);
   });

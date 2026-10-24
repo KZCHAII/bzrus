@@ -50,8 +50,9 @@
     <div class="panel hide" id="v-fail">
       <span class="corner"></span><span class="corner-br"></span>
       <h2>We couldn't finish this reading.</h2>
-      <p class="sub">Something went wrong on our side. Nothing was charged. Please try again in a few minutes.</p>
-      <a class="btn" href="/reading" style="text-decoration:none">Try again <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M1 7h11m0 0L7 2m5 5L7 12" stroke="currentColor" stroke-width="1.8"/></svg></a>
+      <p class="sub" id="v-fail-free">Something went wrong on our side. Nothing was charged. Please try again in a few minutes.</p>
+      <p class="sub hide" id="v-fail-paid">Something went wrong on our side. We've been alerted and will email you within 24 hours with your reading or a full refund.</p>
+      <a class="btn" id="v-fail-btn" href="/reading" style="text-decoration:none">Try again <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M1 7h11m0 0L7 2m5 5L7 12" stroke="currentColor" stroke-width="1.8"/></svg></a>
     </div>
     <div class="panel hide vsave" style="margin-top:14px">
       <span class="corner"></span><span class="corner-br"></span>
@@ -62,6 +63,12 @@
         <p class="err vs-err" hidden></p>
       </form>
       <p class="sub hide vs-done" style="margin:14px 0 0">Saved. The link is in <b class="vs-to"></b>. Lost it? Go to <a href="/find" style="color:var(--cyan)">Find my reading</a>.</p>
+    </div>
+    <div class="panel hide" id="v-refunded">
+      <span class="corner"></span><span class="corner-br"></span>
+      <h2>This reading was refunded.</h2>
+      <p class="sub">Your payment was returned, so this reading is closed. You can get a new one anytime.</p>
+      <a class="btn" href="/reading" style="text-decoration:none">Get a reading <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M1 7h11m0 0L7 2m5 5L7 12" stroke="currentColor" stroke-width="1.8"/></svg></a>
     </div>
     <p class="loading hide" id="v-missing">READING NOT FOUND</p>
   </section>
@@ -151,6 +158,7 @@
     var d;
     try { d = await WS.api('/api/readings?id=' + encodeURIComponent(id) + '&k=' + encodeURIComponent(key)); }
     catch (x) { if (x.status === 404) { $('v-wait').classList.add('hide'); $('v-missing').classList.remove('hide'); return; } return later(5000); }
+    if (d.status === 'refunded') { clearInterval(timer); $('v-wait').classList.add('hide'); $('v-refunded').classList.remove('hide'); return; }
     header(d);
     if (d.status !== 'failed' && !saveShown) { saveShown = true; saveState(d.savedEmail); }
     if (d.status === 'awaiting_payment') {
@@ -162,7 +170,10 @@
     if (d.status === 'generating') { $('v-wait').classList.remove('hide'); return later(4000); }
     clearInterval(timer);
     $('v-wait').classList.add('hide');
-    if (d.status === 'failed') { $('v-fail').classList.remove('hide'); return; }
+    if (d.status === 'failed') {
+      if (d.paid) { $('v-fail-free').classList.add('hide'); $('v-fail-paid').classList.remove('hide'); $('v-fail-btn').classList.add('hide'); }
+      $('v-fail').classList.remove('hide'); return;
+    }
     var sig = (d.cards ? 'c' : 't') + d.text.length;
     if (sig !== rendered) { rendered = sig; WSReading.render($('v-body'), d); }
     if (!isDone) { isDone = true; saveState(savedTo); }
