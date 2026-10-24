@@ -65,8 +65,8 @@
   }
 
   /** 관계 오각형: 친구들이 다섯 관계에 몇 명씩 */
-  function relationsPentagon(entries) {
-    var cnt = REL_K.map(function (k) { return entries.filter(function (e) { return e.relation === k; }).length; });
+  function relationsPentagon(entries, counts) {
+    var cnt = REL_K.map(function (k) { return counts && counts[k] != null ? counts[k] : entries.filter(function (e) { return e.relation === k; }).length; });
     var axes = REL_K.map(function (k, i) { return { label: WS.REL[k].n, color: cv(WS.REL[k].c), sub: String(cnt[i]) }; });
     return pentagon(axes, [{ name: 'Friends', color: cv('--cyan'), values: cnt }], { min: 2, label: 'Friends by relationship type' });
   }

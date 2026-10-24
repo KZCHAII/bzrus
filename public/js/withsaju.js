@@ -114,7 +114,7 @@
     var h = hex.replace('#', ''); if (h.length === 3) h = h.split('').map(function (c) { return c + c; }).join('');
     var n = parseInt(h, 16); return 'rgba(' + (n >> 16 & 255) + ',' + (n >> 8 & 255) + ',' + (n & 255) + ',' + a + ')';
   }
-  function drawMap(canvas, centerLabel, entries) {
+  function drawMap(canvas, centerLabel, entries, counts) {
     var x = canvas.getContext('2d'), W = canvas.width, H = canvas.height, cx = W / 2, cy = H / 2, R = Math.min(W, H) / 2 - 92;
     var TAU = Math.PI * 2, span = TAU / 5;
     x.clearRect(0, 0, W, H);
@@ -122,6 +122,7 @@
     KINDS.forEach(function (k, i) {
       var col = cssVar(REL[k].c), a0 = -Math.PI / 2 - span / 2 + i * span, a1 = a0 + span, mid = (a0 + a1) / 2;
       var list = entries.filter(function (e) { return e.relation === k; });
+      var cnt = counts && counts[k] != null ? counts[k] : list.length; // 그리는 점은 일부, 숫자는 전체
       // 칸 채우기 (빈 칸은 더 옅게)
       var g = x.createRadialGradient(cx, cy, 30, cx, cy, R);
       g.addColorStop(0, rgba(col, list.length ? .02 : .01)); g.addColorStop(1, rgba(col, list.length ? .16 : .06));
@@ -135,7 +136,7 @@
       x.fillStyle = list.length ? col : rgba(col, .55);
       x.font = '700 22px "JetBrains Mono", monospace'; x.fillText(REL[k].n.toUpperCase(), lx, ly - 12);
       x.font = '500 16px "JetBrains Mono", monospace'; x.fillStyle = list.length ? '#e0e0e0' : '#8a8a8a';
-      x.fillText(list.length ? list.length + (list.length === 1 ? ' FRIEND' : ' FRIENDS') : 'EMPTY', lx, ly + 14);
+      x.fillText(cnt ? cnt.toLocaleString('en-US') + (cnt === 1 ? ' FRIEND' : ' FRIENDS') : 'EMPTY', lx, ly + 14);
       if (!list.length) {
         x.fillStyle = rgba(col, .5); x.font = '500 16px "JetBrains Mono", monospace';
         x.fillText('OPEN SLOT', cx + Math.cos(mid) * R * .62, cy + Math.sin(mid) * R * .62);

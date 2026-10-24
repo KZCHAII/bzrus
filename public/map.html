@@ -210,15 +210,16 @@
 
   function renderMap() {
     show('mapBlock');
-    $('m-count').textContent = data.entries.length;
-    var draw = function () { WS.drawMap($('mapCanvas'), data.name, data.entries); };
+    var total = data.total != null ? data.total : data.entries.length;
+    $('m-count').textContent = total.toLocaleString('en-US');
+    var draw = function () { WS.drawMap($('mapCanvas'), data.name, data.entries, data.counts); };
     draw(); if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
-    $('empty').classList.toggle('hide', data.entries.length > 0);
+    $('empty').classList.toggle('hide', total > 0);
     $('list').innerHTML = data.entries.map(function (e, i) {
       var R = WS.REL[e.relation];
       return '<li><span class="rank">' + String(i + 1).padStart(2, '0') + '</span><div class="who"><b>' + esc(e.nickname) + '</b><span style="color:var(' + R.c + ')">' + R.n + '</span> <span style="color:var(--mute-3)">· ' + esc(e.sign.name) + ' ' + esc(e.sign.hanja) + '</span></div><span class="sc">' + e.score + '</span>' +
         (data.isOwner ? '<button class="rm" type="button" data-id="' + esc(e.id) + '">Remove</button>' : '<span></span>') + '</li>';
-    }).join('');
+    }).join('') + (total > data.entries.length ? '<li class="more"><span class="note" style="text-align:left">Showing the top ' + data.entries.length + ' of ' + total.toLocaleString('en-US') + ' friends.</span></li>' : '');
   }
 
   $('list').addEventListener('click', async function (e) {
@@ -250,9 +251,9 @@
     var s = data.sign, E = data.entries;
     var hn = WSCharts.hiddenNote(s, !!s.hiddenSpots);
     $('o-penta').innerHTML = WSCharts.elementsPentagon([{ name: data.name, elements: s.elements, hidden: s.hidden }]) + (hn ? '<p class="hnote">' + hn + '</p>' : '');
-    $('o-rpenta').innerHTML = WSCharts.relationsPentagon(E);
-    $('o-k1').textContent = E.length;
-    $('o-k2').textContent = E.length ? Math.round(E.reduce(function (a, e) { return a + e.score; }, 0) / E.length) : '–';
+    $('o-rpenta').innerHTML = WSCharts.relationsPentagon(E, data.counts);
+    $('o-k1').textContent = (data.total != null ? data.total : E.length).toLocaleString('en-US');
+    $('o-k2').textContent = data.avgScore != null ? data.avgScore : (E.length ? Math.round(E.reduce(function (a, e) { return a + e.score; }, 0) / E.length) : '–');
     $('o-k3').textContent = E.length ? E[0].nickname : '–';
     $('o-top').innerHTML = E.length ? E.slice(0, 5).map(function (e, i) {
       var R = WS.REL[e.relation];

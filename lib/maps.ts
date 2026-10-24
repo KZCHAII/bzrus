@@ -3,10 +3,12 @@ import { createHash, randomBytes } from "node:crypto";
 import { getSql } from "./db";
 import { HttpError, str } from "./http";
 import { envOptional } from "./env";
-import { relationOf, signOf, type KoreanSign, type RelationKind } from "./saju";
+import { relationOf, signByKey, signOf, type KoreanSign, type RelationKind } from "./saju";
 import { track } from "./events";
 
-export const MAX_ENTRIES = 200;
+export const MAX_ENTRIES = 50000;
+/** 지도에 그리는 사람: 관계별 점수 상위 이만큼 (나머지는 숫자로만) */
+export const SHOW_PER_RELATION = 25;
 const MAPS_PER_IP_PER_DAY = 20;
 const ENTRIES_PER_IP_PER_HOUR = 5;
 
@@ -122,15 +124,29 @@ export { loadMap, isOwner };
 export async function viewMap(slug: string, ownerToken: string) {
   const m = await loadMap(slug);
   const owner = signOfIso(m.birth_date, m.birth_time);
-  const rows = await getSql()<{ id: string; nickname: string; birth_date: string; birth_time: string | null; relation: RelationKind; score: number; created_at: Date }[]>`
-    select id, nickname, to_char(birth_date, 'YYYY-MM-DD') birth_date, to_char(birth_time, 'HH24:MI') birth_time, relation, score, created_at
-      from map_entries where map_id = ${m.id} and removed_at is null order by score desc, created_at asc limit ${MAX_ENTRIES}`;
+  const sql = getSql();
+  // 관계별 상위 몇 명만 (친구가 수만 명이어도 가볍게). 사주 계산도 이 사람들만
+  const rows = await sql<{ id: string; nickname: string; birth_date: string; birth_time: string | null; relation: RelationKind; score: number; sign_key: string }[]>`
+    select e.* from unnest(${["mirror", "battery", "spark", "copilot", "coach"]}::text[]) k(rel)
+    cross join lateral (
+      select id, nickname, to_char(birth_date, 'YYYY-MM-DD') birth_date, to_char(birth_time, 'HH24:MI') birth_time, relation, score, sign_key, created_at
+        from map_entries where map_id = ${m.id} and relation = k.rel and removed_at is null
+       order by score desc, created_at asc limit ${SHOW_PER_RELATION}) e
+    order by e.score desc, e.created_at asc`;
   const entries = rows.map((r) => {
-    const s = signOfIso(r.birth_date, r.birth_time);
+    // 저장된 사인 키로 바로 (없거나 옛 데이터면 그때만 계산)
+    const k = signByKey(r.sign_key);
+    const s = k ?? (() => { const x = signOfIso(r.birth_date, r.birth_time); return { name: x.name, hanja: x.hanja, element: x.element }; })();
     return { id: r.id, nickname: r.nickname, sign: { name: s.name, hanja: s.hanja, element: s.element }, relation: r.relation, score: r.score };
   });
+  const stat = await sql<{ relation: RelationKind; n: number; s: number }[]>`
+    select relation, count(*)::int n, coalesce(sum(score), 0)::int s from map_entries where map_id = ${m.id} and removed_at is null group by relation`;
+  const counts: Record<RelationKind, number> = { mirror: 0, battery: 0, spark: 0, copilot: 0, coach: 0 };
+  let total = 0, sum = 0;
+  for (const r of stat) { counts[r.relation] = r.n; total += r.n; sum += r.s; }
+  const avgScore = total ? Math.round(sum / total) : null;
   const own = await isOwner(m, ownerToken);
-  return { slug: m.slug, name: m.name, sign: own ? publicSign(owner) : sharedSign(owner), entries, isOwner: own, ...(own ? { savedEmail: m.owner_email ? maskEmail(m.owner_email) : null } : {}) };
+  return { slug: m.slug, name: m.name, sign: own ? publicSign(owner) : sharedSign(owner), entries, total, counts, avgScore, isOwner: own, ...(own ? { savedEmail: m.owner_email ? maskEmail(m.owner_email) : null } : {}) };
 }
 
 /** 친구가 생일을 넣는다. 지도에 올리기는 동의했을 때만 (안 해도 결과는 본다) */

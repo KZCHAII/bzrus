@@ -334,3 +334,15 @@ export function relationOf(owner: KoreanSign, friend: KoreanSign): { kind: Relat
   score = Math.round(score);
   return { kind, name: RELATIONS[kind].name, score: Math.max(30, Math.min(99, score)), links };
 }
+
+/** 저장된 사인 키("winter-sun")로 이름·한자·오행을 바로 찾기 (사주를 다시 계산하지 않음) */
+const SIGN_BY_KEY: Record<string, { name: string; hanja: string; element: Element }> = (() => {
+  const out: Record<string, { name: string; hanja: string; element: Element }> = {};
+  for (const season of ["Spring", "Summer", "Autumn", "Winter"] as Season[]) {
+    STEM_TYPE.forEach((t, stem) => {
+      out[`${season}-${t.name}`.toLowerCase().replace(/\s+/g, "-")] = { name: `${season} ${t.name}`, hanja: STEM_H[stem], element: STEM_ELEMENT[stem] };
+    });
+  }
+  return out;
+})();
+export const signByKey = (key: string) => SIGN_BY_KEY[key] ?? null;

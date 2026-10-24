@@ -199,3 +199,14 @@ describe("궁합 점수 분포", () => {
     expect(xs.filter((x) => x === 99).length / xs.length).toBeLessThan(0.03);
   });
 });
+
+describe("사인 키로 찾기", () => {
+  it("저장된 키에서 다시 계산한 것과 같은 이름·한자·오행", async () => {
+    const { signByKey } = await import("@/lib/saju");
+    for (const d of ["1990-01-01", "1996-11-21", "1988-02-27", "2001-07-15"]) {
+      const [y, m, dd] = d.split("-").map(Number);
+      const s = signOf({ year: y, month: m, day: dd });
+      expect(signByKey(s.key)).toEqual({ name: s.name, hanja: s.hanja, element: s.element });
+    }
+  });
+});

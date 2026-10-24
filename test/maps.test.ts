@@ -101,3 +101,24 @@ describe("지도", () => {
     expect((await call(addEntry, req(`/api/maps/entries?slug=${slug}`, { body: { nickname: "   ", birthday: "1990-01-01", consent: true }, ip: "192.0.2.50" }))).status).toBe(400);
   });
 });
+
+describe("큰 지도 (인플루언서)", () => {
+  it("친구가 수천 명이어도: 숫자는 전체, 그리는 사람은 관계별 상위 25명", async () => {
+    const m = await call(createMap, req("/api/maps", { body: { name: "Star", birthday: "1990-01-01" }, ip: "203.0.113.200" }));
+    const [{ id }] = await sql`select id from maps where slug = ${m.data.slug}`;
+    const kinds = ["mirror", "battery", "spark", "copilot", "coach"];
+    await sql`insert into map_entries (map_id, nickname, birth_date, sign_key, relation, score, is_test)
+      select ${id}, 'F' || g, date '1990-01-01' + (g % 3000), 'k', (array['mirror','battery','spark','copilot','coach'])[1 + g % 5], 30 + (g % 70), true
+        from generate_series(1, 3000) g`;
+    const t0 = Date.now();
+    const v = await call(getMap, req(`/api/maps?slug=${m.data.slug}`));
+    const ms = Date.now() - t0;
+    expect(v.data.total).toBe(3000);
+    expect(Object.values(v.data.counts).reduce((a: number, b) => a + (b as number), 0)).toBe(3000);
+    for (const k of kinds) expect(v.data.counts[k]).toBe(600);
+    expect(v.data.entries.length).toBe(125);
+    expect(v.data.entries[0].score).toBeGreaterThanOrEqual(v.data.entries[124].score);
+    expect(v.data.avgScore).toBeGreaterThan(30);
+    expect(ms).toBeLessThan(3000);
+  });
+});

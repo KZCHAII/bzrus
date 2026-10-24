@@ -118,3 +118,9 @@ BZR 원본은 섹션당 1,500자·3문단이었지만, 화면에서 너무 길�
 - Resend(무료 월 3,000통), 도메인 withsaju.com — Resend "Auto configure"로 Vercel DNS에 메일 기록 자동 추가, us-east-1, 클릭·열람 추적 끔.
 - EMAIL_FROM=WITHSAJU <hello@withsaju.com>, EMAIL_MODE=live (사장님 결정: 오픈 전이라 손님 발송도 바로 켬). 첫 발송(Find 링크) Delivered 확인.
 - 남은 것: hello@withsaju.com 받는 메일함 없음 → 답장 받으려면 무료 전달(ImprovMX 등) 설정, CONTACT_EMAIL.
+
+## D27. 큰 지도(인플루언서) 대비 (2026-10-24)
+- 친구 한도 200 → 5만 명. 지도에 그리는 사람은 관계별 점수 상위 25명(최대 125명), 숫자(관계별 인원·평균 점수)는 DB에서 한 번에 셈.
+- 친구 사인은 저장된 sign_key로 바로 찾음(매번 사주 재계산 안 함). 관계별 상위 N은 (map_id, relation, score) 인덱스로.
+- 로컬에서만 부하 확인(실제 사이트엔 안 함, 사장님 요청): 친구 2만 명 지도 보기 동시 50 → 초당 141건·중간 0.34초, 같은 지도 동시 생일 입력 초당 106건, 실패 0.
+- 실제 병목은 코드가 아니라 무료 요금제 한도: Vercel Hobby(상업용 금지, CPU 4시간/월 넘으면 정지) → Pro 필수, Neon 무료 100 CU-시간 → Launch(쓴 만큼) 권장. 사장님 결정 대기.
